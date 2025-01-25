@@ -1,0 +1,5 @@
+[esp-idf]
+port = ""
+family = ""
+idfPath = ""
+buildPath = ""
