@@ -1,0 +1,7 @@
+{
+  "espidf":{
+    "family":"esp32p4",
+    "port":"/dev/ttyACM0 -> USB Single Serial",
+    "buildPath":"/home/kodvmv/Documentos/Github/HOOK/ivan"
+  }
+}

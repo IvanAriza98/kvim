@@ -22,7 +22,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("config.global-vars")
 require("config.custom-keys")
-
+require("config.script-vars")
 -- Setup lazy.nvim
 require("lazy").setup({
     spec = {
@@ -32,7 +32,7 @@ require("lazy").setup({
     -- automatically check for plugin updates
     checker = { enabled = true },
 })
+-- Load all utils before own scripts
+require("utils.config-utils")
 -- Ponemos todo que necesitemos con plugins
-require("toml")
 require("layout.port-selector")
-require("layout.main-menu")
