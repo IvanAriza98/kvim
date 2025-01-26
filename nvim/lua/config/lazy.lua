@@ -34,5 +34,7 @@ require("lazy").setup({
 })
 -- Load all utils before own scripts
 require("utils.config-utils")
--- Ponemos todo que necesitemos con plugins
-require("layout.port-selector")
+-- Ponemos todo que necesitemos con plugins fp
+require("layout.main-menu")
+require("layout.config-environment")
+require("layout.cmd-buffer")

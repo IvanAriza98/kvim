@@ -1,4 +1,5 @@
 local json = require("dkjson")
+local vars = require('config.environment-vars')
 
 local function _getConfigFile()
     local file = io.open(vim.g.configs_path, "r")
@@ -31,20 +32,25 @@ local function _setConfigFile(data)
     file:close()
 end
 
-
-function getConfigField(module, property)
+-- supports two levels
+function getConfigField(key1, key2)
     local data = _getConfigFile()
     if not data then return end
-    return vim.inspect(data[module] and _getConfigFile()[module][property] or nil)
+    if key2 == nil then
+	return data[key1]
+    else
+	return data[key1][key2]
+    end
 end
 
-function setConfigField(module, property, value)
+function setConfigField(value, key1, key2)
     local data = _getConfigFile()
     if not data then return end
-    if data[module] then
-	data[module][property] = value
+    if key2 == nil then
+	data[key1] = value 
     else
-	data[module] = { [property] = value }
+	data[key1][key2] = value	
     end
     _setConfigFile(data)
 end
+

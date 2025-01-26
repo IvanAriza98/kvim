@@ -1,7 +1,13 @@
 {
-  "espidf":{
-    "family":"esp32p4",
-    "port":"/dev/ttyACM0 -> USB Single Serial",
-    "buildPath":"/home/kodvmv/Documentos/Github/HOOK/ivan"
+  "python":{
+    "path":"/usr/bin/python3",
+    "scriptPath":""
+  },
+  "environment":"python",
+  "esp-idf-c-cpp":{
+    "port":"",
+    "family":"esp32s3",
+    "buildPath":"",
+    "idfPath":"/home/kodvmv/esp/esp-idf/"
   }
 }
