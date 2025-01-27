@@ -2,30 +2,24 @@ require('utils.config-utils')
 local var = require('config.environment-vars')
 function espIdfBuildCmd()
     local cfg_env = getConfigField(var.key.ENVIRONMENT)
-    if cfg_env == var.env.ESP_IDF_C_CPP then
-	local family = getConfigField(var.env.ESP_IDF_C_CPP, var.key.FAMILY)
-	local buildPath = getConfigField(var.ESP_IDF_C_CPP, var.key.BUILD_PATH)
-	print("idf.py -C " .. buildPath .. " set-target " .. family .. "&& idf.py -C " .. buildPath .. " build")
-	return "idf.py -C " .. buildPath .. " set-target " .. family .. "&& idf.py -C " .. buildPath .. " build"
-    elseif env == var.env.ESP_IDF_MICRO then
-	local family = getConfigField(var.env.ESP_IDF_MICRO, var.key.FAMILY)
-	local buildPath = getConfigField(var.env.ESP_IDF_MICRO, var.key.BUILD_PATH)
-	return "idf.py -C" .. buildPath .. "set-target" .. family .. "&& idf.py -C" .. buildPath .. "build"
-    end
+    local family = getConfigField(cfg_env, var.key.FAMILY)
+    local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
+    return "idf.py set-target -C " .. buildPath .. " set-target " .. family .. " && idf.py build -C " .. buildPath
 end
 
 
 function espIdfExecuteCmd()
     local cfg_env = getConfigField(var.key.ENVIRONMENT)
-    if cfg_env == var.env.ESP_IDF_C_CPP then
-	local port = getConfigField(var.env.ESP_IDF_C_CPP, var.key.PORT)
-	local buildPath = getConfigField(var.env.ESP_IDF_C_CPP, var.key.BUILD_PATH)
-	return "idf.py -B" .. buildPath .. "-p" .. port .. "flash"
-    elseif env == var.env.ESP_IDF_MICRO then
-	local port = getConfigField(var.env.ESP_IDF_MICRO, var.key.PORT)
-	local buildPath = getConfigField(var.env.ESP_IDF_MICRO, var.key.BUILD_PATH)
-	return "idf.py -B" .. buildPath .. "-p" .. port .. "flash"
-    end
+    local port = getConfigField(cfg_env, var.key.PORT)
+    local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
+    return "idf.py flash -B " .. buildPath .. " -p " .. port
+end
+
+function espIdfMonitorCmd()
+    local cfg_env = getConfigField(var.key.ENVIRONMENT)
+    local port = getConfigField(cfg_env, var.key.PORT)
+    local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
+    return "idf.py  monitor -C " .. buildPath .. " -p " .. port
 end
 
 

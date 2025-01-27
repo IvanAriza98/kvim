@@ -1,13 +1,13 @@
 {
-  "python":{
-    "path":"/usr/bin/python3",
-    "scriptPath":""
-  },
-  "environment":"python",
   "esp-idf-c-cpp":{
+    "buildPath":"",
     "port":"",
     "family":"esp32s3",
-    "buildPath":"",
     "idfPath":"/home/kodvmv/esp/esp-idf/"
-  }
+  },
+  "python":{
+    "scriptPath":"",
+    "path":"/usr/bin/python3"
+  },
+  "environment":"esp-idf-c-cpp"
 }

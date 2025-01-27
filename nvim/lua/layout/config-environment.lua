@@ -8,12 +8,14 @@ local python = n.create_signal({ path = '', scriptPath = '' })
 local espidf = n.create_signal({ port = '', family = '', buildPath = '' })
 
 local function save_esp_idf_config_c_cpp()
-    setConfigField(espidf:get_value().port, vars.id.ESP_IDF_C_CPP, vars.key.PORT)
+    setConfigField(vars.env.ESP_IDF_C_CPP, vars.key.ENVIRONMENT)
+    if espidf:get_value().port ~= getConfigField(vars.env.ESP_IDF_C_CPP, vars.key.PORT) then
+	setConfigField(espidf:get_value().port, vars.id.ESP_IDF_C_CPP, vars.key.PORT)
+    end
     setConfigField(espidf:get_value().family, vars.id.ESP_IDF_C_CPP, vars.key.FAMILY)
     setConfigField(espidf:get_value().buildPath, vars.id.ESP_IDF_C_CPP, vars.key.BUILD_PATH)
 end
 
- -- NOTE Revisar como puedo sacarlo de aquí y hacerlo general para cada cosa 
 function esp_idf_config_c_cpp(render)
     local usb_devices_list = {}
     for path, device in ipairs(get_usb_devices()) do
@@ -25,18 +27,9 @@ function esp_idf_config_c_cpp(render)
     espidf.family = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.FAMILY)
     espidf.buildpath = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.BUILD_PATH)
     
-    return n.form(
-	{
-	    id = "esp32-settings",
-	    submit_key = "<c-cr>",
-	    on_submit = function(is_valid)
-		setConfigField(vars.env.ESP_IDF_C_CPP, vars.key.ENVIRONMENT)
-		save_esp_idf_config_c_cpp()
-		render:close()
-	    end,
-	},
+    local form_elements= {
 	n.select({
-	    border_label = "select family",
+	    border_label = "Select family",
 	    selected = espidf.family,
 	    data = {
 		n.option("esp32", { id = "esp32" }),
@@ -55,28 +48,47 @@ function esp_idf_config_c_cpp(render)
 	    on_select = function(node, component)
 		espidf.family = node.text
 	    end,
-	}),
-	n.select({
-	    border_label = "select port",
-	    selected = espidf.port,
-	    data = usb_devices_list,
-	    multiselect = false,
-	    on_select = function(node, component)
-		espidf.port = node.text
-	    end,
-	}),
+	}),	
 	n.text_input({
 	    flex = 1,
-	    border_label = "set build path",
-	    value = espidf.buildpath,
+	    border_label = "Build path",
+	    value = espidf.buildPath,
 	    on_change = function(value, component)
-		espidf.buildpath = value
+		espidf.buildPath = value
 	    end,
-	})
+	}),
+    }
+    
+    if usb_device_list ~= nil then
+	if #usb_device_list > 0 then 
+	    table.insert(form_elements, 2, 	
+		n.select({
+			border_label = "Select port",
+			selected = espidf.port,
+			data = usb_devices_list,
+			multiselect = false,
+			on_select = function(node, component)
+			    espidf.port = node.text
+			end,
+		})
+	    )
+	end
+    end
+    return n.form(
+	{
+	    id = "esp32-settings",
+	    submit_key = "<c-cr>",
+	    on_submit = function(is_valid)
+		save_esp_idf_config_c_cpp()
+		render:close()
+	    end,
+	},
+	unpack(form_elements)
     )
 end
 
 local function save_python_config()
+    setConfigField(vars.env.PYTHON, vars.key.ENVIRONMENT)
     setConfigField(python:get_value().path, vars.id.PYTHON, vars.key.PYTHON_PATH)
     setConfigField(python:get_value().scriptPath, vars.id.PYTHON, vars.key.PYTHON_SCRIPT_PATH)
 end
@@ -89,7 +101,6 @@ function config_python(render)
 	    id = "python-settings",
 	    submit_key = "<c-cr>",
 	    on_submit = function(is_valid)
-		setConfigField(vars.env.PYTHON, vars.key.ENVIRONMENT)
 		save_python_config()
 		render:close()
 	    end,
