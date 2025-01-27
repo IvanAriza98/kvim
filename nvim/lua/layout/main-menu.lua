@@ -14,19 +14,28 @@ function mainMenu()
 	{ flex = 0 },
 	n.button({
 	  label = var.label.ESP_IDF_C_CPP,
+	  global_press_key = "<c-1>",
 	  is_active = is_tab_active(var.id.ESP_IDF_C_CPP),
 	  on_press = function()
-	    print("ESP-IDF")
 	    development.environment = var.id.ESP_IDF_C_CPP
 	  end,
 	}),
 	n.gap(1),
 	n.button({
 	  label = var.label.PYTHON,
+	  global_press_key = "<c-2>",
 	  is_active = is_tab_active(var.id.PYTHON),
 	  on_press = function()
-	    print("PYTHON")
 	    development.environment = var.id.PYTHON
+	  end,
+	}),
+	n.gap(1),
+	n.button({
+	  label = var.label.SSH,
+	  global_press_key = "<c-3>",
+	  is_active = is_tab_active(var.id.SSH),
+	  on_press = function()
+	    development.environment = var.id.SSH
 	  end,
 	})
       ),
@@ -38,8 +47,14 @@ function mainMenu()
       n.tab(
 	{ id = var.id.PYTHON},
 	config_python(mainRender)		
+      ),
+      n.tab( 
+	{ id = var.id.SSH}, 
+	ssh_config(mainRender)		
       )
     )
 end
 
-mainRender:render(mainMenu()) 
+vim.keymap.set("n", "<leader>k", function()
+    mainRender:render(mainMenu())
+end, {noremap = true, desc = ""})

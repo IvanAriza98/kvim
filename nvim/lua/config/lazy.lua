@@ -22,7 +22,6 @@ vim.opt.rtp:prepend(lazypath)
 
 require("config.global-vars")
 require("config.custom-keys")
-require("config.script-vars")
 -- Setup lazy.nvim
 require("lazy").setup({
     spec = {
@@ -37,4 +36,5 @@ require("utils.config-utils")
 -- Ponemos todo que necesitemos con plugins fp
 require("layout.main-menu")
 require("layout.config-environment")
+require("layout.config-communications")
 require("layout.cmd-buffer")

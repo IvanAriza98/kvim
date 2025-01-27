@@ -2,9 +2,9 @@
 local envs = {
     C_CPP		= "c-cpp",
     PYTHON 		= "python",
-    -- Let a gap to new lenguages
     ESP_IDF_C_CPP	= "esp-idf-c-cpp",
     ESP_IDF_MICRO	= "esp-idf-micro",
+    SSH			= "ssh",
 }
 
 local labels = {
@@ -12,6 +12,7 @@ local labels = {
     PYTHON		= "Python",
     ESP_IDF_C_CPP	= "ESP-IDF C/C++",
     ESP_IDF_MICRO	= "ESP-IDF Micropython",
+    SSH			= "SSH", 
 }
 
 local keys = {
@@ -24,6 +25,10 @@ local keys = {
 
     DEVELOPMENT = "development",
     ENVIRONMENT = "environment",
+    
+    --- SSH COMUNICATION
+    TARGET_IP	= "targetIp",
+    TARGET_DIR	= "targetDir",
 }
 
 return {

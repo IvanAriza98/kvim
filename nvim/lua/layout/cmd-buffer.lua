@@ -27,7 +27,7 @@ local function send_cmd(cmd)
     vim.fn.jobstart(cmd, {
         stdout_buffered = false,
         on_stdout = function(_, data)
-            if data then
+            if data[1] ~= "" then
                 -- Añade las nuevas líneas al buffer
                 vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
 
@@ -35,12 +35,12 @@ local function send_cmd(cmd)
                 local win_id = vim.fn.bufwinid(buf)
                 if win_id ~= -1 then
                     local line_count = vim.api.nvim_buf_line_count(buf)
-                    vim.api.nvim_win_set_cursor(win_id, { line_count, 0 })
+                    vim.api.nvim_win_set_cursor(win_id, { line_count-1, 0 })
                 end
             end
         end,
         on_stderr = function(_, data)
-            if data then
+            if data[1] ~= "" then
                 -- Añade errores al buffer
                 vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
 
@@ -48,27 +48,37 @@ local function send_cmd(cmd)
                 local win_id = vim.fn.bufwinid(buf)
                 if win_id ~= -1 then
                     local line_count = vim.api.nvim_buf_line_count(buf)
-                    vim.api.nvim_win_set_cursor(win_id, { line_count, 0 })
+                    vim.api.nvim_win_set_cursor(win_id, { line_count-1, 0 })
                 end
             end
         end,
     })
 end
 
- 
 vim.keymap.set("n", "<F5>", function()
-    local env_cfg = getConfigField(var.key.ENVIRONMENT)
-    if env_cfg == var.env.ESP_IDF_C_CPP or env_cfg == var.env.ESP_IDF_MICRO then
-	send_cmd(espIdfExecuteCmd())
-    elseif env_cfg == var.env.PYTHON then
-	send_cmd(pythonExecuteCmd())
+    local cfg_env = getConfigField(var.key.ENVIRONMENT)
+    if cfg_env == var.env.ESP_IDF_C_CPP then
+	local family = getConfigField(cfg_env, var.key.FAMILY)
+	local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
+	send_cmd(espIdfFullCleanCmd(buildPath))
+	send_cmd(espIdfSetTargetCmd(family, buildPath)) 
+	send_cmd(espIdfBuildCmd(buildPath))
     end
     renderer:render(body)
     renderer:set_size({height = 20})
 end, {noremap = true, desc = ""})
 
 vim.keymap.set("n", "<F6>", function()
-    send_cmd(espIdfBuildCmd())
+    local cfg_env = getConfigField(var.key.ENVIRONMENT)
+
+    if cfg_env == var.env.ESP_IDF_C_CPP or cfg_env == var.env.ESP_IDF_MICRO then
+	local port = getConfigField(cfg_env, var.key.PORT)
+	local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
+	send_cmd(espIdfFlashCmd(port, buildPath))
+	send_cmd(espIdfFlashCmd(port, buildPath))
+    elseif cfg_env == var.env.PYTHON then
+	send_cmd(pythonExecuteCmd())
+    end
     renderer:render(body)
     renderer:set_size({height = 20})
 end, {noremap = true, desc = ""})

@@ -1,13 +1,17 @@
 {
-  "esp-idf-c-cpp":{
-    "buildPath":"",
-    "port":"",
-    "family":"esp32s3",
-    "idfPath":"/home/kodvmv/esp/esp-idf/"
+  "ssh":{
+    "targetIp":"10.124.1.112",
+    "targetDir":"/home/iariza/"
   },
   "python":{
     "scriptPath":"",
     "path":"/usr/bin/python3"
   },
-  "environment":"esp-idf-c-cpp"
+  "environment":"esp-idf-c-cpp",
+  "esp-idf-c-cpp":{
+    "port":"",
+    "buildPath":"/home/kodvmv/Documentos/GitHub/HOOK/Software-Design/trunk",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "family":"esp32s3"
+  }
 }

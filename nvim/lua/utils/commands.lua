@@ -1,25 +1,24 @@
 require('utils.config-utils')
 local var = require('config.environment-vars')
-function espIdfBuildCmd()
-    local cfg_env = getConfigField(var.key.ENVIRONMENT)
-    local family = getConfigField(cfg_env, var.key.FAMILY)
-    local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
-    return "idf.py set-target -C " .. buildPath .. " set-target " .. family .. " && idf.py build -C " .. buildPath
+
+function espIdfBuildCmd(buildPath)
+   return 'idf.py build -C ' ..buildPath
 end
 
-
-function espIdfExecuteCmd()
-    local cfg_env = getConfigField(var.key.ENVIRONMENT)
-    local port = getConfigField(cfg_env, var.key.PORT)
-    local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
-    return "idf.py flash -B " .. buildPath .. " -p " .. port
+function espIdfSetTargetCmd(family, buildPath)
+    return 'idf.py set-target ' ..family.. ' -C ' ..buildPath
 end
 
-function espIdfMonitorCmd()
-    local cfg_env = getConfigField(var.key.ENVIRONMENT)
-    local port = getConfigField(cfg_env, var.key.PORT)
-    local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
-    return "idf.py  monitor -C " .. buildPath .. " -p " .. port
+function espIdfFullCleanCmd(buildPath)
+    return 'idf.py fullclean -C '..buildPath
+end
+
+function espIdfFlashCmd(port, buildPath)
+    return 'idf.py flash -p ' ..port.. ' -C ' ..buildPath
+end
+
+function espIdfMonitorCmd(port, buildPath)
+    return 'idf.py monitor -p ' ..port.. '-C ' ..buildPath
 end
 
 
