@@ -1,7 +1,7 @@
-require('utils.devices')
+require('kvim.utils.devices')
 
 local n = require("nui-components")
-local vars = require('config.environment-vars')
+local vars = require('kvim.config.environment-vars')
 
 
 local python = n.create_signal({ path = '', scriptPath = '' })
@@ -18,15 +18,13 @@ end
 
 function esp_idf_config_c_cpp(render)
     local usb_devices_list = {}
-    for path, device in ipairs(get_usb_devices()) do
+    for _, device in ipairs(get_usb_devices()) do
 	table.insert(usb_devices_list, n.option(device.name, { id = device.path}))
     end
-    
     -- el env debería de ser global para acceder desde cualquier lado
     espidf.port = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.PORT)
     espidf.family = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.FAMILY)
     espidf.buildpath = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.BUILD_PATH)
-    
     local form_elements= {
 	n.select({
 	    border_label = "Select family",

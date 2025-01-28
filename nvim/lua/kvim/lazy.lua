@@ -20,21 +20,24 @@ vim.opt.rtp:prepend(lazypath)
 -- loading lazy.nvim so that mappings are correct.
 -- This is also a good place to setup other settings (vim.opt)
 
-require("config.global-vars")
-require("config.custom-keys")
+require("kvim.config.global-vars")
+require("kvim.config.custom-keys")
+
 -- Setup lazy.nvim
 require("lazy").setup({
     spec = {
 	-- import your plugins
-	{ import = "plugins" },
+	{ import = "kvim.plugins" },
+	{ import = "kvim.plugins.lsp" },
+	{ import = "kvim.plugins.lualine" },
     },
     -- automatically check for plugin updates
     checker = { enabled = true },
 })
 -- Load all utils before own scripts
-require("utils.config-utils")
+require("kvim.utils.config-utils")
 -- Ponemos todo que necesitemos con plugins fp
-require("layout.main-menu")
-require("layout.config-environment")
-require("layout.config-communications")
-require("layout.cmd-buffer")
+require("kvim.layout.main-menu")
+require("kvim.layout.config-environment")
+require("kvim.layout.config-communications")
+require("kvim.layout.cmd-buffer")

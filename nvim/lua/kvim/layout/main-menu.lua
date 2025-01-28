@@ -1,7 +1,7 @@
-require("layout.config-environment")
+require("kvim.layout.config-environment")
 
 local n = require("nui-components")
-local var = require("config.environment-vars")
+local var = require("kvim.config.environment-vars")
 
 local mainRender = n.create_renderer({with=50, height=10}) 
 local development = n.create_signal({ environment = var.id.ESP_IDF_C_CPP })

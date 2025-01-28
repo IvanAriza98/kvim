@@ -1,7 +1,6 @@
-require('utils.devices')
-
+require('kvim.utils.devices')
 local n = require("nui-components")
-local vars = require('config.environment-vars')
+local vars = require('kvim.config.environment-vars')
 
 local ssh = n.create_signal({ targetIp = '', targetDir = '' })
 

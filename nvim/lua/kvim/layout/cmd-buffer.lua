@@ -1,7 +1,7 @@
 --- Component to build or execute algorithms (build esp-idf, compile C programs, run python programs ...)
-require('utils.commands')
+require('kvim.utils.commands')
 local n = require('nui-components')
-local var = require('config.environment-vars') 
+local var = require('kvim.config.environment-vars') 
 
 renderer = n.create_renderer({
   width = 60,
@@ -60,8 +60,8 @@ vim.keymap.set("n", "<F5>", function()
     if cfg_env == var.env.ESP_IDF_C_CPP then
 	local family = getConfigField(cfg_env, var.key.FAMILY)
 	local buildPath = getConfigField(cfg_env, var.key.BUILD_PATH)
-	send_cmd(espIdfFullCleanCmd(buildPath))
-	send_cmd(espIdfSetTargetCmd(family, buildPath)) 
+	-- send_cmd(espIdfFullCleanCmd(buildPath))
+	-- send_cmd(espIdfSetTargetCmd(family, buildPath)) 
 	send_cmd(espIdfBuildCmd(buildPath))
     end
     renderer:render(body)

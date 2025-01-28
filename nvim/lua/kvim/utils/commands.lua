@@ -1,5 +1,5 @@
-require('utils.config-utils')
-local var = require('config.environment-vars')
+require('kvim.utils.config-utils')
+local var = require('kvim.config.environment-vars')
 
 function espIdfBuildCmd(buildPath)
    return 'idf.py build -C ' ..buildPath

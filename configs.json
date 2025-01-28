@@ -1,17 +1,17 @@
 {
   "ssh":{
-    "targetIp":"10.124.1.112",
-    "targetDir":"/home/iariza/"
+    "targetDir":"/home/iariza/",
+    "targetIp":"10.124.1.112"
+  },
+  "environment":"esp-idf-c-cpp",
+  "esp-idf-c-cpp":{
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "buildPath":"/home/kodvmv/Documentos/GitHub/HOOK/Software-Design/trunk",
+    "port":"",
+    "family":"esp32s3"
   },
   "python":{
     "scriptPath":"",
     "path":"/usr/bin/python3"
-  },
-  "environment":"esp-idf-c-cpp",
-  "esp-idf-c-cpp":{
-    "port":"",
-    "buildPath":"/home/kodvmv/Documentos/GitHub/HOOK/Software-Design/trunk",
-    "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "family":"esp32s3"
   }
 }
