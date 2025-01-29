@@ -34,6 +34,7 @@ return {
     vim.fn.sign_define("DiagnosticSignHint", { text = "󰌵", texthl = "DiagnosticSignHint" })
 
     require("neo-tree").setup({
+      sources = { "filesystem", "buffers", "git_status", "document_symbols" },
       close_if_last_window = false, -- Close Neo-tree if it is the last window left in the tab
       popup_border_style = "rounded",
       enable_git_status = true,
@@ -120,7 +121,7 @@ return {
         type = {
           enabled = true,
           width = 10, -- width of the column
-          required_width = 122, -- min width of window required to show this column
+          required_width = 22, --122, -- min width of window required to show this column
         },
         last_modified = {
           enabled = true,
@@ -333,7 +334,9 @@ return {
         },
       },
     })
-
-    vim.cmd([[nnoremap \ :Neotree reveal<cr>]])
-  end,
+    vim.keymap.set('n', '\\', '<cmd>Neotree reveal left<CR>', { noremap = true, silent = true}) 		-- alternative to normal neotree position
+    vim.keymap.set('n', '<leader>fp', '<cmd>Neotree reveal float<CR>', { noremap = true, silent = true})	-- neotree float window 
+    vim.keymap.set('n', '<leader>fb', '<cmd>Neotree buffers float<CR>', { noremap = true, silent = true})	-- buffer float window
+    vim.keymap.set('n', '<leader>fo', '<cmd>Neotree document_symbols right<CR>', { noremap = true, silent = true})	-- buffer float window
+    end,
 }

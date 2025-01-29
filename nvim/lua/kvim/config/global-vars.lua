@@ -10,9 +10,10 @@ vim.opt.softtabstop = 0
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
 vim.opt.compatible = false
-vim.opt.encoding = "UTF-8"
-vim.opt.guifont = "FiraCode Nerd Font:h11"
-vim.opt.termguicolors = true
+-- vim.opt.encoding = "UTF-8"
+--vim.opt.guifont = "FiraCode Nerd Font:h11"
+-- vim.opt.termguicolors = true
+-- vim.o.guifont = "Monaspace Radon"
 
 --- lines customization
 vim.opt.number = true
@@ -20,4 +21,4 @@ vim.opt.number = true
 
 --- Paths
 vim.g.git_path = "/home/kodvmv/Documentos/GitHub/kvim"
-vim.g.configs_path = vim.g.git_path .. "/configs.json" 
+vim.g.configs_path = vim.g.git_path .. "/configs.json"
