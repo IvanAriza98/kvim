@@ -1,29 +1,29 @@
 local json = require("dkjson")
-local vars = require('kvim.config.environment-vars')
+-- local vars = require('kvim.config.environment-vars')
 
 local function _getConfigFile()
     local file = io.open(vim.g.configs_path, "r")
     if not file then
 	print("Config file not found.")
-	return 
+	return
     end
 
     local content = file:read("*a")
     file.close()
 
-    local data, pos, err = json.decode(content, 1, nil)
+    local data, _, _ = json.decode(content, 1, nil)
     return data
 end
 
 local function _setConfigFile(data)
-    local content, err = json.encode(data, { indent = true }) 
+    local content, err = json.encode(data, { indent = true })
     if err then
 	print("Error to encode.")
 	return
     end
 
     local file = io.open(vim.g.configs_path, "w")
-    if not file then 
+    if not file then
 	print("Config file not found")
 	return
     end

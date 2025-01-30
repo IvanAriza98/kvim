@@ -43,30 +43,30 @@ function esp_idf_config_c_cpp(render)
 		n.option("esp32c61", { id = "esp32c61" }),
 	    },
 	    multiselect = false,
-	    on_select = function(node, component)
+	    on_select = function(node, _)
 		espidf.family = node.text
 	    end,
-	}),	
+	}),
 	n.text_input({
 	    flex = 1,
 	    border_label = "Build path",
 	    value = espidf.buildPath,
-	    on_change = function(value, component)
+	    on_change = function(value, _)
 		espidf.buildPath = value
 	    end,
 	}),
     }
-    
-    if usb_device_list ~= nil then
-	if #usb_device_list > 0 then 
-	    table.insert(form_elements, 2, 	
+    if usb_devices_list ~= nil then
+	if #usb_devices_list > 0 then
+	    table.insert(form_elements, 2,
 		n.select({
 			border_label = "Select port",
 			selected = espidf.port,
 			data = usb_devices_list,
 			multiselect = false,
-			on_select = function(node, component)
-			    espidf.port = node.text
+			on_select = function(node, _)
+			    local dev = string.match(node.text, "%s*([^%->]*)%s*%-?>")
+			    espidf.port = dev or node.text:gsub("%s*%-?>.*", "")
 			end,
 		})
 	    )
@@ -76,7 +76,7 @@ function esp_idf_config_c_cpp(render)
 	{
 	    id = "esp32-settings",
 	    submit_key = "<c-cr>",
-	    on_submit = function(is_valid)
+	    on_submit = function(_)
 		save_esp_idf_config_c_cpp()
 		render:close()
 	    end,
@@ -98,7 +98,7 @@ function config_python(render)
 	{
 	    id = "python-settings",
 	    submit_key = "<c-cr>",
-	    on_submit = function(is_valid)
+	    on_submit = function(_)
 		save_python_config()
 		render:close()
 	    end,
@@ -107,7 +107,7 @@ function config_python(render)
 	    flex = 1,
 	    border_label = "python path",
 	    value = python.path,
-	    on_change = function(value, component)
+	    on_change = function(value, _)
 		python.path = value
 	    end,
 	}),
@@ -116,7 +116,7 @@ function config_python(render)
 	    border_label = "script path",
 	    placeholder = "If it's empty, Kvim use the local file path that you're using.",
 	    value = python.scriptPath,
-	    on_change = function(value, component)
+	    on_change = function(value, _)
 		python.scriptPath = value
 	    end,
 	})

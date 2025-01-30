@@ -16,9 +16,11 @@ function get_usb_devices()
     local files = vim.fn.glob('/dev/serial/by-id/*', false, true)
     for _,file in ipairs(files) do
 	local device_link = vim.loop.fs_realpath(file)
-	if device_link:match('/dev/ttyUSB')  or device_link:match('/dev/ttyACM') then
-	    local device_name = vim.fn.fnamemodify(file, ":t")
-	    table.insert(devices, { path = device_link, name = device_link .. " -> " .. format_device_name(device_name) })
+	if device_link ~= nil then
+	    if device_link:match('/dev/ttyUSB')  or device_link:match('/dev/ttyACM') then
+		local device_name = vim.fn.fnamemodify(file, ":t")
+		table.insert(devices, { path = device_link, name = device_link .. " -> " .. format_device_name(device_name) })
+	    end
 	end
     end
     return devices
