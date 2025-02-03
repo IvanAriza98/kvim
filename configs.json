@@ -10,7 +10,7 @@
   },
   "esp-idf-c-cpp":{
     "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "buildPath":"/home/kodvmv/Documentos/GitHub/HOOK/Software_Design/trunk",
+    "buildPath":"/home/kodvmv/Descargas/ESP32-S3-LCD-1.69_DemoCode/ESP-IDF-v5.3.1/02_ESP_IDF_ST7789_LVGL",
     "port":"/dev/ttyACM0 ",
     "family":"esp32s3"
   }
