@@ -3,7 +3,7 @@ require("kvim.layout.config-environment")
 local n = require("nui-components")
 local var = require("kvim.config.environment-vars")
 
-local mainRender = n.create_renderer({with=50, height=10}) 
+local mainRender = n.create_renderer({with=50, height=10})
 local development = n.create_signal({ environment = var.id.ESP_IDF_C_CPP })
 local is_tab_active = n.is_active_factory(development.environment)
 
@@ -42,15 +42,19 @@ function mainMenu()
       n.gap(1),
       n.tab(
 	{ id = var.id.ESP_IDF_C_CPP },
-	esp_idf_config_c_cpp(mainRender)		
+	esp_idf_config_c_cpp(mainRender)
       ),
       n.tab(
 	{ id = var.id.PYTHON},
-	config_python(mainRender)		
+	config_python(mainRender)
       ),
-      n.tab( 
-	{ id = var.id.SSH}, 
-	ssh_config(mainRender)		
+      n.tab(
+	{ id = var.id.SSH},
+	n.paragraph({lines = {
+	    n.line(n.text("⚠️ Please ensure that the SSH authentication details are correct before", "Italic")),
+	    n.line(n.text("  proceeding (ssh-keygen + ssh-copy-id + authenticate).", "Italic"))
+	    }}),
+	ssh_config(mainRender)
       )
     )
 end

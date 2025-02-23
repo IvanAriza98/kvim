@@ -1,17 +1,18 @@
 {
-  "environment":"esp-idf-c-cpp",
   "python":{
-    "scriptPath":"",
-    "path":"/usr/bin/python3"
+    "path":"/usr/bin/python3",
+    "scriptPath":""
   },
+  "environment":"esp-idf-c-cpp",
   "ssh":{
-    "targetDir":"/home/iariza/",
-    "targetIp":"10.124.1.112"
+    "targetDir":"~/",
+    "targetUser":"kodvmv",
+    "targetIp":"localhost"
   },
   "esp-idf-c-cpp":{
-    "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "buildPath":"/home/kodvmv/Descargas/ESP32-S3-LCD-1.69_DemoCode/ESP-IDF-v5.3.1/02_ESP_IDF_ST7789_LVGL",
     "port":"/dev/ttyACM0 ",
+    "buildPath":"/home/kodvmv/Descargas/ESP32-S3-LCD-1.69_DemoCode/ESP-IDF-v5.3.1/02_ESP_IDF_ST7789_LVGL",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
     "family":"esp32s3"
   }
 }

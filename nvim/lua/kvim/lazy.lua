@@ -35,6 +35,7 @@ require("lazy").setup({
     checker = { enabled = true },
 })
 -- Load all utils before own scripts
+require("kvim.utils.ssh")
 require("kvim.utils.config-utils")
 -- Ponemos todo que necesitemos con plugins fp
 require("kvim.layout.main-menu")

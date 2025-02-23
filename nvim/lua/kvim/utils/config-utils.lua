@@ -9,7 +9,7 @@ local function _getConfigFile()
     end
 
     local content = file:read("*a")
-    file.close()
+    file:close()
 
     local data, _, _ = json.decode(content, 1, nil)
     return data
@@ -44,12 +44,15 @@ function getConfigField(key1, key2)
 end
 
 function setConfigField(value, key1, key2)
-    local data = _getConfigFile()
+    local data = _getConfigFile() or {}
     if not data then return end
     if key2 == nil then
-	data[key1] = value 
+	data[key1] = value
     else
-	data[key1][key2] = value	
+	if not data[key1] or type(data[key1]) ~= "table" then
+	    data[key1] = {}
+	end
+	data[key1][key2] = value
     end
     _setConfigFile(data)
 end

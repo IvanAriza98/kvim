@@ -12,7 +12,7 @@ local labels = {
     PYTHON		= "Python",
     ESP_IDF_C_CPP	= "ESP-IDF C/C++",
     ESP_IDF_MICRO	= "ESP-IDF Micropython",
-    SSH			= "SSH", 
+    SSH			= "SSH",
 }
 
 local keys = {
@@ -25,9 +25,11 @@ local keys = {
 
     DEVELOPMENT = "development",
     ENVIRONMENT = "environment",
-    
+
     --- SSH COMUNICATION
     TARGET_IP	= "targetIp",
+    TARGET_USER = "targetUser",
+    TARGET_PASS = "targetPass",
     TARGET_DIR	= "targetDir",
 }
 
