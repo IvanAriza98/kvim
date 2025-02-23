@@ -1,0 +1,63 @@
+# Vim 9.1 generó este archivo "viminfo".
+# Puede editarlo, ¡sólo si tiene cuidado!
+
+# Viminfo version
+|1,4
+
+# Valor de 'encoding' cuando se escribió este archivo
+*encoding=utf-8
+
+
+# hlsearch on (H) or off (h):
+~h
+# Historia de Línea de órdenes (de lo más nuevo a lo más antiguo):
+:q!
+|2,0,1740319328,,"q!"
+:wq!
+|2,0,1740256400,,"wq!"
+
+# Historia de Cadena de búsqueda (de lo más nuevo a lo más antiguo):
+
+# Historia de Expresión (de lo más nuevo a lo más antiguo):
+
+# Historia de Línea de entrada (de lo más nuevo a lo más antiguo):
+
+# Historia de Línea de depuración (de lo más nuevo a lo más antiguo):
+
+# Registros:
+
+# Marcas en el archivo:
+'0  12  0  /etc/resolv.conf
+|4,48,12,0,1740319328,"/etc/resolv.conf"
+'1  26  17  /etc/resolv.conf
+|4,49,26,17,1740256404,"/etc/resolv.conf"
+'2  26  17  /etc/resolv.conf
+|4,50,26,17,1740256404,"/etc/resolv.conf"
+
+# Lista de saltos (el más reciente va primero):
+-'  12  0  /etc/resolv.conf
+|4,39,12,0,1740319328,"/etc/resolv.conf"
+-'  1  0  /etc/resolv.conf
+|4,39,1,0,1740319322,"/etc/resolv.conf"
+-'  26  17  /etc/resolv.conf
+|4,39,26,17,1740256404,"/etc/resolv.conf"
+-'  26  17  /etc/resolv.conf
+|4,39,26,17,1740256404,"/etc/resolv.conf"
+-'  20  0  /etc/resolv.conf
+|4,39,20,0,1740256387,"/etc/resolv.conf"
+-'  20  0  /etc/resolv.conf
+|4,39,20,0,1740256387,"/etc/resolv.conf"
+-'  1  0  /etc/resolv.conf
+|4,39,1,0,1740256387,"/etc/resolv.conf"
+
+# Historia de las marcas en los archivos (de la más reciente a la más antigua):
+
+> /etc/resolv.conf
+	*	1740319325	0
+	"	12	0
+	^	26	18
+	.	26	18
+	+	21	0
+	+	22	0
+	+	23	9
+	+	26	18
