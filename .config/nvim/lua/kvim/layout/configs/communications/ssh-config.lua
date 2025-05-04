@@ -4,14 +4,14 @@ local vars = require('kvim.config.environment-vars')
 
 local ssh = n.create_signal({ targetIp = '', targetDir = '', targetUser = '', targetPass = ''})
 
-local function save_ssh_config(targetIp, targetDir, targetUser, targetPass)
+local function save_ssh(targetIp, targetDir, targetUser, targetPass)
     setConfigField(targetIp, vars.id.SSH, vars.key.TARGET_IP)
     setConfigField(targetDir, vars.id.SSH, vars.key.TARGET_DIR)
     setConfigField(targetUser, vars.id.SSH, vars.key.TARGET_USER)
     setConfigField(targetPass, vars.id.SSH, vars.key.TARGET_PASS)
 end
 
-function ssh_config(render)
+function config_ssh()
     -- el env debería de ser global para acceder desde cualquier lado
     ssh.targetIp = getConfigField(vars.id.SSH, vars.key.TARGET_IP)
     ssh.targetDir = getConfigField(vars.id.SSH, vars.key.TARGET_DIR)
@@ -22,10 +22,21 @@ function ssh_config(render)
 	    id = "ssh-settings",
 	    submit_key = "<c-cr>",
 	    on_submit = function(_)
-		save_ssh_config(ssh.targetIp:get_value(), ssh.targetDir:get_value(), ssh.targetUser:get_value())
-		render:close()
+		save_ssh(ssh.targetIp:get_value(), ssh.targetDir:get_value(), ssh.targetUser:get_value())
 	    end,
 	},
+	n.gap(1),
+	n.paragraph({
+	    autofocus = true,
+	    lines = "SSH Configurator",
+	    align ="center",
+	}),
+	n.gap(1),
+	n.paragraph({lines = {
+	    n.line(n.text("⚠️ Please ensure that the SSH authentication details are correct before", "Italic")),
+	    n.line(n.text("  proceeding (ssh-keygen + ssh-copy-id + authenticate).", "Italic"))
+	    }}),
+	n.gap(1),
 	n.text_input({
 	    flex = 1,
 	    border_label = "User",
@@ -52,3 +63,4 @@ function ssh_config(render)
 	})
     )
 end
+

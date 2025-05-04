@@ -39,6 +39,10 @@ require("kvim.utils.ssh")
 require("kvim.utils.config-utils")
 -- Ponemos todo que necesitemos con plugins fp
 require("kvim.layout.main-menu")
-require("kvim.layout.config-environment")
-require("kvim.layout.config-communications")
 require("kvim.layout.cmd-buffer")
+-- Development Configs
+require("kvim.layout.configs.esp-idf.config")
+require("kvim.layout.configs.nrf-sdk.config")
+require("kvim.layout.configs.general.python-config")
+-- Comunication Configs
+require("kvim.layout.configs.communications.ssh-config")

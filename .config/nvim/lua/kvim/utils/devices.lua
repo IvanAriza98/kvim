@@ -26,3 +26,15 @@ function get_usb_devices()
     return devices
 end
 
+function get_nrf_devices()
+    local handle = io.popen("nrfjprog --ids")
+    local result = handle:read("*a")
+    handle:close()
+
+    local ids = {}
+    for id in result:gmatch("%d+") do
+	table.insert(ids, id)
+    end
+
+    return ids
+end

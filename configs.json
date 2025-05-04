@@ -1,18 +1,24 @@
 {
-  "python":{
-    "path":"/usr/bin/python3",
-    "scriptPath":""
+  "nrf_sdk":{
+    "device":"",
+    "board":"nrf9160dk@0.14.0/nrf52840",
+    "appPath":"/home/kodvmv/firmware",
+    "prj":"/home/kodvmv/firmware/prj.conf"
   },
-  "environment":"esp-idf-c-cpp",
+  "environment":"esp_idf_c_cpp",
   "ssh":{
-    "targetDir":"~/",
+    "targetIp":"localhost",
     "targetUser":"kodvmv",
-    "targetIp":"localhost"
+    "targetDir":"~/"
   },
-  "esp-idf-c-cpp":{
-    "port":"/dev/ttyACM0 ",
-    "buildPath":"/home/kodvmv/Descargas/ESP32-S3-LCD-1.69_DemoCode/ESP-IDF-v5.3.1/02_ESP_IDF_ST7789_LVGL",
+  "python":{
+    "scriptPath":"",
+    "path":"/usr/bin/python3"
+  },
+  "esp_idf_c_cpp":{
+    "buildPath":"test que taal adios hola hello",
     "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "family":"esp32s3"
+    "port":"/dev/ttyACM1 ",
+    "family":"esp32c2"
   }
 }

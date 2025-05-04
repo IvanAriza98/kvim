@@ -11,7 +11,10 @@ local function _getConfigFile()
     local content = file:read("*a")
     file:close()
 
-    local data, _, _ = json.decode(content, 1, nil)
+    local data = json.decode(content)
+    if not data then
+	print("Failed to decode")
+    end
     return data
 end
 
