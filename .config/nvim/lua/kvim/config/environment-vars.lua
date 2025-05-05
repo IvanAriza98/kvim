@@ -2,8 +2,7 @@
 local envs = {
     C_CPP		= "c_cpp",
     PYTHON 		= "python",
-    ESP_IDF_C_CPP	= "esp_idf_c_cpp",
-    ESP_IDF_MICRO	= "esp_idf_micro",
+    ESP_IDF		= "esp_idf",
     SSH			= "ssh",
     NRF_SDK		= "nrf_sdk"
 }
@@ -11,27 +10,27 @@ local envs = {
 local labels = {
     C_CPP		= "C/C++",
     PYTHON		= "Python",
-    ESP_IDF_C_CPP	= "ESP-IDF C/C++",
-    ESP_IDF_MICRO	= "ESP-IDF Micropython",
+    ESP_IDF 		= "ESP-IDF",
     SSH			= "SSH",
     NRF_SDK		= "NRF-SDK"
 }
 
 local keys = {
     --- ESP-IDF
-    PORT = "port",
-    FAMILY = "family",
-    BUILD_PATH = "buildPath",
+    IDF_PORT	= "port",
+    IDF_FAMILY	= "family",
+    IDF_PATH	= "idfPath",
+    IDF_APPPATH = "appPath",
 
     --- NRF
-    NRF_PRJ	= "prj",
-    NRF_BOARD	= "board",
-    NRF_DEVICE	= "device",
-    NRF_APPPATH	= "appPath",
+    NRF_PRJ		= "prj",
+    NRF_BOARD		= "board",
+    NRF_DEVICE		= "device",
+    NRF_APPPATH		= "appPath",
+    NRF_ZEPHYRPATH	= "zephyrPath",
 
     --- PYTHON
-    PYTHON_PATH = "path",
-    PYTHON_SCRIPT_PATH = "scriptPath",
+    PYT_PATH = "path",
 
     DEVELOPMENT = "development",
     ENVIRONMENT = "environment",

@@ -1,105 +1,42 @@
 --- Component to build or execute algorithms (build esp-idf, compile C programs, run python programs ...)
-require('kvim.utils.commands')
+require('kvim.utils.python-commands')
+require('kvim.utils.esp-idf-commands')
 require('kvim.utils.nrf-sdk-commands')
 
-local n = require('nui-components')
-local var = require('kvim.config.environment-vars')
+function getEnvironment()
+    local scoreNrf = getScoreNrf()
+    local scoreIdf = getScoreIdf()
+    local scorePyt = getScorePyt()
+    -- local scoreCpp = getScoreCpp()
 
-local renderer = n.create_renderer({
-  width = 60,
-  height = 3,
-})
-local buf = vim.api.nvim_create_buf(false, true)
-local body = function()
-  return n.buffer({
-	  id = "buffer",
-	  flex = 1,
-	  buf = buf,
-	  autoscroll = false,
-	  border_label = "Build Output",
-	})
+    local max_score = math.max(scoreNrf, scoreIdf, scorePyt) --, scoreCpp)
+
+    if (max_score == 0) then
+    elseif(max_score == scoreNrf) then
+	return "nrf"
+    elseif(max_score == scoreIdf) then
+	return "idf"
+    elseif(max_score == scorePyt) then
+	return "pyt"
+ --    elseif(max_score == scoreCpp) then
+	-- return "cpp"
+    end
 end
 
-local function send_cmd(cmd)
-    -- Limpia el buffer antes de empezar
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
-
-    vim.fn.jobstart(cmd, {
-        stdout_buffered = false,
-        on_stdout = function(_, data)
-            if data[1] ~= "" then
-                -- Añade las nuevas líneas al buffer
-                vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
-
-                -- Autoscroll: Mueve el cursor a la última línea en la ventana del buffer
-                local win_id = vim.fn.bufwinid(buf)
-                if win_id ~= -1 then
-                    local line_count = vim.api.nvim_buf_line_count(buf)
-                    vim.api.nvim_win_set_cursor(win_id, { line_count-1, 0 })
-                end
-            end
-        end,
-        on_stderr = function(_, data)
-            if data[1] ~= "" then
-                -- Añade errores al buffer
-                vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
-
-                -- Autoscroll: Igual que stdout
-                local win_id = vim.fn.bufwinid(buf)
-                if win_id ~= -1 then
-                    local line_count = vim.api.nvim_buf_line_count(buf)
-                    vim.api.nvim_win_set_cursor(win_id, { line_count-1, 0 })
-                end
-            end
-        end,
-	on_exit = function(_, exit_code)
-	    vim.schedule(function()
-		local msg = "✅ Command done."
-		if exit_code ~= 0 then
-		    msg = "❌ " ..msg .. "(exit code: "..exit_code..")"
-		end
-		local line_count = vim.api.nvim_buf_line_count(buf)
-		vim.api.nvim_buf_set_lines(buf, line_count, line_count, false, {msg})
-		local win_id = vim.fn.bufwinid(buf)
-		if win_id ~= -1 then
-		    vim.api.nvim_win_set_cursor(win_id, {line_count, 0})
-		end
-	    end)
-	end,
-    })
-end
-
--- vim.keymap.set("n", "<F5>", function()
---     vim.cmd("botright split | term " .. configBuildFolder())
---
---     -- vim.cmd([[
---     --     setlocal nobuflisted
---     --     setlocal bufhidden=hide
---     --     setlocal winfixheight
---     --     resize 12
---     -- ]])
--- end, { noremap = true, desc = "" })
 
 vim.keymap.set("n", "<F5>", function()
-    -- Abre terminal automáticamente con buffer nuevo
-    vim.cmd("botright new")  -- Usa `new` en lugar de `split`
-    local bufnr = vim.api.nvim_get_current_buf()
-
-    vim.fn.termopen(configBuildFolder(), {
-        on_exit = function(_, exit_code, _)
-            local msg = exit_code == 0 and "✅ Build success!" or "❌ Build failed (" .. exit_code .. ")"
-            vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, { "", msg })
-        end
-    })
-
-    -- Opciones de ventana
-    vim.cmd([[
-        setlocal nobuflisted
-        setlocal bufhidden=hide
-        setlocal winfixheight
-        resize 12
-    ]])
-end, { noremap = true, desc = "Build with west" })
+    local cmd = "botright split | term "
+    local env = getEnvironment()
+    if (env == "nrf") then
+	vim.cmd(cmd..nrfConfigBuildProject())
+	-- vim.cmd(cmd..nrfBuildProject())
+    elseif (env == "idf") then
+	vim.cmd(cmd..idfBuildProject())
+    elseif (env == "pyt") then
+	vim.cmd(cmd..pytExecute())
+    elseif (env == "cpp") then
+    end
+end, { noremap = true, desc = "Build" })
 
 
 -- vim.keymap.set("n", "<F5>", function()

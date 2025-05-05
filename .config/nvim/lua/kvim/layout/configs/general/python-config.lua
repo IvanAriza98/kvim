@@ -1,18 +1,14 @@
 local n = require("nui-components")
 local vars = require('kvim.config.environment-vars')
 
-local python = n.create_signal({
-    path = "",
-    scriptPath = "" })
+local python = n.create_signal({ path = "" })
 
 local function save_config()
-    setConfigField(vars.env.PYTHON, vars.key.ENVIRONMENT)
-    setConfigField(python:get_value().path, vars.id.PYTHON, vars.key.PYTHON_PATH)
-    setConfigField(python:get_value().scriptPath, vars.id.PYTHON, vars.key.PYTHON_SCRIPT_PATH)
+    setConfigField(python:get_value().path, vars.id.PYTHON, vars.key.PYT_PATH)
 end
 
 function config_python() --render)
-    python.path = getConfigField(vars.id.PYTHON, vars.key.PYTHON_PATH)
+    python.path = getConfigField(vars.id.PYTHON, vars.key.PYT_PATH)
     return n.form(
 	{
 	    id = "python-settings",

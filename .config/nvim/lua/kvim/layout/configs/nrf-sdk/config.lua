@@ -14,6 +14,7 @@ local function save_nrf_sdk()
     setConfigField(nrfSdk:get_value().board, vars.id.NRF_SDK, vars.key.NRF_BOARD)
     setConfigField(nrfSdk:get_value().device, vars.id.NRF_SDK, vars.key.NRF_DEVICE)
     setConfigField(nrfSdk:get_value().appPath, vars.id.NRF_SDK, vars.key.NRF_APPPATH)
+    setConfigField(nrfSdk:get_value().zephyrPath, vars.id.NRF_SDK, vars.key.NRF_ZEPHYRPATH)
 end
 
 function config_nrf_sdk()
@@ -22,6 +23,7 @@ function config_nrf_sdk()
     nrfSdk.board = getConfigField(vars.id.NRF_SDK, vars.key.NRF_BOARD)
     nrfSdk.device = getConfigField(vars.id.NRF_SDK, vars.key.NRF_DEVICE)
     nrfSdk.appPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_APPPATH)
+    nrfSdk.zephyrPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_ZEPHYRPATH)
     for _, device in ipairs(get_nrf_devices()) do
 	table.insert(nrf_devices_list, n.option(device, { id = device}))
     end
@@ -58,6 +60,14 @@ function config_nrf_sdk()
 	    value = nrfSdk:get_value().prj,
 	    on_change = function(value)
 		nrfSdk.prj = value
+	    end,
+	}),
+	n.text_input({
+	    flex = 1,
+	    border_label = "Zephyr path",
+	    value = nrfSdk:get_value().zephyrPath,
+	    on_change = function(value)
+		nrfSdk.zephyrPath = value
 	    end,
 	}),
 	n.columns(

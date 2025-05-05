@@ -5,21 +5,23 @@ local vars = require('kvim.config.environment-vars')
 local espidf = n.create_signal({
     port = {""},
     family = {""},
-    buildPath = {""} })
+    appPath = {""},
+    idfPath = {""}
+})
 
 local function save_esp_idf_c_cpp()
-    setConfigField(vars.env.ESP_IDF_C_CPP, vars.key.ENVIRONMENT) -- deprecated 
-
-    setConfigField(espidf:get_value().port, vars.id.ESP_IDF_C_CPP, vars.key.PORT)
-    setConfigField(espidf:get_value().family, vars.id.ESP_IDF_C_CPP, vars.key.FAMILY)
-    setConfigField(espidf:get_value().buildPath, vars.id.ESP_IDF_C_CPP, vars.key.BUILD_PATH)
+    setConfigField(espidf:get_value().port, vars.id.ESP_IDF, vars.key.IDF_PORT)
+    setConfigField(espidf:get_value().idfPath, vars.id.ESP_IDF, vars.key.IDF_PATH)
+    setConfigField(espidf:get_value().family, vars.id.ESP_IDF, vars.key.IDF_FAMILY)
+    setConfigField(espidf:get_value().appPath, vars.id.ESP_IDF, vars.key.IDF_APPPATH)
 end
 
 function config_esp_idf_c_cpp()
     local usb_devices_list = {}
-    espidf.port = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.PORT)
-    espidf.family = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.FAMILY)
-    espidf.buildPath = getConfigField(vars.id.ESP_IDF_C_CPP, vars.key.BUILD_PATH)
+    espidf.port = getConfigField(vars.id.ESP_IDF, vars.key.IDF_PORT)
+    espidf.idfPath = getConfigField(vars.id.ESP_IDF, vars.key.IDF_PATH)
+    espidf.family = getConfigField(vars.id.ESP_IDF, vars.key.IDF_FAMILY)
+    espidf.appPath = getConfigField(vars.id.ESP_IDF, vars.key.IDF_APPPATH)
 
     for _, device in ipairs(get_usb_devices()) do
 	table.insert(usb_devices_list, n.option(device.name, { id = device.path}))
@@ -57,9 +59,18 @@ function config_esp_idf_c_cpp()
 	    flex = 1,
 	    autoresize = true,
 	    border_label = "Build path",
-	    value = espidf:get_value().buildPath,
+	    value = espidf:get_value().appPath,
 	    on_change = function(value, _)
-		espidf.buildPath = value
+		espidf.appPath = value
+	    end,
+	}),
+	n.text_input({
+	    flex = 1,
+	    autoresize = true,
+	    border_label = "Idf path",
+	    value = espidf:get_value().idfPath,
+	    on_change = function(value, _)
+		espidf.idfPath = value
 	    end,
 	}),
 	n.columns(
