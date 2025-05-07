@@ -1,0 +1,23 @@
+{
+  "nrf_sdk":{
+    "board":"nrf9160dk@0.14.0/nrf52840",
+    "prj":"/home/kodvmv/firmware/prj.conf",
+    "zephyrPath":"/home/kodvmv/ncs/v3.0.0",
+    "appPath":"/home/kodvmv/firmware",
+    "device":""
+  },
+  "ssh":{
+    "targetIp":"172.28.1.1",
+    "targetPath":"~/",
+    "targetUser":"root"
+  },
+  "esp_idf":{
+    "appPath":"test que taal adios hola hello",
+    "family":"esp32c2",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "port":"/dev/ttyACM1 "
+  },
+  "python":{
+    "path":"/usr/bin/python3"
+  }
+}

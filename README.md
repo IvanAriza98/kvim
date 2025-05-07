@@ -18,3 +18,13 @@ Install hyprland enviroment:
 2.) sudo pacman -Syu
 3.) sudo pacman -S hyprland
 
+
+
+# How to use SSH Connections
+1.) Configure /etc/ssh/sshd_config
+    Hosts *    
+        PasswordAuthentication yes
+        HostkeyAlgoritms +ssh-rsa
+        PubkeyAcceptedAlgorithms +ssh-rsa
+2.) ssh-keygen -> Generating type (rsa ...) of key pair
+3.) ssh-copy-id user@address -> add password to the private key

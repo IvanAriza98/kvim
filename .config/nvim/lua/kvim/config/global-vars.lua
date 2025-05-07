@@ -20,5 +20,7 @@ vim.opt.number = true
 -- vim.wo.relativenumber = true
 
 --- Paths
-vim.g.git_path = "/home/kodvmv/Documentos/GitHub/kvim"
+-- TODO I must be think how to treat individual paths
+-- vim.g.git_path = "/home/iariza/Documents/GitHub/kvim/.config/nvim/"
+vim.g.git_path = "/home/iariza/Documents/Github/kvim/.config/nvim/"
 vim.g.configs_path = vim.g.git_path .. "/configs.json"

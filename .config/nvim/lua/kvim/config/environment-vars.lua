@@ -36,10 +36,9 @@ local keys = {
     ENVIRONMENT = "environment",
 
     --- SSH COMUNICATION
-    TARGET_IP	= "targetIp",
-    TARGET_USER = "targetUser",
-    TARGET_PASS = "targetPass",
-    TARGET_DIR	= "targetDir",
+    SSH_IP	= "targetIp",
+    SSH_PATH	= "targetPath",
+    SSH_USER	= "targetUser",
 }
 
 return {

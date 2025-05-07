@@ -1,5 +1,4 @@
 local json = require("dkjson")
--- local vars = require('kvim.config.environment-vars')
 
 local function _getConfigFile()
     local file = io.open(vim.g.configs_path, "r")
