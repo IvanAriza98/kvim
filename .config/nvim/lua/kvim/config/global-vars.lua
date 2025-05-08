@@ -22,5 +22,7 @@ vim.opt.number = true
 --- Paths
 -- TODO I must be think how to treat individual paths
 -- vim.g.git_path = "/home/iariza/Documents/GitHub/kvim/.config/nvim/"
-vim.g.git_path = "/home/iariza/Documents/Github/kvim/.config/nvim/"
-vim.g.configs_path = vim.g.git_path .. "/configs.json"
+-- find dynamically location of .config/nvim/configs.json
+-- vim.g.git_path = "/home/iariza/Documents/Github/kvim/.config/nvim/"
+local nvim_repo_root = vim.fn.fnamemodify(current_file, ":p:h:h:h:h")
+vim.g.configs_path = nvim_repo_root .. "/configs.json"
