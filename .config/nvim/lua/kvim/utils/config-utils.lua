@@ -3,7 +3,7 @@ local json = require("dkjson")
 local function _getConfigFile()
     local file = io.open(vim.g.configs_path, "r")
     if not file then
-	print("Config file not found.")
+	print("Config file not found. ", vim.g.configs_path)
 	return
     end
 
@@ -27,6 +27,7 @@ local function _setConfigFile(data)
     local file = io.open(vim.g.configs_path, "w")
     if not file then
 	print("Config file not found")
+	print(vim.g.configs_path)
 	return
     end
 
