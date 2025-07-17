@@ -33,6 +33,7 @@ require("lazy").setup({
 	-- automatically check for plugin updates
 	checker = { enabled = true },
 })
+
 -- Load all utils before own scripts
 require("kvim.utils.ssh")
 require("kvim.utils.config-utils")
