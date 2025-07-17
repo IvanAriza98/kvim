@@ -38,6 +38,13 @@ vim.keymap.set("n", "<F5>", function()
     end
 end, { noremap = true, desc = "Build" })
 
+vim.keymap.set("n", "<F6>", function()
+    local cmd = "botright split | term "
+    local env = getEnvironment()
+    if (env == "nrf") then
+	vim.cmd(cmd..nrfFlashProject())
+    end
+end, { noremap = true, desc = "Flash" })
 
 -- vim.keymap.set("n", "<F5>", function()
 --     local cfg_env = getConfigField(var.key.ENVIRONMENT)

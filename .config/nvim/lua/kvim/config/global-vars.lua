@@ -3,10 +3,11 @@ vim.g.maplocalleader = "\\"
 
 vim.opt.cursorline = true
 vim.opt.syntax = "on"
+vim.opt.expandtab = true
 vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
 vim.opt.smarttab = true
-vim.opt.tabstop = 8
-vim.opt.softtabstop = 0
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
 vim.opt.compatible = false
