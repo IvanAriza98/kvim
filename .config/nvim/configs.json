@@ -1,24 +1,28 @@
 {
-  "esp_idf":{
-    "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "port":"/dev/ttyACM1 ",
-    "appPath":"test que taal adios hola hello",
-    "family":"esp32c2"
+  "nrf_sdk": {
+    "baseConfigFiles": "prj.conf",
+    "appPath": "/home/kodvmv/Documentos/GitHub/Minimal/firmware-design/minimal/",
+    "boardTarget": "E73_2G4M08S1C/nrf52840",
+    "baseDevicetreeOverlays": "",
+    "zephyrToolchainPath": "/home/kodvmv/ncs/v3.0.0",
+    "extraKconfigFragments": "",
+    "extraDevicetreeOverlays": "overlays/",
+    "snDevice": "1050286221"
   },
-  "ssh":{
-    "user":"user",
-    "path":"~/",
-    "ip":"localhost",
-    "port":"2222"
+  "esp_idf": {
+    "family": "esp32c2",
+    "appPath": "",
+    "idfPath": "/home/kodvmv/esp/esp-idf/",
+    "port": "/dev/ttyACM1 "
   },
-  "python":{
-    "path":"/usr/bin/python3"
+  "ssh": {
+    "port": "2222",
+    "user": "user",
+    "ip": "localhost",
+    "path": "~/"
   },
-  "nrf_sdk":{
-    "zephyrPath":"/home/kodvmv/ncs/v3.0.0",
-    "board":"nrf52840dk/nrf52840",
-    "prj":"/home/kodvmv/firmware/prj.conf",
-    "device":"960002610",
-    "appPath":"/home/kodvmv/firmware"
+  "python": {
+    "path": "/usr/bin/python3"
   }
 }
+

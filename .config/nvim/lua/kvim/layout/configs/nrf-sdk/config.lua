@@ -3,27 +3,39 @@ local n = require("nui-components")
 local vars = require("kvim.config.environment-vars")
 
 local nrfSdk = n.create_signal({
-	prj = { "" },
-	board = { "" },
-	device = { "" },
 	appPath = { "" },
+	zephyrToolchainPath = { "" },
+	boardTarget = { "" },
+	baseConfigFiles = { "" },
+	extraKconfigFragments = { "" },
+	baseDevicetreeOverlays = { "" },
+	extraDevicetreeOverlays = { "" },
+	snDevice = { "" },
 })
 
 local function save_nrf_sdk()
-	setConfigField(nrfSdk:get_value().prj, vars.id.NRF_SDK, vars.key.NRF_PRJ)
-	setConfigField(nrfSdk:get_value().board, vars.id.NRF_SDK, vars.key.NRF_BOARD)
-	setConfigField(nrfSdk:get_value().device, vars.id.NRF_SDK, vars.key.NRF_DEVICE)
-	setConfigField(nrfSdk:get_value().appPath, vars.id.NRF_SDK, vars.key.NRF_APPPATH)
-	setConfigField(nrfSdk:get_value().zephyrPath, vars.id.NRF_SDK, vars.key.NRF_ZEPHYRPATH)
+	setConfigField(nrfSdk:get_value().appPath, vars.id.NRF_SDK, vars.key.NRF_APP_PATH)
+	setConfigField(nrfSdk:get_value().zephyrToolchainPath, vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_TOOLCHAIN_PATH)
+	setConfigField(nrfSdk:get_value().boardTarget, vars.id.NRF_SDK, vars.key.NRF_BOARD_TARGET)
+	setConfigField(nrfSdk:get_value().baseConfigFiles, vars.id.NRF_SDK, vars.key.NRF_CONFIG_FILES)
+	setConfigField(nrfSdk:get_value().extraKconfigFragments, vars.id.NRF_SDK, vars.key.NRF_EXTRA_KCONFIG_FRAGMENTS)
+	setConfigField(nrfSdk:get_value().baseDevicetreeOverlays, vars.id.NRF_SDK, vars.key.NRF_BASE_DEVICETREE_OVERLAYS)
+	setConfigField(nrfSdk:get_value().extraDevicetreeOverlays, vars.id.NRF_SDK, vars.key.NRF_EXTRA_DEVICETREE_OVERLAYS)
+	setConfigField(nrfSdk:get_value().snDevice, vars.id.NRF_SDK, vars.key.NRF_SN_DEVICE)
 end
 
 function config_nrf_sdk()
 	local nrf_devices_list = {}
-	nrfSdk.prj = getConfigField(vars.id.NRF_SDK, vars.key.NRF_PRJ)
-	nrfSdk.board = getConfigField(vars.id.NRF_SDK, vars.key.NRF_BOARD)
-	nrfSdk.device = getConfigField(vars.id.NRF_SDK, vars.key.NRF_DEVICE)
-	nrfSdk.appPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_APPPATH)
-	nrfSdk.zephyrPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_ZEPHYRPATH)
+	nrfSdk.appPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_APP_PATH)
+	nrfSdk.zephyrToolchainPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_TOOLCHAIN_PATH)
+	nrfSdk.boardTarget = getConfigField(vars.id.NRF_SDK, vars.key.NRF_BOARD_TARGET)
+	nrfSdk.baseConfigFiles = getConfigField(vars.id.NRF_SDK, vars.key.NRF_CONFIG_FILES)
+
+	nrfSdk.extraKconfigFragments = getConfigField(vars.id.NRF_SDK, vars.key.NRF_EXTRA_KCONFIG_FRAGMENTS)
+	nrfSdk.baseDevicetreeOverlays = getConfigField(vars.id.NRF_SDK, vars.key.NRF_BASE_DEVICETREE_OVERLAYS)
+	nrfSdk.extraDevicetreeOverlays = getConfigField(vars.id.NRF_SDK, vars.key.NRF_EXTRA_DEVICETREE_OVERLAYS)
+
+	nrfSdk.snDevice = getConfigField(vars.id.NRF_SDK, vars.key.NRF_SN_DEVICE)
 	for _, device in ipairs(get_nrf_devices()) do
 		table.insert(nrf_devices_list, n.option(device, { id = device }))
 	end
@@ -47,29 +59,57 @@ function config_nrf_sdk()
 		}),
 		n.text_input({
 			flex = 1,
-			border_label = "Board/Micro",
-			value = nrfSdk:get_value().board,
+			border_label = "Zephyr Toolchain Path",
+			value = nrfSdk:get_value().zephyrToolchainPath,
 			on_change = function(value)
-				nrfSdk.board = value
+				nrfSdk.zephyrToolchainPath = value
 			end,
 		}),
 		n.text_input({
 			flex = 1,
-			selected = nrfSdk.prj,
-			border_label = "Prj.conf",
-			value = nrfSdk:get_value().prj,
+			border_label = "Board Target",
+			value = nrfSdk:get_value().boardTarget,
 			on_change = function(value)
-				nrfSdk.prj = value
+				nrfSdk.boardTarget = value
 			end,
 		}),
 		n.text_input({
 			flex = 1,
-			border_label = "Zephyr path",
-			value = nrfSdk:get_value().zephyrPath,
+			selected = nrfSdk.baseConfigFiles,
+			border_label = "Base Configuration Files (Kconfig)",
+			value = nrfSdk:get_value().baseConfigFiles,
 			on_change = function(value)
-				nrfSdk.zephyrPath = value
+				nrfSdk.baseConfigFiles = value
 			end,
 		}),
+		n.text_input({
+			flex = 1,
+			selected = nrfSdk.extraKconfigFragments,
+			border_label = "Extra Kconfig Fragments",
+			value = nrfSdk:get_value().extraKconfigFragments,
+			on_change = function(value)
+				nrfSdk.extraKconfigFragments = value
+			end,
+		}),
+		n.text_input({
+			flex = 1,
+			selected = nrfSdk.baseDevicetreeOverlays,
+			border_label = "Base Devicetree Overlays",
+			value = nrfSdk:get_value().baseDevicetreeOverlays,
+			on_change = function(value)
+				nrfSdk.baseDevicetreeOverlays = value
+			end,
+		}),
+		n.text_input({
+			flex = 1,
+			selected = nrfSdk.extraDevicetreeOverlays,
+			border_label = "Extra Devicetree Overlays (Directories)",
+			value = nrfSdk:get_value().extraDevicetreeOverlays,
+			on_change = function(value)
+				nrfSdk.extraDevicetreeOverlays = value
+			end,
+		}),
+
 		n.columns(
 			n.button({
 				label = "Back",
@@ -99,7 +139,7 @@ function config_nrf_sdk()
 					-- selected = nrfSdk:get_value().device,
 					data = nrf_devices_list,
 					on_select = function(node, _)
-						nrfSdk.device = node.text
+						nrfSdk.snDevice = node.text
 					end,
 				})
 			)
