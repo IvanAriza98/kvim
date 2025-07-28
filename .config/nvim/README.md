@@ -9,3 +9,6 @@ Needs several tools:
 - git - to use repositories
   sudo pacman -Sy git
 - luarocks - ?
+
+
+- BE CAREFUL! to install icons need to instal nerd tree with pacman and configure .json in WSL (Winch Arch)

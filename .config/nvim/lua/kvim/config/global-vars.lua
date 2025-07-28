@@ -11,10 +11,8 @@ vim.opt.smarttab = true
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
 vim.opt.compatible = false
--- vim.opt.encoding = "UTF-8"
---vim.opt.guifont = "FiraCode Nerd Font:h11"
--- vim.opt.termguicolors = true
--- vim.o.guifont = "Monaspace Radon"
+
+vim.opt.termguicolors = true
 
 --- lines customization
 vim.opt.number = true

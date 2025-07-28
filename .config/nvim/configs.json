@@ -1,28 +1,27 @@
 {
-  "nrf_sdk": {
-    "baseConfigFiles": "prj.conf",
-    "appPath": "/home/kodvmv/Documentos/GitHub/Minimal/firmware-design/minimal/",
-    "boardTarget": "E73_2G4M08S1C/nrf52840",
-    "baseDevicetreeOverlays": "",
-    "zephyrToolchainPath": "/home/kodvmv/ncs/v3.0.0",
-    "extraKconfigFragments": "",
-    "extraDevicetreeOverlays": "overlays/",
-    "snDevice": "1050286221"
+  "nrf_sdk":{
+    "appPath":"/home/kodvmv/Documentos/GitHub/Minimal/firmware-design/minimal/",
+    "baseConfigFiles":"prj.conf",
+    "boardTarget":"E73_2G4M08S1C/nrf52840",
+    "snDevice":"1050286221",
+    "zephyrToolchainPath":"/home/kodvmv/ncs/v3.0.0",
+    "extraDevicetreeOverlays":"overlays/",
+    "extraKconfigFragments":"",
+    "baseDevicetreeOverlays":""
   },
-  "esp_idf": {
-    "family": "esp32c2",
-    "appPath": "",
-    "idfPath": "/home/kodvmv/esp/esp-idf/",
-    "port": "/dev/ttyACM1 "
+  "python":{
+    "path":"/usr/bin/python3"
   },
-  "ssh": {
-    "port": "2222",
-    "user": "user",
-    "ip": "localhost",
-    "path": "~/"
+  "esp_idf":{
+    "family":"esp32c2",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "port":"/dev/ttyACM1 ",
+    "appPath":""
   },
-  "python": {
-    "path": "/usr/bin/python3"
+  "ssh":{
+    "user":"root",
+    "ip":"172.28.1.10",
+    "port":"22",
+    "path":"~/"
   }
 }
-
