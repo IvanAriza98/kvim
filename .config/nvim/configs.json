@@ -1,28 +1,27 @@
 {
-  "nrf_sdk": {
-    "baseConfigFiles": "prj.conf",
-    "appPath": "/home/kodvmv/Documentos/GitHub/Minimal/firmware-design/minimal/",
-    "boardTarget": "E73_2G4M08S1C/nrf52840",
-    "baseDevicetreeOverlays": "",
-    "zephyrToolchainPath": "/home/kodvmv/ncs/v3.0.0",
-    "extraKconfigFragments": "",
-    "extraDevicetreeOverlays": "overlays/",
-    "snDevice": "1050286221"
+  "esp_idf":{
+    "family":"esp32c2",
+    "appPath":"",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "port":"/dev/ttyACM1 "
   },
-  "esp_idf": {
-    "family": "esp32c2",
-    "appPath": "",
-    "idfPath": "/home/kodvmv/esp/esp-idf/",
-    "port": "/dev/ttyACM1 "
+  "ssh":{
+    "path":"~/B900001_RTP800/Herramientas/F701233_Generador_Version_Conjunta/",
+    "ip":"10.124.11.112",
+    "port":"22",
+    "user":"iariza"
   },
-  "ssh": {
-    "port": "2222",
-    "user": "user",
-    "ip": "localhost",
-    "path": "~/"
+  "python":{
+    "path":"/usr/bin/python3"
   },
-  "python": {
-    "path": "/usr/bin/python3"
+  "nrf_sdk":{
+    "appPath":"/home/kodvmv/Documentos/GitHub/Minimal/firmware-design/minimal/",
+    "baseConfigFiles":"prj.conf",
+    "snDevice":"1050286221",
+    "extraDevicetreeOverlays":"overlays/",
+    "baseDevicetreeOverlays":"",
+    "zephyrToolchainPath":"/home/kodvmv/ncs/v3.0.0",
+    "boardTarget":"E73_2G4M08S1C/nrf52840",
+    "extraKconfigFragments":""
   }
 }
-
