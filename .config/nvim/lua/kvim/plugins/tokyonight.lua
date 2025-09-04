@@ -4,7 +4,7 @@ return {
 	config = function()
 		require("tokyonight").setup({
 			style = "storm", -- Cambia el estilo aquí (storm, moon, night, day)
-			transparent = true, -- Desactiva el color de fondo
+			-- transparent = true, -- Desactiva el color de fondo
 			terminal_colors = true, -- Colores personalizados para el terminal
 			styles = {
 				comments = { italic = true }, -- Comentarios en cursiva
