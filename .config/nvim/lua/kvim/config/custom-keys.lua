@@ -1,8 +1,9 @@
 local noremap = { noremap = true }
 local noremap_silent = { noremap = true, silent = true }
+
 -- General
-vim.api.nvim_set_keymap("n", "<C-s>", ":w!<CR>", noremap)
-vim.api.nvim_set_keymap("n", "<C-q>", ":q!<CR>", noremap)
+vim.api.nvim_set_keymap("n", "s", ":w!<CR>", noremap)
+vim.api.nvim_set_keymap("n", "q", ":q!<CR>", noremap)
 
 vim.api.nvim_set_keymap("n", "<ESC>", ":noh<CR>", noremap)
 vim.api.nvim_set_keymap("t", "<ESC>", "<C-\\><C-n>", noremap_silent)

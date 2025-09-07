@@ -1,6 +1,7 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+
 vim.opt.cursorline = true
 vim.opt.syntax = "on"
 vim.opt.expandtab = true
