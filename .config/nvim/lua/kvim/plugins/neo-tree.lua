@@ -338,7 +338,8 @@ return {
 			},
 		})
 		vim.keymap.set("n", "\\", "<cmd>Neotree reveal left<CR>", { noremap = true, silent = true }) -- alternative to normal neotree position
-		vim.keymap.set("n", "<leader>fp", "<cmd>Neotree reveal float<CR>", { noremap = true, silent = true }) -- neotree float window
+        -- ATEMPT! We're using yazi to the ctrl menu and move across the file system!
+		-- vim.keymap.set("n", "<leader>fp", "<cmd>Neotree reveal float<CR>", { noremap = true, silent = true }) -- neotree float window 
 		vim.keymap.set("n", "<leader>fb", "<cmd>Neotree buffers<CR>", { noremap = true, silent = true }) -- buffer float window
 		vim.keymap.set("n", "ø", "<cmd>Neotree right document_symbols<CR>", { noremap = true, silent = true }) -- buffer float window
 	end,
