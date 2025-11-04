@@ -1,9 +1,13 @@
 local vars = require("kvim.config.environment-vars")
 
-function share_pub_key(user, ip, port)
-	local key_path = os.getenv("HOME") .. "/.ssh/id_rsa"
+function share_pub_key(key_type, user, ip, port)
+	local key_path = os.getenv("HOME") .. "/.ssh/id_" .. key_type
 	local pub_key_path = key_path .. ".pub"
 
+    if not key_type or key_type == "" then
+		print("❌ SSH key type is not defined")
+		return
+    end
 	if not ip or ip == "" then
 		print("❌ SSH ip is not defined")
 		return
@@ -14,12 +18,14 @@ function share_pub_key(user, ip, port)
 	end
 
 	if vim.fn.filereadable(key_path) == 0 then
-		print("🔑 Generating RSA 4096-bit key...")
-		os.execute(string.format('ssh-keygen -t rsa -b 4096 -f "%s" -N ""', key_path))
+		print(string.format("🔑 Generating %s key...", key_type:upper()))
+		os.execute(string.format('ssh-keygen -t %s -b 4096 -f "%s" -N ""', key_type, key_path))
 	end
 
 	local cmd = string.format('ssh-copy-id -f -i "%s" -p %s %s@%s', pub_key_path, port, user, ip)
-	vim.cmd("split | terminal " .. cmd)
+    vim.cmd("new")
+    vim.fn.termopen(cmd)
+    vim.cmd("startinsert")
 end
 
 function ssh_terminal(direction)

@@ -24,7 +24,7 @@ function config_esp_idf_c_cpp()
     espidf.appPath = getConfigField(vars.id.ESP_IDF, vars.key.IDF_APPPATH)
 
     for _, device in ipairs(get_usb_devices()) do
-	table.insert(usb_devices_list, n.option(device.name, { id = device.path}))
+	    table.insert(usb_devices_list, n.option(device.name, { id = device.path}))
     end
 
     local form_elements= {
@@ -39,20 +39,20 @@ function config_esp_idf_c_cpp()
 	    border_label = "Select family",
 	    selected = espidf.family,
 	    data = {
-		n.option("esp32", { id = "esp32" }),
-		n.option("esp32s2", { id = "esp32s2" }),
-		n.option("esp32c2", { id = "esp32c2" }),
-		n.option("esp32s3", { id = "esp32s3" }),
-		n.option("esp32c3", { id = "esp32c3" }),
-		n.option("esp32c6", { id = "esp32c6" }),
-		n.option("esp32h2", { id = "esp32h2" }),
-		n.option("esp32p4", { id = "esp32p4" }),
-		n.option("esp32c5", { id = "esp32c5" }),
-		n.option("esp32c61", { id = "esp32c61" }),
-		n.option("linux", { id = "linux" })
+            n.option("esp32", { id = "esp32" }),
+            n.option("esp32s2", { id = "esp32s2" }),
+            n.option("esp32c2", { id = "esp32c2" }),
+            n.option("esp32s3", { id = "esp32s3" }),
+            n.option("esp32c3", { id = "esp32c3" }),
+            n.option("esp32c6", { id = "esp32c6" }),
+            n.option("esp32h2", { id = "esp32h2" }),
+            n.option("esp32p4", { id = "esp32p4" }),
+            n.option("esp32c5", { id = "esp32c5" }),
+            n.option("esp32c61", { id = "esp32c61" }),
+            n.option("linux", { id = "linux" })
 	    },
 	    on_select = function(node, _)
-		espidf.family = node.text
+		    espidf.family = node.text
 	    end,
 	}),
 	n.text_input({
