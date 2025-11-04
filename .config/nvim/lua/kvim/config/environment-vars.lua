@@ -44,6 +44,7 @@ local keys = {
 	SSH_PORT = "port",
 	SSH_USER = "user",
 	SSH_PATH = "path",
+    SSH_KEY_TYPE = "key_type",
 }
 
 return {

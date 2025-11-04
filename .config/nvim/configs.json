@@ -1,9 +1,10 @@
 {
   "ssh":{
-    "ip":"10.124.11.112",
-    "user":"iariza",
+    "path":"~/",
+    "key_type":"ed25519",
     "port":"22",
-    "path":"~/B900001_RTP800/Herramientas/F701233_Generador_Version_Conjunta/"
+    "ip":"172.28.1.1",
+    "user":"root"
   },
   "python":{
     "path":"/usr/bin/python3"
@@ -21,9 +22,12 @@
     "boardTarget":"mkpro"
   },
   "esp_idf":{
-    "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "port":"/dev/ttyACM1 ",
     "appPath":"",
-    "family":"esp32c2"
+    "family":"esp32c2",
+    "port":"/dev/ttyACM1 ",
+    "idfPath":"/home/kodvmv/esp/esp-idf/"
+  },
+  "python":{
+    "path":"/usr/bin/python3"
   }
 }
