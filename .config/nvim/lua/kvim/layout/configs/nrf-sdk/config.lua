@@ -4,7 +4,8 @@ local vars = require("kvim.config.environment-vars")
 
 local nrfSdk = n.create_signal({
 	appPath = { "" },
-	zephyrToolchainPath = { "" },
+	zephyrVersionPath = { "" },
+	zephyrCompilerPath = { "" },
 	boardTarget = { "" },
 	baseConfigFiles = { "" },
 	extraKconfigFragments = { "" },
@@ -15,7 +16,8 @@ local nrfSdk = n.create_signal({
 
 local function save_nrf_sdk()
 	setConfigField(nrfSdk:get_value().appPath, vars.id.NRF_SDK, vars.key.NRF_APP_PATH)
-	setConfigField(nrfSdk:get_value().zephyrToolchainPath, vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_TOOLCHAIN_PATH)
+	setConfigField(nrfSdk:get_value().zephyrVersionPath, vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_VERSION_PATH)
+	setConfigField(nrfSdk:get_value().zephyrCompilerPath, vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_COMPILER_PATH)
 	setConfigField(nrfSdk:get_value().boardTarget, vars.id.NRF_SDK, vars.key.NRF_BOARD_TARGET)
 	setConfigField(nrfSdk:get_value().baseConfigFiles, vars.id.NRF_SDK, vars.key.NRF_CONFIG_FILES)
 	setConfigField(nrfSdk:get_value().extraKconfigFragments, vars.id.NRF_SDK, vars.key.NRF_EXTRA_KCONFIG_FRAGMENTS)
@@ -27,7 +29,8 @@ end
 function config_nrf_sdk()
 	local nrf_devices_list = {}
 	nrfSdk.appPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_APP_PATH)
-	nrfSdk.zephyrToolchainPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_TOOLCHAIN_PATH)
+	nrfSdk.zephyrVersionPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_VERSION_PATH)
+	nrfSdk.zephyrCompilerPath = getConfigField(vars.id.NRF_SDK, vars.key.NRF_ZEPHYR_COMPILER_PATH)
 	nrfSdk.boardTarget = getConfigField(vars.id.NRF_SDK, vars.key.NRF_BOARD_TARGET)
 	nrfSdk.baseConfigFiles = getConfigField(vars.id.NRF_SDK, vars.key.NRF_CONFIG_FILES)
 
@@ -57,12 +60,20 @@ function config_nrf_sdk()
 				nrfSdk.appPath = value
 			end,
 		}),
+        n.text_input({
+			flex = 1,
+			border_label = "Zephyr Version Path",
+			value = nrfSdk:get_value().zephyrVersionPath,
+			on_change = function(value)
+				nrfSdk.zephyrVersionPath = value
+			end,
+		}),
 		n.text_input({
 			flex = 1,
-			border_label = "Zephyr Toolchain Path",
-			value = nrfSdk:get_value().zephyrToolchainPath,
+			border_label = "Zephyr Compiler Path",
+			value = nrfSdk:get_value().zephyrCompilerPath,
 			on_change = function(value)
-				nrfSdk.zephyrToolchainPath = value
+				nrfSdk.zephyrCompilerPath = value
 			end,
 		}),
 		n.text_input({

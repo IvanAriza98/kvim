@@ -61,3 +61,11 @@ vim.keymap.set("n", "<F7>", function()
 		vim.cmd(cmd .. nrfRTTMonitorProject())
 	end
 end, { noremap = true, desc = "Monitor" })
+
+vim.keymap.set("n", "<F8>", function()
+	local cmd = "botright split | term "
+	local env = getEnvironment()
+	if env == "nrf" then
+		vim.cmd(cmd .. nrfDebugMonitorProject())
+	end
+end, { noremap = true, desc = "Monitor" })

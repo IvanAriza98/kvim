@@ -24,7 +24,8 @@ local keys = {
 
 	--- NRF
 	NRF_APP_PATH = "appPath",
-	NRF_ZEPHYR_TOOLCHAIN_PATH = "zephyrToolchainPath",
+	NRF_ZEPHYR_VERSION_PATH = "zephyrVersionPath",
+	NRF_ZEPHYR_COMPILER_PATH = "zephyrCompilerPath",
 	NRF_BOARD_TARGET = "boardTarget",
 	NRF_CONFIG_FILES = "baseConfigFiles",
 	NRF_EXTRA_KCONFIG_FRAGMENTS = "extraKconfigFragments",

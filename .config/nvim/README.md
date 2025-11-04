@@ -9,7 +9,7 @@ Needs several tools:
 - git - to use repositories
   sudo pacman -Sy git
 - luarocks - ?
-
+- sudo pacman -Sy lsof --> to nrf-sdk (serial debug)
 
 LSP         -> Intelligent
 DAP         -> Debug
