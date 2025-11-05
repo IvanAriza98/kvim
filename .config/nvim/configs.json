@@ -1,33 +1,30 @@
 {
-  "ssh":{
-    "path":"~/",
-    "key_type":"ed25519",
-    "port":"22",
-    "ip":"172.28.1.1",
-    "user":"root"
-  },
   "python":{
     "path":"/usr/bin/python3"
   },
   "nrf_sdk":{
+    "extraKconfigFragments":"",
+    "baseConfigFiles":"/home/KODVMV/ncs/workspace/firmware-MKPro/app/prj.conf",
+    "boardTarget":"mkpro",
     "zephyrCompilerPath":"",
+    "zephyrToolchainPath":"/home/KODVMV/ncs/v3.1.1",
     "zephyrVersionPath":"/home/KODVMV/ncs/workspace/firmware-MKPro",
     "snDevice":"1050286221",
     "appPath":"/home/KODVMV/ncs/workspace/firmware-MKPro/app",
     "extraDevicetreeOverlays":"/home/KODVMV/ncs/workspace/firmware-MKPro/app/boards",
-    "baseDevicetreeOverlays":"",
-    "extraKconfigFragments":"",
-    "baseConfigFiles":"/home/KODVMV/ncs/workspace/firmware-MKPro/app/prj.conf",
-    "zephyrToolchainPath":"/home/KODVMV/ncs/v3.1.1",
-    "boardTarget":"mkpro"
+    "baseDevicetreeOverlays":""
+  },
+  "ssh":{
+    "ip":"172.28.1.1",
+    "path":"~/",
+    "key_type":"ed25519",
+    "user":"root",
+    "port":"22"
   },
   "esp_idf":{
-    "appPath":"",
     "family":"esp32c2",
-    "port":"/dev/ttyACM1 ",
-    "idfPath":"/home/kodvmv/esp/esp-idf/"
-  },
-  "python":{
-    "path":"/usr/bin/python3"
+    "appPath":"",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "port":"/dev/ttyACM1 "
   }
 }
