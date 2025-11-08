@@ -33,7 +33,7 @@ end
 function getScoreIdf()
     local score = 0
     local currentPath = vim.fn.expand('%:p:h')
-    local appPath = getConfigField(var.id.NRF_SDK, var.key.IDF_APPPATH)
+    local appPath = getConfigField(var.id.ESP_IDF, var.key.IDF_APPPATH)
 
     if not currentPath:find(appPath, 1, true) then
 	return score

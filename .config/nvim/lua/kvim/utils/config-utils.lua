@@ -1,7 +1,6 @@
 local json = require("dkjson")
 
 local function _getConfigFile()
-	print(vim.g.configs_path)
 	local file = io.open(vim.g.configs_path, "r")
 	if not file then
 		print("Config file not found. ", vim.g.configs_path)

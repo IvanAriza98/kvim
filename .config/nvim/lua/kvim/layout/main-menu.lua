@@ -9,7 +9,7 @@ local n = require("nui-components")
 
 local btnRender = n.create_renderer({width=19, height=2})
 local pythonRender = n.create_renderer({with=50, height=2})
-local nrfSdkRender = n.create_renderer({with=50, height=10})
+local nrfSdkRender = n.create_renderer({with=50, height=25})
 local espIdfcRender = n.create_renderer({with=50, height=10})
 
 local sshRender = n.create_renderer({with=50, height=8})

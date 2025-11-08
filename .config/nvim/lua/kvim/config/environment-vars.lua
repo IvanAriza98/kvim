@@ -23,15 +23,15 @@ local keys = {
 	IDF_APPPATH = "appPath",
 
 	--- NRF
-	NRF_APP_PATH = "appPath",
-	NRF_ZEPHYR_VERSION_PATH = "zephyrVersionPath",
-	NRF_ZEPHYR_COMPILER_PATH = "zephyrCompilerPath",
+	NRF_SN_DEVICE = "snDevice",
+	NRF_WORKSPACE_PATH = "workspacePath",
+	NRF_PROJECT_NAME = "projectName",
+	NRF_APPLICATION = "application",
 	NRF_BOARD_TARGET = "boardTarget",
-	NRF_CONFIG_FILES = "baseConfigFiles",
+    NRF_APP_CONFIG_FILE = "appConfigFile",
 	NRF_EXTRA_KCONFIG_FRAGMENTS = "extraKconfigFragments",
 	NRF_BASE_DEVICETREE_OVERLAYS = "baseDevicetreeOverlays",
 	NRF_EXTRA_DEVICETREE_OVERLAYS = "extraDevicetreeOverlays",
-	NRF_SN_DEVICE = "snDevice",
 
 	--- PYTHON
 	PYT_PATH = "path",

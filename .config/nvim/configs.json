@@ -4,27 +4,26 @@
   },
   "nrf_sdk":{
     "extraKconfigFragments":"",
-    "baseConfigFiles":"/home/KODVMV/ncs/workspace/firmware-MKPro/app/prj.conf",
+    "appConfigFile":"app/prj.conf",
     "boardTarget":"mkpro",
-    "zephyrCompilerPath":"",
-    "zephyrToolchainPath":"/home/KODVMV/ncs/v3.1.1",
-    "zephyrVersionPath":"/home/KODVMV/ncs/workspace/firmware-MKPro",
+    "application":"app",
+    "projectName":"firmware-MKPro",
+    "extraDevicetreeOverlays":"app/boards",
+    "workspacePath":"/home/KODVMV/ncs/workspace",
     "snDevice":"1050286221",
-    "appPath":"/home/KODVMV/ncs/workspace/firmware-MKPro/app",
-    "extraDevicetreeOverlays":"/home/KODVMV/ncs/workspace/firmware-MKPro/app/boards",
     "baseDevicetreeOverlays":""
   },
-  "ssh":{
-    "ip":"172.28.1.1",
-    "path":"~/",
-    "key_type":"ed25519",
-    "user":"root",
-    "port":"22"
-  },
   "esp_idf":{
-    "family":"esp32c2",
     "appPath":"",
     "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "family":"esp32c2",
     "port":"/dev/ttyACM1 "
+  },
+  "ssh":{
+    "user":"root",
+    "ip":"172.28.1.1",
+    "key_type":"ed25519",
+    "path":"~/",
+    "port":"22"
   }
 }

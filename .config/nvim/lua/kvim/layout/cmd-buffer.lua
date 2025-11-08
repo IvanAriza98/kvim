@@ -5,21 +5,24 @@ require("kvim.utils.nrf-sdk-commands")
 
 function getEnvironment()
 	local scoreNrf = getScoreNrf()
-	local scoreIdf = getScoreIdf()
 	local scorePyt = getScorePyt()
+	-- TODO review different getScored environment
+    -- local scoreIdf = getScoreIdf()
 	-- local scoreCpp = getScoreCpp()
+	-- local max_score = math.max(scoreNrf, scoreIdf, scorePyt) --, scoreCpp)
+	local max_score = math.max(scoreNrf, scorePyt) --, scoreCpp)
 
-	local max_score = math.max(scoreNrf, scoreIdf, scorePyt) --, scoreCpp)
 
 	if max_score == 0 then
 	elseif max_score == scoreNrf then
 		return "nrf"
-	elseif max_score == scoreIdf then
-		return "idf"
 	elseif max_score == scorePyt then
 		return "pyt"
-		--    elseif(max_score == scoreCpp) then
-		-- return "cpp"
+	-- TODO review different getScored environment
+	-- elseif max_score == scoreIdf then
+	-- 	return "idf"
+    -- elseif max_score == scoreCpp then
+    -- return "cpp"
 	end
 end
 

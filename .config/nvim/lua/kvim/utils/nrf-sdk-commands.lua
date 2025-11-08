@@ -1,35 +1,35 @@
 require("kvim.utils.config-utils")
 local var = require("kvim.config.environment-vars")
 
--- NOTE! To work's properly is mandatory add in the ~/ncs/toolchains/??????/opt/zephyr-sdk
 function nrfConfigBuildProject()
-	local appPath = getConfigField(var.id.NRF_SDK, var.key.NRF_APP_PATH)
-	local baseConfigFiles = getConfigField(var.id.NRF_SDK, var.key.NRF_CONFIG_FILES)
-	local zephyrPath = getConfigField(var.id.NRF_SDK, var.key.NRF_ZEPHYR_VERSION_PATH)
+	local workspacePath = getConfigField(var.id.NRF_SDK, var.key.NRF_WORKSPACE_PATH)
+	local project = getConfigField(var.id.NRF_SDK, var.key.NRF_PROJECT_NAME)
+	local application = getConfigField(var.id.NRF_SDK, var.key.NRF_APPLICATION)
 	local boardTarget = getConfigField(var.id.NRF_SDK, var.key.NRF_BOARD_TARGET)
-
+    local appConfigFile = getConfigField(var.id.NRF_SDK, var.key.NRF_APP_CONFIG_FILE)
 	local extraKconfigFragments = getConfigField(var.id.NRF_SDK, var.key.NRF_EXTRA_KCONFIG_FRAGMENTS)
 	local baseDevicetreeOverlays = getConfigField(var.id.NRF_SDK, var.key.NRF_BASE_DEVICETREE_OVERLAYS)
 	local extraDevicetreeOverlays = getConfigField(var.id.NRF_SDK, var.key.NRF_EXTRA_DEVICETREE_OVERLAYS)
-
-    local sep = "/"
-	if appPath:sub(-1) == "/" then
-		sep = ""
-	end
-    local cmd = "cd " .. zephyrPath .. " && python -m west build --build-dir " .. appPath .. "/build " .. appPath
-	cmd = cmd .. " --pristine --board " .. boardTarget .. " --sysbuild"
-	cmd = cmd .. " -- -DCONF_FILE=" .. baseConfigFiles .. " -DBOARD_ROOT=" .. appPath
+    local projectPath = workspacePath .. "/" .. project
+    local applicationPath = workspacePath .. "/" .. project .. "/" .. application
+    -- ~~~~~~ Rules ~~~~~~
+    -- Build folder will create in the same directory of the application
+    -- You should have a .venv with all dependencies requierements to use zephyr + NrfSdk
+    -- Board directory should be in the project directory boards/
+    local cmd = "cd " .. workspacePath .. " && ".. workspacePath.. "/.venv/bin/python -m west build --build-dir " .. applicationPath .. "/build "
+    cmd = cmd .. applicationPath .. " --pristine --board " .. boardTarget .. " --sysbuild"
+	cmd = cmd .. " -- -DCONF_FILE=" .. projectPath .. "/" .. appConfigFile .. " -DBOARD_ROOT=" .. projectPath
 
 	if extraKconfigFragments ~= nil and extraKconfigFragments ~= "" then
-		cmd = cmd .. " -DEXTRA_CONF_FILE=" .. appPath .. sep .. extraKconfigFragments
+		cmd = cmd .. " -DEXTRA_CONF_FILE=" .. projectPath .. "/" .. extraKconfigFragments
 	end
 
 	if baseDevicetreeOverlays ~= nil and baseDevicetreeOverlays ~= "" then
-		cmd = cmd .. " -DDTC_OVERLAY_FILE=" .. appPath .. sep .. baseDevicetreeOverlays
+		cmd = cmd .. " -DDTC_OVERLAY_FILE=".. projectPath .. "/" .. baseDevicetreeOverlays
 	end
 
 	if extraDevicetreeOverlays ~= nil and extraDevicetreeOverlays ~= "" then
-		local overlayDir = extraDevicetreeOverlays
+		local overlayDir = projectPath .. "/" .. extraDevicetreeOverlays
 		local overlayFiles = ""
 		local p = io.popen('ls "' .. overlayDir .. '"')
 		if p then
@@ -43,10 +43,11 @@ function nrfConfigBuildProject()
 
 		overlayFiles = overlayFiles:match("^%s*(.-)%s*$") -- Trim leading and trailing spaces
 		if overlayFiles ~= "" then
+            overlayFiles = overlayFiles:gsub("%s+", ";")
 			cmd = cmd .. ' -DEXTRA_DTC_OVERLAY_FILE="' .. overlayFiles .. '"'
 		end
 	end
-
+    print(cmd)
 	return cmd
 end
 
@@ -104,25 +105,30 @@ function nrfRTTMonitorProject()
 end
 
 function nrfDebugMonitorProject()
-    local appPath = getConfigField(var.id.NRF_SDK, var.key.NRF_APP_PATH)
-    return "python -m west debug --runner jlink --build-dir "
-        .. appPath
-        .. "/build"
+    local workspacePath = getConfigField(var.id.NRF_SDK, var.key.NRF_WORKSPACE_PATH)
+	local project = getConfigField(var.id.NRF_SDK, var.key.NRF_PROJECT_NAME)
+	local application = getConfigField(var.id.NRF_SDK, var.key.NRF_APPLICATION)
+    local applicationPath = workspacePath .. "/" .. project .. "/" .. application
+    return "python -m west debug --runner jlink --build-dir " .. applicationPath .. "/build"
 end
 
 
 function getScoreNrf()
 	local score = 0
 	local currentPath = vim.fn.expand("%:p:h")
-	local appPath = getConfigField(var.id.NRF_SDK, var.key.NRF_APP_PATH)
 
-	if not currentPath:find(appPath, 1, true) then
+    local workspacePath = getConfigField(var.id.NRF_SDK, var.key.NRF_WORKSPACE_PATH)
+	local project = getConfigField(var.id.NRF_SDK, var.key.NRF_PROJECT_NAME)
+	local application = getConfigField(var.id.NRF_SDK, var.key.NRF_APPLICATION)
+    local applicationPath = workspacePath .. "/" .. project .. "/" .. application
+
+	if not currentPath:find(applicationPath, 1, true) then
 		return score
 	end
 
 	local filename = vim.api.nvim_buf_get_name(0)
-	local build_exist = vim.fn.isdirectory(appPath .. "/build") == 1
-	local prj_found = vim.fn.systemlist("find . -name " .. appPath .. "prj.conf")
+	local build_exist = vim.fn.isdirectory(applicationPath .. "/build") == 1
+	local prj_found = vim.fn.systemlist("find . -name " .. applicationPath .. "prj.conf")
 
 	if filename:match("%.c") then
 		score = score + 1
