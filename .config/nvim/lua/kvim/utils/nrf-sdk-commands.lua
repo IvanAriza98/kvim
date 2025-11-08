@@ -47,27 +47,34 @@ function nrfConfigBuildProject()
 			cmd = cmd .. ' -DEXTRA_DTC_OVERLAY_FILE="' .. overlayFiles .. '"'
 		end
 	end
-    print(cmd)
 	return cmd
 end
 
 function nrfBuildProject()
-	local appPath = getConfigField(var.id.NRF_SDK, var.key.NRF_APP_PATH)
-	local zephyrPath = getConfigField(var.id.NRF_SDK, var.key.NRF_ZEPHYR_VERSION_PATH)
-	return "cd " .. zephyrPath .. " && python -m west build --build-dir " .. appPath .. "/build " .. appPath
-	-- return "python -m west build --build-dir " .. appPath .. "/build " .. appPath
+    local workspacePath = getConfigField(var.id.NRF_SDK, var.key.NRF_WORKSPACE_PATH)
+	local project = getConfigField(var.id.NRF_SDK, var.key.NRF_PROJECT_NAME)
+	local application = getConfigField(var.id.NRF_SDK, var.key.NRF_APPLICATION)
+
+    local projectPath = workspacePath .. "/" .. project
+    local applicationPath = workspacePath .. "/" .. project .. "/" .. application
+
+    return "cd " .. projectPath .. " && " .. workspacePath .."/.venv/bin/python -m west build --build-dir " .. applicationPath .. "/build " .. applicationPath
 end
 
 function nrfFlashProject()
 	local snDevice = getConfigField(var.id.NRF_SDK, var.key.NRF_SN_DEVICE)
-	local appPath = getConfigField(var.id.NRF_SDK, var.key.NRF_APP_PATH)
-	local zephyrToolchainPath = getConfigField(var.id.NRF_SDK, var.key.NRF_ZEPHYR_VERSION_PATH)
-	local monitor = nrfRTTMonitorProject() -- Automatically get the RTT monitor
+    local workspacePath = getConfigField(var.id.NRF_SDK, var.key.NRF_WORKSPACE_PATH)
+	local project = getConfigField(var.id.NRF_SDK, var.key.NRF_PROJECT_NAME)
+	local application = getConfigField(var.id.NRF_SDK, var.key.NRF_APPLICATION)
 
-	return "cd "
-		.. zephyrToolchainPath
-		.. " && python -m west flash -d "
-		.. appPath
+    local projectPath = workspacePath .. "/" .. project
+    local applicationPath = workspacePath .. "/" .. project .. "/" .. application
+	-- local monitor = nrfRTTMonitorProject() -- Automatically get the RTT monitor
+
+    return "cd "
+		.. projectPath
+        .. " && " .. workspacePath .."/.venv/bin/python -m west flash -d "
+		.. applicationPath
 		.. "/build --dev-id "
 		.. snDevice
 		.. " --erase"
@@ -77,10 +84,14 @@ end
 
 function nrfRTTMonitorProject()
 	local snDevice = getConfigField(var.id.NRF_SDK, var.key.NRF_SN_DEVICE)
-	local appPath = getConfigField(var.id.NRF_SDK, var.key.NRF_APP_PATH)
-	local zephyrToolchainPath = getConfigField(var.id.NRF_SDK, var.key.NRF_ZEPHYR_VERSION_PATH)
+    local workspacePath = getConfigField(var.id.NRF_SDK, var.key.NRF_WORKSPACE_PATH)
+	local project = getConfigField(var.id.NRF_SDK, var.key.NRF_PROJECT_NAME)
+	local application = getConfigField(var.id.NRF_SDK, var.key.NRF_APPLICATION)
 
-	-- Check if port 2331 is already in use
+    local projectPath = workspacePath .. "/" .. project
+    local applicationPath = workspacePath .. "/" .. project .. "/" .. application
+
+    -- Check if port 2331 is already in use
 	local port = 2331
 	local cmd = string.format("lsof -i :%d | awk '{print $2}' | tail -n +2", port)
 	local handle = io.popen(cmd)
@@ -96,11 +107,11 @@ function nrfRTTMonitorProject()
 	end
 
 	return "cd "
-		.. zephyrToolchainPath
+		.. projectPath
 		.. " && nrfjprog -s "
 		.. snDevice
 		.. " -r && python -m west rtt -r jlink --build-dir "
-		.. appPath
+		.. applicationPath
 		.. "/build -- --speed 1000"
 end
 
@@ -109,7 +120,7 @@ function nrfDebugMonitorProject()
 	local project = getConfigField(var.id.NRF_SDK, var.key.NRF_PROJECT_NAME)
 	local application = getConfigField(var.id.NRF_SDK, var.key.NRF_APPLICATION)
     local applicationPath = workspacePath .. "/" .. project .. "/" .. application
-    return "python -m west debug --runner jlink --build-dir " .. applicationPath .. "/build"
+    return workspacePath .. "/.venv/bin/python -m west debug --runner jlink --build-dir " .. applicationPath .. "/build"
 end
 
 
