@@ -1,45 +1,43 @@
 ---@type LazySpec
+-- yazi.nvim: Gestor de archivos rápido escrito en Rust
+-- Integración con Yazi (alternativa a netrw/ranger)
 return {
   "mikavilpas/yazi.nvim",
-  version = "*", -- use the latest stable version
-  event = "VeryLazy",
+  version = "*",                             -- Usa la última versión estable
+  event = "VeryLazy",                        -- Se carga después de iniciar (no bloquea)
   dependencies = {
-    { "nvim-lua/plenary.nvim", lazy = false },
+    { "nvim-lua/plenary.nvim", lazy = true }, -- Dependencia para comandos async
   },
-  lazy = false,
+  lazy = true,                              -- Carga perezosa (keymaps la activan)
   keys = {
-    -- 👇 in this section, choose your own keymappings!
+    -- <Leader>fp = Abre Yazi en la carpeta del archivo actual
     {
       "<leader>fp",
       mode = { "n", "v" },
       "<cmd>Yazi<cr>",
       desc = "Open yazi at the current file",
     },
+    -- <Leader>cw = Abre Yazi en el directorio de trabajo actual de Neovim
     {
-      -- Open in the current working directory
       "<leader>cw",
       "<cmd>Yazi cwd<cr>",
       desc = "Open the file manager in nvim's working directory",
     },
+    -- Ctrl+Up = Reanuda la última sesión de Yazi
     {
       "<c-up>",
       "<cmd>Yazi toggle<cr>",
       desc = "Resume the last yazi session",
     },
   },
-  ---@type YaziConfig | {}
   opts = {
-    -- if you want to open yazi instead of netrw, see below for more info
-    open_for_directories = false,
+    open_for_directories = false,           -- No abre directorios directamente (usa netrw/yazi)
     keymaps = {
-      show_help = "<f1>",
+      show_help = "<f1>",                   -- Muestra ayuda en Yazi
     },
   },
-  -- 👇 if you use `open_for_directories=true`, this is recommended
   init = function()
-    -- mark netrw as loaded so it's not loaded at all.
-    --
-    -- More details: https://github.com/mikavilpas/yazi.nvim/issues/802
+    -- Desactiva netrw para que Yazi sea el único gestor de archivos
     vim.g.loaded_netrwPlugin = 1
   end,
 }

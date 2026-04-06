@@ -39,7 +39,7 @@ return {
             "bash-debug-adapter",
           },
           auto_update = false,
-          run_on_start = true,
+          run_on_start = false,
         })
       end,
     },

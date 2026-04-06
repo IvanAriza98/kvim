@@ -1,14 +1,12 @@
+-- smear-cursor.nvim: Efecto de cursor con estela
+-- Añade un efecto visual de "arrastre" al mover el cursor
 return {
 	"sphamba/smear-cursor.nvim",
-    lazy = false,
+    lazy = true,                            -- Carga perezosa
+    event = "UIEnter",                      -- Se carga cuando la UI está lista
 	opts = {
-		stiffness = 0.5,
-		trailing_stiffness = 0.49,
-        never_draw_over_target = false
-		-- cursor_color = "#ff8800",
-		-- trailing_exponent = 5,
-		-- hide_target_hack = true,
-		-- gamma = 1,
-		-- smear_insert_mode = true,
+		stiffness = 0.5,           -- Rigidez del cursor (0-1, menor = más flexible)
+		trailing_stiffness = 0.49, -- Rigidez de la estela (efecto de cola)
+        never_draw_over_target = false -- No dibujar sobre el objetivo
 	},
 }

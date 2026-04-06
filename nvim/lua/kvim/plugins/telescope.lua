@@ -1,11 +1,14 @@
+-- Telescope.nvim: Buscador/buscador difuso para Neovim
+-- Proporciona búsqueda de archivos, grep, buffers, LSP, etc.
 return {
 	{
 		"nvim-telescope/telescope.nvim",
+		lazy = true,  -- Carga perezosa para no ralentizar inicio
+		cmd = "Telescope", -- Se carga cuando se ejecuta el comando Telescope
 		dependencies = {
-			"nvim-lua/plenary.nvim",
-			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-			"nvim-tree/nvim-web-devicons",
-			-- "nvim-telescope/telescope-file-browser.nvim",
+			"nvim-lua/plenary.nvim",                            -- Utils Lua comunes
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" }, -- Extensión FZF (requiere compilación)
+			"nvim-tree/nvim-web-devicons",                       -- Iconos para resultados
 		},
 		config = function()
 			local telescope = require("telescope")
@@ -15,21 +18,15 @@ return {
 				defaults = {
 					mappings = {
 						i = {
+							-- Ctrl+k/j = Navegar hacia arriba/abajo en resultados
 							["<C-k>"] = actions.move_selection_previous,
 							["<C-j>"] = actions.move_selection_next,
+							-- Ctrl+q = Enviar selección a quickfix list y abrirla
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 						},
 					},
 				},
 			})
-			-- telescope.load_extension("file_browser");
-
-			-- local keymap = vim.keymap -- for concienses
-			-- vim.keymap.set('n', '<leader>ff','<cmd>Telescope find_files<CR>', { desc = 'Telescope find files' })
-			-- vim.keymap.set('n', '<leader>fr','<cmd>Telescope oldfiles<CR>', { desc = 'Telescope live grep' })
-			-- vim.keymap.set('n', '<leader>fs','<cmd>Telescope live_grep<CR>', { desc = 'Telescope buffers' })
-			-- vim.keymap.set('n', '<leader>fc','<cmd>Telescope grep_string<CR>', { desc = 'Telescope help tags' })
-			-- vim.keymap.set("n", "<space>fp", "<cmd>Telescope file_browser path=%:p:h select_buffer=true<CR>")
 		end,
 	},
 }

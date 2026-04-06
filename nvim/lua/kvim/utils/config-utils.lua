@@ -1,6 +1,15 @@
 local json = require("dkjson")
 
+local _config_cache = nil
+local _cache_time = nil
+local CACHE_TTL = 5000
+
 local function _getConfigFile()
+	local now = vim.loop.now()
+	if _config_cache and _cache_time and (now - _cache_time) < CACHE_TTL then
+		return _config_cache
+	end
+
 	local file = io.open(vim.g.configs_path, "r")
 	if not file then
 		print("Config file not found. ", vim.g.configs_path)
@@ -14,10 +23,14 @@ local function _getConfigFile()
 	if not data then
 		print("Failed to decode")
 	end
+	_config_cache = data
+	_cache_time = now
 	return data
 end
 
 local function _setConfigFile(data)
+	_config_cache = nil
+	_cache_time = nil
 	local content, err = json.encode(data, { indent = true })
 	if err then
 		print("Error to encode.")

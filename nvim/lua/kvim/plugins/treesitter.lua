@@ -6,7 +6,7 @@ return {
 		local configs = require("nvim-treesitter.configs")
 		configs.setup({
 			modules = {},
-			auto_install = true,
+			auto_install = false,
 			ignore_install = {},
 			ensure_installed = {
 				"c",
@@ -14,11 +14,6 @@ return {
 				"vim",
 				"vimdoc",
 				"query",
-				"elixir",
-				"heex",
-				"javascript",
-				"html",
-				"cpp",
 				"python",
 			},
 			sync_install = false,
