@@ -6,7 +6,7 @@ vim.api.nvim_set_keymap("n", "s", ":w!<CR>", noremap)
 vim.api.nvim_set_keymap("n", "q", ":q!<CR>", noremap)
 
 vim.api.nvim_set_keymap("n", "<ESC>", ":noh<CR>", noremap)
-vim.api.nvim_set_keymap("t", "<ESC>", "<C-\\><C-n>", noremap_silent)
+vim.api.nvim_set_keymap("t", "<C-x>", "<C-\\><C-n>", noremap_silent)
 
 -- Open Terminal
 vim.api.nvim_set_keymap("n", "<C-t>l", ":rightbelow vsplit | term<CR>", noremap_silent)

@@ -16,7 +16,7 @@ vim.opt.compatible = false
 vim.opt.termguicolors = true
 
 --- lines customization
-vim.opt.number = true
+vim.wo.number = true
 vim.wo.relativenumber = true
 
 --- Paths

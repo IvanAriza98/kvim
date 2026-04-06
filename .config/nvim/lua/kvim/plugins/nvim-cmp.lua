@@ -8,7 +8,6 @@ return {
 		"saadparwaiz1/cmp_luasnip", --for autocompletion
 		"rafamadriz/friendly-snippets", -- usefull snippets
 	},
-
 	config = function()
 		local cmp = require("cmp")
 		local luasnip = require("luasnip")
