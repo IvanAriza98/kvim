@@ -1,6 +1,6 @@
 require("kvim.utils.devices")
 local n = require("nui-components")
-local vars = require("kvim.config.environment-vars")
+local vars = require("kvim.env")
 
 local nrfSdk = n.create_signal({
 	snDevice = "",

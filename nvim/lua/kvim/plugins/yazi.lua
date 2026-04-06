@@ -4,8 +4,9 @@ return {
   version = "*", -- use the latest stable version
   event = "VeryLazy",
   dependencies = {
-    { "nvim-lua/plenary.nvim", lazy = true },
+    { "nvim-lua/plenary.nvim", lazy = false },
   },
+  lazy = false,
   keys = {
     -- 👇 in this section, choose your own keymappings!
     {

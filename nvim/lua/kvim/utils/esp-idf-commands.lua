@@ -1,5 +1,5 @@
 require('kvim.utils.config-utils')
-local var = require('kvim.config.environment-vars')
+local var = require('kvim.env')
 
 function idfBuildProject()
     local appPath = getConfigField(var.id.ESP_IDF, var.key.IDF_APPPATH)

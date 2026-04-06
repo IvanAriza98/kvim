@@ -1,5 +1,5 @@
 require("kvim.utils.config-utils")
-local var = require("kvim.config.environment-vars")
+local var = require("kvim.env")
 
 function nrfConfigBuildProject()
 	local workspacePath = getConfigField(var.id.NRF_SDK, var.key.NRF_WORKSPACE_PATH)

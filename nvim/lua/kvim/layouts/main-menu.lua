@@ -1,7 +1,7 @@
-require("kvim.layout.configs.esp-idf.config")
-require("kvim.layout.configs.nrf-sdk.config")
-require("kvim.layout.configs.general.python-config")
-require("kvim.layout.configs.communications.ssh-config")
+require("kvim.layouts.configs.esp-idf.config")
+require("kvim.layouts.configs.nrf-sdk.config")
+require("kvim.layouts.configs.general.python-config")
+require("kvim.layouts.configs.communications.ssh-config")
 
 require("kvim.utils.devices")
 

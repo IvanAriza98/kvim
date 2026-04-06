@@ -1,5 +1,5 @@
 local n = require("nui-components")
-local vars = require('kvim.config.environment-vars')
+local vars = require('kvim.env')
 
 local python = n.create_signal({ path = "" })
 

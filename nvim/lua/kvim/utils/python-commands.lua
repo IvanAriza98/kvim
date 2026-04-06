@@ -1,4 +1,4 @@
-local var = require('kvim.config.environment-vars')
+local var = require('kvim.env')
 
 function pytExecute()
     local python_bin = getConfigField(var.id.PYTHON, var.key.PYT_PATH)

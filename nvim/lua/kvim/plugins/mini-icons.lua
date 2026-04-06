@@ -1,1 +1,5 @@
-return { "echasnovski/mini.icons", version = false }
+return { 
+    "echasnovski/mini.icons", 
+    version = false,
+    lazy = false,
+}

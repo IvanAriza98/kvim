@@ -2,6 +2,7 @@ return {
 	{
 		"brenton-leighton/multiple-cursors.nvim",
 		version = "*", -- Use the latest tagged version
+        lazy = false,
 		opts = {
 			match_visible_only = true,
 		}, -- This causes the plugin setup function to be called

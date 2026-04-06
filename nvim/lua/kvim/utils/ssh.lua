@@ -1,4 +1,4 @@
-local vars = require("kvim.config.environment-vars")
+local vars = require("kvim.env")
 
 function share_pub_key(key_type, user, ip, port)
 	local key_path = os.getenv("HOME") .. "/.ssh/id_" .. key_type
