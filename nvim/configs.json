@@ -1,0 +1,52 @@
+{
+  "esp_idf":{
+    "family":"esp32c2",
+    "port":"/dev/ttyACM1 ",
+    "appPath":"",
+    "idfPath":"/home/kodvmv/esp/esp-idf/"
+  },
+  "python":{
+    "path":"/usr/bin/python3"
+  },
+  "nrf_sdk":{
+    "baseDevicetreeOverlays":"",
+    "extraKconfigFragments":"",
+    "appConfigFile":"app/prj.conf",
+    "boardTarget":"mkpro",
+<<<<<<< HEAD
+    "application":"app",
+    "projectName":"firmware-MKPro",
+    "extraDevicetreeOverlays":"app/boards",
+    "workspacePath":"/home/KODVMV/ncs/workspace",
+    "snDevice":"1050286221",
+    "baseDevicetreeOverlays":""
+  },
+  "esp_idf":{
+    "appPath":"",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "family":"esp32c2",
+    "port":"/dev/ttyACM1 "
+  },
+  "ssh":{
+    "user":"root",
+    "ip":"172.28.1.1",
+    "key_type":"ed25519",
+    "path":"~/",
+    "port":"22"
+=======
+    "zephyrCompilerPath":"",
+    "zephyrToolchainPath":"/home/KODVMV/ncs/v3.1.1",
+    "snDevice":"1050286221",
+    "appPath":"/home/KODVMV/ncs/workspace/firmware-MKPro/app",
+    "extraDevicetreeOverlays":"/home/KODVMV/ncs/workspace/firmware-MKPro/app/boards",
+    "zephyrVersionPath":"/home/KODVMV/ncs/workspace/firmware-MKPro"
+  },
+  "ssh":{
+    "ip":"10.124.11.112",
+    "port":"22",
+    "path":"/home/iariza/B900001_RTP800/Herramientas/F701233_Generador_Version_Conjunta/branches/cicd",
+    "key_type":"ed25519",
+    "user":"iariza"
+>>>>>>> 13ca618 (Backup from work before doing an AI branch)
+  }
+}
