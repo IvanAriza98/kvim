@@ -1,6 +1,9 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+vim.opt.wrap = true         --- Permite que las lineas largas se visualicen en varias lineas
+vim.opt.linebreak = true    --- Evita que corte palabras a la mitad
+vim.opt.breakindent = true  --- mantiene el estilo de indentanción en las líneas envueltas
 
 vim.opt.cursorline = true
 vim.opt.syntax = "on"
