@@ -11,6 +11,7 @@ A powerful Neovim configuration designed to replace multiple specialized program
 - **File Management** - Ultra-fast file manager with Yazi + fuzzy finder with Telescope
 - **Integrated Terminal** - Embedded terminals with directional splits and SSH support
 - **Smart Comments** - Intelligent commenting for 60+ languages
+- **TODO Highlights** - Highlight and search TODO, FIXME, NOTE, and similar markers
 
 ### Supported Languages
 | Language | LSP | Linter | Formatter | Debugger |
@@ -89,6 +90,7 @@ Lazy.nvim will automatically install all plugins on first launch.
 | `<C-t>h/j/k/l` | Open terminal in split direction |
 | `<C-t>rh/rv/rf` | SSH in hsplit/vsplit/float |
 | `<C-t>af` | Send current file via SCP |
+| `<C-x>` | Exit terminal mode |
 
 ### LSP (when server active)
 | Key | Action |
