@@ -13,6 +13,7 @@
 -- - Two-level access: getConfigField("esp_idf", "idfPath")
 
 local json = require("dkjson")
+local env = require("kvim.env")
 
 local _config_cache = nil
 local _cache_time = nil
@@ -111,7 +112,110 @@ function setConfigField(value, key1, key2)
 	_setConfigFile(data)
 end
 
+--- Gets all SSH sessions from the config file.
+--- @return table? Array of SSH session objects, or nil if no sessions exist
+local function getSSHSessions()
+	local sessions = getConfigField(env.id.SSH, env.key.SSH_SESSIONS)
+	if not sessions or type(sessions) ~= "table" then
+		return nil
+	end
+	return sessions
+end
+
+--- Gets the current active SSH session index.
+--- @return number? The active session index (1-based), or nil if not set
+local function getActiveSSH()
+	return getConfigField(env.id.SSH, env.key.SSH_ACTIVE)
+end
+
+--- Sets the active SSH session index.
+--- @param index number The session index to set as active (1-based)
+--- @return boolean True if successfully set, false if index is invalid
+local function setActiveSSH(index)
+	local sessions = getSSHSessions()
+	if not sessions or index < 1 or index > #sessions then
+		vim.notify("Invalid SSH session index: " .. tostring(index), vim.log.levels.WARN)
+		return false
+	end
+	setConfigField(index, env.id.SSH, env.key.SSH_ACTIVE)
+	return true
+end
+
+--- Adds a new SSH session to the config file.
+--- @param session table The SSH session object to add
+--- @return boolean True if successfully added, false otherwise
+local function addSSHSession(session)
+	if not session or type(session) ~= "table" then
+		vim.notify("Invalid SSH session object", vim.log.levels.WARN)
+		return false
+	end
+
+	local sessions = getSSHSessions()
+	if not sessions then
+		sessions = {}
+	end
+
+	table.insert(sessions, session)
+	setConfigField(sessions, env.id.SSH, env.key.SSH_SESSIONS)
+
+	-- If this is the first session, set it as active
+	if not getActiveSSH() then
+		setConfigField(1, env.id.SSH, env.key.SSH_ACTIVE)
+	end
+
+	return true
+end
+
+--- Updates an existing SSH session at the given index.
+--- @param index number The session index to update (1-based)
+--- @param session table The new SSH session object
+--- @return boolean True if successfully updated, false if index is invalid
+local function updateSSHSession(index, session)
+	local sessions = getSSHSessions()
+	if not sessions or index < 1 or index > #sessions then
+		vim.notify("Invalid SSH session index: " .. tostring(index), vim.log.levels.WARN)
+		return false
+	end
+
+	if not session or type(session) ~= "table" then
+		vim.notify("Invalid SSH session object", vim.log.levels.WARN)
+		return false
+	end
+
+	sessions[index] = session
+	setConfigField(sessions, env.id.SSH, env.key.SSH_SESSIONS)
+	return true
+end
+
+--- Deletes an SSH session at the given index.
+--- @param index number The session index to delete (1-based)
+--- @return boolean True if successfully deleted, false if index is invalid
+local function deleteSSHSession(index)
+	local sessions = getSSHSessions()
+	if not sessions or index < 1 or index > #sessions then
+		vim.notify("Invalid SSH session index: " .. tostring(index), vim.log.levels.WARN)
+		return false
+	end
+
+	table.remove(sessions, index)
+	setConfigField(sessions, env.id.SSH, env.key.SSH_SESSIONS)
+
+	-- Adjust active index if needed
+	local active = getActiveSSH()
+	if active and active > #sessions then
+		setConfigField(#sessions > 0 and #sessions or nil, env.id.SSH, env.key.SSH_ACTIVE)
+	end
+
+	return true
+end
+
 return {
 	getConfigField = getConfigField,
 	setConfigField = setConfigField,
+	getSSHSessions = getSSHSessions,
+	getActiveSSH = getActiveSSH,
+	setActiveSSH = setActiveSSH,
+	addSSHSession = addSSHSession,
+	updateSSHSession = updateSSHSession,
+	deleteSSHSession = deleteSSHSession,
 }

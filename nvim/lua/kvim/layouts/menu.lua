@@ -215,6 +215,10 @@ function M.get_esp_idf_items()
             end)() or { { name = "    No devices found", cmd = function() end } },
         },
         {
+            name = "  ─────────────────",
+            cmd = function() end,
+        },
+        {
             name = "  ▶️  Build",
             cmd = function()
                 M._exec_external(function()
@@ -328,6 +332,10 @@ function M.get_nrf_sdk_items()
             end,
         },
         {
+            name = "  ─────────────────",
+            cmd = function() end,
+        },
+        {
             name = "  ▶️  Build",
             cmd = function()
                 M._exec_external(function()
@@ -422,6 +430,10 @@ function M.get_python_items()
             end,
         },
         {
+            name = "  ─────────────────",
+            cmd = function() end,
+        },
+        {
             name = "  ▶️  Run Current File",
             cmd = function()
                 M._exec_external(function()
@@ -458,83 +470,184 @@ function M.configure_python()
 end
 
 -- === Submenú SSH ===
+-- Formatea el nombre de una sesión SSH para mostrar en el menú
+-- @param session table La sesión SSH (debe tener ip y opcionalmente user/name)
+-- @return string El nombre formateado como "nombre(user)" o "ip(user)"
+function M.format_ssh_session_name(session)
+    if not session or not session.ip then
+        return "(sin sesión)"
+    end
+    local display_name = session.name or session.ip
+    if session.user then
+        return display_name .. "(" .. session.user .. ")"
+    end
+    return display_name .. "()"
+end
+
+-- Obtiene los items del submenú SSH con múltiples sesiones
 function M.get_ssh_items()
     local config_utils = require("kvim.utils.config-utils")
-    local vars = require("kvim.env")
 
-    local ip = config_utils.getConfigField(vars.id.SSH, vars.key.SSH_IP) or "Not set"
-    local port = config_utils.getConfigField(vars.id.SSH, vars.key.SSH_PORT) or "22"
-    local user = config_utils.getConfigField(vars.id.SSH, vars.key.SSH_USER) or "Not set"
+    local sessions = config_utils.getSSHSessions() or {}
+    local active_idx = config_utils.getActiveSSH() or 1
+
+    -- Construir lista de sesiones con indicador de activa
+    local session_items = {}
+    for i, session in ipairs(sessions) do
+        local prefix = (i == active_idx) and "✅ " or "  "
+        table.insert(session_items, {
+            name = "  " .. prefix .. M.format_ssh_session_name(session),
+            cmd = function()
+                M._exec_internal(function()
+                    config_utils.setActiveSSH(i)
+                    vim.notify("✓ Sesión activa: " .. M.format_ssh_session_name(session), vim.log.levels.INFO)
+                end)
+            end,
+        })
+    end
 
     return {
+        -- Lista de sesiones
         {
-            name = "  📋 Config",
-            cmd = function()
-                M._exec_internal(function()
-                    M.configure_ssh()
-                end)
-            end,
+            name = "  🔐 Sesiones",
+            items = #session_items > 0 and session_items or { {
+                name = "    (sin sesiones)",
+                cmd = function() end,
+            } },
         },
+        -- Separador
         {
-            name = "  🌐 IP: " .. (ip ~= "" and ip or "Not set"),
-            cmd = function()
-                M._exec_internal(function()
-                    M._open_input({
-                        prompt = "SSH IP Address:",
-                        default = ip,
-                    }, function(new_ip)
-                        if new_ip then
-                            config_utils.setConfigField(new_ip, vars.id.SSH, vars.key.SSH_IP)
-                            vim.notify("✓ SSH IP saved!", vim.log.levels.INFO)
-                        end
-                    end)
-                end)
-            end,
+            name = "  ─────────────────",
+            cmd = function() end,
         },
+        -- Opciones de conexión
         {
-            name = "  🔌 Port: " .. port,
-            cmd = function()
-                M._exec_internal(function()
-                    M._open_input({
-                        prompt = "SSH Port:",
-                        default = port,
-                    }, function(new_port)
-                        if new_port then
-                            config_utils.setConfigField(new_port, vars.id.SSH, vars.key.SSH_PORT)
-                            vim.notify("✓ SSH Port saved!", vim.log.levels.INFO)
-                        end
-                    end)
-                end)
-            end,
-        },
-        {
-            name = "  👤 User: " .. (user ~= "" and user or "Not set"),
-            cmd = function()
-                M._exec_internal(function()
-                    M._open_input({
-                        prompt = "SSH User:",
-                        default = user,
-                    }, function(new_user)
-                        if new_user then
-                            config_utils.setConfigField(new_user, vars.id.SSH, vars.key.SSH_USER)
-                            vim.notify("✓ SSH User saved!", vim.log.levels.INFO)
-                        end
-                    end)
-                end)
-            end,
-        },
-        {
-            name = "  📂 SSH Connect",
+            name = "  📋 Conectar",
             cmd = function()
                 M._exec_external(function()
+                    if #sessions == 0 then
+                        vim.notify("No hay sesiones SSH. Crea una primero.", vim.log.levels.WARN)
+                        return
+                    end
                     vim.cmd("SSHConnect")
                 end)
             end,
         },
         {
+            name = "  📋 Conectar a...",
+            cmd = function()
+                M._exec_internal(function()
+                    if #sessions == 0 then
+                        vim.notify("No hay sesiones SSH. Crea una primero.", vim.log.levels.WARN)
+                        return
+                    end
+                    local choices = {}
+                    for i, session in ipairs(sessions) do
+                        choices[i] = M.format_ssh_session_name(session)
+                    end
+                    M._open_select(choices, {
+                        prompt = "Seleccionar sesión SSH:",
+                    }, function(choice)
+                        if choice then
+                            for i, name in ipairs(choices) do
+                                if name == choice then
+                                    config_utils.setActiveSSH(i)
+                                    vim.notify("✓ Conectando a: " .. choice, vim.log.levels.INFO)
+                                    M._exec_external(function()
+                                        vim.cmd("SSHConnect")
+                                    end)
+                                    break
+                                end
+                            end
+                        end
+                    end)
+                end)
+            end,
+        },
+        -- Gestión de sesiones
+        {
+            name = "  ➕ Nueva sesión",
+            cmd = function()
+                M._exec_internal(function()
+                    M.add_ssh_session()
+                end)
+            end,
+        },
+        {
+            name = "  ✏️  Editar sesión",
+            cmd = function()
+                M._exec_internal(function()
+                    if #sessions == 0 then
+                        vim.notify("No hay sesiones SSH. Crea una primero.", vim.log.levels.WARN)
+                        return
+                    end
+                    local choices = {}
+                    for i, session in ipairs(sessions) do
+                        choices[i] = M.format_ssh_session_name(session)
+                    end
+                    M._open_select(choices, {
+                        prompt = "Editar sesión SSH:",
+                    }, function(choice)
+                        if choice then
+                            for i, name in ipairs(choices) do
+                                if name == choice then
+                                    M.edit_ssh_session(i, sessions[i])
+                                    break
+                                end
+                            end
+                        end
+                    end)
+                end)
+            end,
+        },
+        {
+            name = "  🗑️  Eliminar sesión",
+            cmd = function()
+                M._exec_internal(function()
+                    if #sessions == 0 then
+                        vim.notify("No hay sesiones SSH.", vim.log.levels.WARN)
+                        return
+                    end
+                    local choices = {}
+                    for i, session in ipairs(sessions) do
+                        choices[i] = M.format_ssh_session_name(session)
+                    end
+                    M._open_select(choices, {
+                        prompt = "Eliminar sesión SSH:",
+                    }, function(choice)
+                        if choice then
+                            for i, name in ipairs(choices) do
+                                if name == choice then
+                                    vim.ui.input({
+                                        prompt = "Confirmar eliminar '" .. name .. "'? (s/n):",
+                                    }, function(confirm)
+                                        if confirm and (confirm == "s" or confirm == "S") then
+                                            config_utils.deleteSSHSession(i)
+                                            vim.notify("✓ Sesión eliminada", vim.log.levels.INFO)
+                                        end
+                                    end)
+                                    break
+                                end
+                            end
+                        end
+                    end)
+                end)
+            end,
+        },
+        -- Separador
+        {
+            name = "  ─────────────────",
+            cmd = function() end,
+        },
+        -- Transferencia de archivos
+        {
             name = "  📤 SSH Upload",
             cmd = function()
                 M._exec_external(function()
+                    if #sessions == 0 then
+                        vim.notify("No hay sesiones SSH. Crea una primero.", vim.log.levels.WARN)
+                        return
+                    end
                     vim.cmd("SSHUpload")
                 end)
             end,
@@ -543,11 +656,153 @@ function M.get_ssh_items()
             name = "  📥 SSH Download",
             cmd = function()
                 M._exec_external(function()
+                    if #sessions == 0 then
+                        vim.notify("No hay sesiones SSH. Crea una primero.", vim.log.levels.WARN)
+                        return
+                    end
                     vim.cmd("SSHDownload")
                 end)
             end,
         },
     }
+end
+
+-- Añade una nueva sesión SSH
+function M.add_ssh_session()
+    local config_utils = require("kvim.utils.config-utils")
+
+    local new_session = {
+        ip = "",
+        user = "",
+        port = "22",
+        path = "",
+        key_type = "ed25519",
+        name = "",
+    }
+
+    M._open_input({
+        prompt = "Nombre (opcional, por defecto usa IP):",
+        default = "",
+    }, function(name)
+        if name and name ~= "" then
+            new_session.name = name
+        end
+        M._open_input({
+            prompt = "IP:",
+            default = new_session.ip,
+        }, function(ip)
+            if not ip or ip == "" then
+                vim.notify("IP requerida", vim.log.levels.WARN)
+                return
+            end
+            new_session.ip = ip
+
+            -- Si no hay nombre, usar ip(user) por defecto
+            if new_session.name == "" then
+                new_session.name = ip
+            end
+
+            M._open_input({
+                prompt = "Usuario:",
+                default = new_session.user,
+            }, function(user)
+                new_session.user = user or ""
+
+                M._open_input({
+                    prompt = "Puerto:",
+                    default = new_session.port,
+                }, function(port)
+                    new_session.port = port or "22"
+
+                    M._open_input({
+                        prompt = "Ruta por defecto:",
+                        default = new_session.path,
+                    }, function(path)
+                        new_session.path = path or ""
+
+                        M._open_select({
+                            "rsa", "dsa", "ecdsa", "ecdsa-sk", "ed25519", "ed25519-sk"
+                        }, {
+                            prompt = "Tipo de clave:",
+                            default = new_session.key_type,
+                        }, function(key_type)
+                            new_session.key_type = key_type or "ed25519"
+
+                            config_utils.addSSHSession(new_session)
+                            vim.notify("✓ Sesión añadida: " .. M.format_ssh_session_name(new_session), vim.log.levels.INFO)
+                        end)
+                    end)
+                end)
+            end)
+        end)
+    end)
+end
+
+-- Edita una sesión SSH existente
+-- @param index number Índice de la sesión a editar (1-based)
+-- @param session table La sesión SSH actual
+function M.edit_ssh_session(index, session)
+    local config_utils = require("kvim.utils.config-utils")
+
+    local edited = {
+        name = session.name or "",
+        ip = session.ip or "",
+        user = session.user or "",
+        port = session.port or "22",
+        path = session.path or "",
+        key_type = session.key_type or "ed25519",
+    }
+
+    M._open_input({
+        prompt = "Nombre:",
+        default = edited.name,
+    }, function(name)
+        edited.name = name or ""
+
+        M._open_input({
+            prompt = "IP:",
+            default = edited.ip,
+        }, function(ip)
+            if not ip or ip == "" then
+                vim.notify("IP requerida", vim.log.levels.WARN)
+                return
+            end
+            edited.ip = ip
+
+            M._open_input({
+                prompt = "Usuario:",
+                default = edited.user,
+            }, function(user)
+                edited.user = user or ""
+
+                M._open_input({
+                    prompt = "Puerto:",
+                    default = edited.port,
+                }, function(port)
+                    edited.port = port or "22"
+
+                    M._open_input({
+                        prompt = "Ruta por defecto:",
+                        default = edited.path,
+                    }, function(path)
+                        edited.path = path or ""
+
+                        M._open_select({
+                            "rsa", "dsa", "ecdsa", "ecdsa-sk", "ed25519", "ed25519-sk"
+                        }, {
+                            prompt = "Tipo de clave:",
+                            default = edited.key_type,
+                        }, function(key_type)
+                            edited.key_type = key_type or "ed25519"
+
+                            config_utils.updateSSHSession(index, edited)
+                            vim.notify("✓ Sesión actualizada: " .. M.format_ssh_session_name(edited), vim.log.levels.INFO)
+                        end)
+                    end)
+                end)
+            end)
+        end)
+    end)
 end
 
 function M.configure_ssh()

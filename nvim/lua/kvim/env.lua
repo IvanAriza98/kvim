@@ -45,6 +45,8 @@ local keys = {
 	SSH_USER = "user",
 	SSH_PATH = "path",
     SSH_KEY_TYPE = "key_type",
+	SSH_SESSIONS = "sessions",
+	SSH_ACTIVE = "active",
 }
 
 return {

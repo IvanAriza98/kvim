@@ -1,27 +1,31 @@
 {
+  "nrf_sdk":{
+    "projectName":"firmware-MKPro",
+    "baseDevicetreeOverlays":"",
+    "boardTarget":"Not set",
+    "snDevice":"1050286221",
+    "application":"app",
+    "workspacePath":"/home/KODVMV/ncs/workspace",
+    "extraDevicetreeOverlays":"app/boards"
+  },
+  "python":{
+    "path":"/usr/bin/python3"
+  },
+  "ssh":{
+    "active":1,
+    "sessions":[{
+        "ip":"172.28.1.1",
+        "path":"~/",
+        "port":"22",
+        "key_type":"rsa",
+        "user":"root",
+        "name":"172.28.1.1"
+      }]
+  },
   "esp_idf":{
     "idfPath":"/home/kodvmv/esp/esp-idf/",
     "family":"esp32s2",
     "appPath":"",
     "port":"/dev/ttyACM1"
-  },
-  "ssh":{
-    "ip":"172.28.1.1",
-    "port":"22",
-    "path":"~/",
-    "key_type":"ed25519",
-    "user":"root"
-  },
-  "python":{
-    "path":"/usr/bin/python3"
-  },
-  "nrf_sdk":{
-    "baseDevicetreeOverlays":"",
-    "application":"app",
-    "snDevice":"1050286221",
-    "boardTarget":"Not set",
-    "workspacePath":"/home/KODVMV/ncs/workspace",
-    "extraDevicetreeOverlays":"app/boards",
-    "projectName":"firmware-MKPro"
   }
 }

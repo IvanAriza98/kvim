@@ -17,16 +17,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ESP-IDF, NRF-SDK, Python, SSH configuration menus
   - Keyboard-only navigation
 - OpenCode agent configurations (docs-maintainer, nvim-plugins, nvim-menu, nvim-configs)
+- **SSH Multi-Session Support**:
+  - Multiple SSH sessions storage and management
+  - Session selector with active session indicator (✅)
+  - Add, edit, delete SSH sessions via menu
+  - Connect to active session or select from list
+  - File transfer (upload/download) using active session
 
 ### Changed
 - **Menu System**: Migrated from nui-menu to nvzone/menu (volt framework)
 - Improved lazy loading system for layouts (VeryLazy event trigger)
 - Updated LSP configurations for better compatibility
+- **SSH Config Structure**: Migrated from single-object to sessions array
+  - New structure: `{ sessions: [], active: index }`
+  - Session format: `{ name, ip, user, port, path, key_type }`
+  - Automatic name generation: `ip(user)` if no name provided
 
 ### Fixed
 - Config caching mechanism with 5-second TTL
 - USB device detection path stability (/dev/serial/by-id)
 - Config path resolution (now uses KVIM_HOME relative path)
+- SSH session index adjustment after deletion
 
 ### Removed
 - Legacy NUI-based layout files (main-menu.lua, configs/ directory)

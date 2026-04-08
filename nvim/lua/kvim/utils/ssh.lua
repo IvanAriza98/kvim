@@ -1,37 +1,82 @@
-local vars = require("kvim.env")
+local config_utils = require("kvim.utils.config-utils")
+
+-- Helper function to get active SSH session object
+local function getActiveSession()
+	local active_index = config_utils.getActiveSSH()
+	if not active_index then
+		vim.notify("No active SSH session. Set one with :SSHSetActive <n>", vim.log.levels.ERROR)
+		return nil
+	end
+
+	local sessions = config_utils.getSSHSessions()
+	if not sessions or not sessions[active_index] then
+		vim.notify("Invalid SSH session index: " .. tostring(active_index), vim.log.levels.ERROR)
+		return nil
+	end
+
+	return sessions[active_index]
+end
 
 function share_pub_key(key_type, user, ip, port)
-	local key_path = os.getenv("HOME") .. "/.ssh/id_" .. key_type
-	local pub_key_path = key_path .. ".pub"
+	-- Check if all parameters are provided
+	local has_all_params = key_type and user and ip and port
 
-    if not key_type or key_type == "" then
-		print("❌ SSH key type is not defined")
+	-- If not all params provided, try to get from active session
+	local session = nil
+	if not has_all_params then
+		session = getActiveSession()
+		if not session then
+			return
+		end
+	end
+
+	-- Use session values as fallback for missing params
+	key_type = key_type or (session and session.key_type)
+	user = user or (session and session.user)
+	ip = ip or (session and session.ip)
+	port = tostring(port or (session and session.port))
+
+	if not key_type or key_type == "" then
+		vim.notify("SSH key type is not defined", vim.log.levels.ERROR)
 		return
-    end
+	end
 	if not ip or ip == "" then
-		print("❌ SSH ip is not defined")
+		vim.notify("SSH IP is not defined", vim.log.levels.ERROR)
 		return
 	end
 	if not user or user == "" then
-		print("❌ SSH user is not defined")
+		vim.notify("SSH user is not defined", vim.log.levels.ERROR)
 		return
 	end
 
+	local key_path = os.getenv("HOME") .. "/.ssh/id_" .. key_type
+	local pub_key_path = key_path .. ".pub"
+
 	if vim.fn.filereadable(key_path) == 0 then
-		print(string.format("🔑 Generating %s key...", key_type:upper()))
+		vim.notify(string.format("Generating %s key...", key_type:upper()), vim.log.levels.INFO)
 		os.execute(string.format('ssh-keygen -t %s -b 4096 -f "%s" -N ""', key_type, key_path))
 	end
 
 	local cmd = string.format('ssh-copy-id -f -i "%s" -p %s %s@%s', pub_key_path, port, user, ip)
-    vim.cmd("new")
-    vim.fn.termopen(cmd)
-    vim.cmd("startinsert")
+	vim.cmd("new")
+	vim.fn.termopen(cmd)
+	vim.cmd("startinsert")
 end
 
 function ssh_terminal(direction)
-	local ip = getConfigField(vars.id.SSH, vars.key.SSH_IP)
-	local port = getConfigField(vars.id.SSH, vars.key.SSH_PORT)
-	local user = getConfigField(vars.id.SSH, vars.key.SSH_USER)
+	local session = getActiveSession()
+	if not session then
+		return
+	end
+
+	local ip = session.ip
+	local port = tostring(session.port)
+	local user = session.user
+
+	if not ip or not user then
+		vim.notify("SSH session is missing ip or user", vim.log.levels.ERROR)
+		return
+	end
 
 	local size = 30
 	if direction == "vertical" then
@@ -51,22 +96,27 @@ function ssh_terminal(direction)
 end
 
 function transfer_file(file, local_to_remote)
-	local ip = getConfigField(vars.id.SSH, vars.key.SSH_IP)
-	local port = getConfigField(vars.id.SSH, vars.key.SSH_PORT)
-	local path = getConfigField(vars.id.SSH, vars.key.SSH_PATH)
-	local user = getConfigField(vars.id.SSH, vars.key.SSH_USER)
+	local session = getActiveSession()
+	if not session then
+		return
+	end
+
+	local ip = session.ip
+	local port = tostring(session.port)
+	local path = session.path
+	local user = session.user
 
 	if not (ip and path and file) then
-		print("Error: Missing parameters ...")
+		vim.notify("Missing parameters: ip, path, or file", vim.log.levels.ERROR)
 		return
 	end
 
 	if local_to_remote == true then
 		os.execute(string.format("/usr/bin/scp -P %s '%s' %s@%s:'%s'", port, file, user, ip, path))
-		print("Sended OK.")
+		vim.notify("File sent successfully", vim.log.levels.INFO)
 	else
 		os.execute(string.format("/usr/bin/scp -P %s %s@%s:'%s' '%s'", port, user, ip, path, vim.fn.expand("%:p:h")))
-		print("Sended OK.")
+		vim.notify("File received successfully", vim.log.levels.INFO)
 	end
 end
 
