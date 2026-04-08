@@ -159,10 +159,29 @@ function M.get_esp_idf_items()
 
     return {
         {
-            name = "  📋 Config: " .. family,
+            name = "  📋 Config",
             cmd = function()
                 M._exec_internal(function()
                     M.configure_esp_idf()
+                end)
+            end,
+        },
+        {
+            name = "  🔲 Family: " .. family,
+            cmd = function()
+                M._exec_internal(function()
+                    M._open_select({
+                        "esp32", "esp32s2", "esp32c2", "esp32s3", "esp32c3",
+                        "esp32c6", "esp32h2", "esp32p4", "esp32c5", "esp32c61", "linux"
+                    }, {
+                        prompt = "Select ESP Family:",
+                        default = family,
+                    }, function(choice)
+                        if choice then
+                            config_utils.setConfigField(choice, vars.id.ESP_IDF, vars.key.IDF_FAMILY)
+                            vim.notify("✓ ESP Family set to: " .. choice, vim.log.levels.INFO)
+                        end
+                    end)
                 end)
             end,
         },

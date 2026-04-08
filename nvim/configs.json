@@ -1,31 +1,31 @@
 {
+  "ssh":{
+    "sessions":[{
+        "key_type":"rsa",
+        "path":"~/",
+        "ip":"172.28.1.1",
+        "name":"172.28.1.1",
+        "user":"root",
+        "port":"22"
+      }],
+    "active":1
+  },
+  "esp_idf":{
+    "appPath":"",
+    "port":"/dev/ttyACM1",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "family":"esp32s2"
+  },
   "nrf_sdk":{
     "projectName":"firmware-MKPro",
+    "application":"app",
     "baseDevicetreeOverlays":"",
     "boardTarget":"Not set",
     "snDevice":"1050286221",
-    "application":"app",
-    "workspacePath":"/home/KODVMV/ncs/workspace",
-    "extraDevicetreeOverlays":"app/boards"
+    "extraDevicetreeOverlays":"app/boards",
+    "workspacePath":"/home/KODVMV/ncs/workspace"
   },
   "python":{
     "path":"/usr/bin/python3"
-  },
-  "ssh":{
-    "active":1,
-    "sessions":[{
-        "ip":"172.28.1.1",
-        "path":"~/",
-        "port":"22",
-        "key_type":"rsa",
-        "user":"root",
-        "name":"172.28.1.1"
-      }]
-  },
-  "esp_idf":{
-    "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "family":"esp32s2",
-    "appPath":"",
-    "port":"/dev/ttyACM1"
   }
 }
