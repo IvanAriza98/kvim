@@ -1,3 +1,17 @@
+-- =============================================================================
+-- Config Utils: JSON Configuration Reader/Writer
+-- =============================================================================
+-- Reads and writes configuration to ~/.config/nvim/configs.json
+-- Uses dkjson for dependency-free JSON parsing.
+--
+-- Cache Strategy:
+-- - TTL: 5 seconds to balance freshness vs performance
+-- - Auto-invalidation on write operations
+--
+-- Key Conventions:
+-- - Top-level keys: esp_idf, nrf_sdk, project, ssh, etc.
+-- - Two-level access: getConfigField("esp_idf", "idfPath")
+
 local json = require("dkjson")
 
 local _config_cache = nil
@@ -48,7 +62,16 @@ local function _setConfigFile(data)
 	file:close()
 end
 
--- supports two levels
+--- Retrieves a configuration field from the JSON config file.
+--- Supports one or two-level key access.
+---
+--- @param key1 string The top-level key
+--- @param key2 string? Optional second-level key
+--- @return any The configuration value, or nil if not found
+---
+--- @usage
+---   local path = getConfigField("esp_idf", "idfPath")
+---   local name = getConfigField("project", "name")
 function getConfigField(key1, key2)
 	local data = _getConfigFile()
 	if not data then
@@ -61,6 +84,17 @@ function getConfigField(key1, key2)
 	end
 end
 
+--- Sets a configuration field in the JSON config file.
+--- Automatically creates nested tables if needed for two-level keys.
+--- Invalidates the cache after writing.
+---
+--- @param value any The value to set
+--- @param key1 string The top-level key
+--- @param key2 string? Optional second-level key
+---
+--- @usage
+---   setConfigField("/opt/esp-idf", "esp_idf", "idfPath")
+---   setConfigField("my-project", "project", "name")
 function setConfigField(value, key1, key2)
 	local data = _getConfigFile() or {}
 	if not data then

@@ -128,12 +128,47 @@ Lazy.nvim will automatically install all plugins on first launch.
 nvim/
 ├── init.lua                 # Entry point
 └── lua/kvim/
-    ├── lazy.lua             # Plugin manager
-    ├── core/                # Neovim core config
+    ├── lazy.lua             # Plugin manager (lazy.nvim)
+    ├── env.lua              # Environment variables
     ├── plugins/             # Plugin specifications
-    ├── utils/               # Custom utilities
-    └── layouts/             # UI components
+    │   ├── ai/              # OpenCode AI assistant
+    │   ├── lsp/             # LSP configs (clangd, pyright, etc.)
+    │   ├── lualine/         # Status bar
+    │   ├── alpha/           # Dashboard
+    │   ├── nvim-cmp.lua     # Completion
+    │   ├── nvim-dap.lua     # Debug adapter
+    │   ├── telescope.lua    # Fuzzy finder
+    │   ├── treesitter.lua   # Syntax highlighting
+    │   ├── yazi.lua         # File manager
+    │   └── ...              # 20+ more plugins
+    ├── core/                # Neovim core configuration
+    │   ├── init.lua         # Module loader (eager loading)
+    │   ├── options.lua      # Vim settings (indent, UI, runtime)
+    │   ├── keymaps.lua      # Global keybindings
+    │   └── autocmds.lua     # Event-based autocommands
+    ├── utils/               # Custom Lua utilities
+    │   ├── config-utils.lua # JSON config CRUD (dkjson-based)
+    │   ├── devices.lua      # USB/NRF device detection
+    │   ├── esp-idf-commands.lua  # ESP-IDF build/flash/monitor
+    │   ├── nrf-sdk-commands.lua  # NRF-SDK build/flash/debug
+    │   ├── python-commands.lua   # Python tools (ruff, debugpy)
+    │   ├── ssh.lua          # SSH/SCP helpers
+    │   └── init.lua         # Utils loader
+    └── layouts/             # UI components (nui-based)
+        ├── init.lua         # Lazy loading system (deferred require)
+        ├── main-menu.lua    # Main menu UI (nui-menu)
+        ├── cmd-buffer.lua   # Command buffer UI (nui-popup)
+        └── configs/         # Config UI dialogs
+            ├── esp-idf/     # ESP-IDF project settings
+            ├── nrf-sdk/     # Nordic NRF project settings
+            └── general/     # Python/workspace settings
 ```
+
+### Loading Strategy
+
+Layouts use **deferred loading** to minimize startup time:
+- **FileType trigger** (100ms): main-menu, cmd-buffer load on first file open
+- **VimEnter trigger** (500ms): config dialogs load after editor is ready
 
 ## Configuration
 
@@ -143,10 +178,6 @@ KVIM stores configuration in `~/.config/nvim/configs.json`. On first run, it wil
 - SDK locations (ESP-IDF, NRF)
 - Default build commands
 - SSH configurations
-
-## Screenshots
-
-Check the `screenshots/` directory for UI previews.
 
 ## Credits
 
