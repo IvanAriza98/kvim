@@ -110,3 +110,8 @@ function setConfigField(value, key1, key2)
 	end
 	_setConfigFile(data)
 end
+
+return {
+	getConfigField = getConfigField,
+	setConfigField = setConfigField,
+}

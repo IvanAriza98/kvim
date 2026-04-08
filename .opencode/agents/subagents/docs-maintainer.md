@@ -1,6 +1,6 @@
 ---
+name: docs-maintainer
 description: Responsable de README, changelog y documentación de la configuración.
-mode: subagent
 tools:
   read: true
   write: true

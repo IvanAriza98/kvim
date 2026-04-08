@@ -13,14 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mini Icons plugin for improved file icons
 - Smear Cursor plugin for cursor trail effect
 - Colorizer plugin for hex color preview
+- **nvzone/menu**: Modern menu system with nested submenus
+  - ESP-IDF, NRF-SDK, Python, SSH configuration menus
+  - Keyboard-only navigation
+- OpenCode agent configurations (docs-maintainer, nvim-plugins, nvim-menu, nvim-configs)
 
 ### Changed
-- Improved lazy loading system for layouts (500ms deferred load)
+- **Menu System**: Migrated from nui-menu to nvzone/menu (volt framework)
+- Improved lazy loading system for layouts (VeryLazy event trigger)
 - Updated LSP configurations for better compatibility
 
 ### Fixed
 - Config caching mechanism with 5-second TTL
 - USB device detection path stability (/dev/serial/by-id)
+- Config path resolution (now uses KVIM_HOME relative path)
+
+### Removed
+- Legacy NUI-based layout files (main-menu.lua, configs/ directory)
 
 ### Added (Unreleased Features)
 

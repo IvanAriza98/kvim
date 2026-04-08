@@ -1,6 +1,6 @@
 ---
+name: nvim-menu
 description: Especialista en la gestion del widget de configuracion para el IDE
-mode: subagent
 tools:
   read: true
   write: true

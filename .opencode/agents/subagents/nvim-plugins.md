@@ -1,6 +1,6 @@
 ---
+name: nvim-plugins
 description: Especialista en añadir, eliminar, migrar, modificar y reorganizar plugins de Neovim.
-mode: subagent
 tools:
   read: true
   write: true

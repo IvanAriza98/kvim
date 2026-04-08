@@ -82,7 +82,7 @@ Lazy.nvim will automatically install all plugins on first launch.
 | `<ESC>` | Clear search highlight |
 | `<leader>fp` | Open Yazi at current file |
 | `<leader>cw` | Open Yazi at working directory |
-| `<leader>k` | Open main menu |
+| `<leader>k` / `<leader><space>` | Open main menu |
 
 ### Terminal
 | Key | Action |
@@ -135,6 +135,7 @@ nvim/
     │   ├── lsp/             # LSP configs (clangd, pyright, etc.)
     │   ├── lualine/         # Status bar
     │   ├── alpha/           # Dashboard
+    │   ├── nvzone-menu.lua  # Menu UI (nvzone/volt + nvzone/menu)
     │   ├── nvim-cmp.lua     # Completion
     │   ├── nvim-dap.lua     # Debug adapter
     │   ├── telescope.lua    # Fuzzy finder
@@ -154,21 +155,16 @@ nvim/
     │   ├── python-commands.lua   # Python tools (ruff, debugpy)
     │   ├── ssh.lua          # SSH/SCP helpers
     │   └── init.lua         # Utils loader
-    └── layouts/             # UI components (nui-based)
-        ├── init.lua         # Lazy loading system (deferred require)
-        ├── main-menu.lua    # Main menu UI (nui-menu)
-        ├── cmd-buffer.lua   # Command buffer UI (nui-popup)
-        └── configs/         # Config UI dialogs
-            ├── esp-idf/     # ESP-IDF project settings
-            ├── nrf-sdk/     # Nordic NRF project settings
-            └── general/     # Python/workspace settings
+    └── layouts/             # UI components (nvzone/menu-based)
+        ├── init.lua         # Menu keymaps (deferred loading)
+        └── menu.lua         # Main menu with submenus
 ```
 
 ### Loading Strategy
 
 Layouts use **deferred loading** to minimize startup time:
-- **FileType trigger** (100ms): main-menu, cmd-buffer load on first file open
-- **VimEnter trigger** (500ms): config dialogs load after editor is ready
+- **VeryLazy event**: nvzone/menu loads only when menu is opened
+- **FileType trigger** (100ms): syntax files load on first file open
 
 ## Configuration
 

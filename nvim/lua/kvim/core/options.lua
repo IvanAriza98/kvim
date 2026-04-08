@@ -33,4 +33,4 @@ if not kvim_home or kvim_home == "" then
 end
 
 vim.g.kvim_home = kvim_home
-vim.g.configs_path = vim.g.kvim_home .. ".config/nvim/configs.json"
+vim.g.configs_path = vim.g.kvim_home .. "nvim/configs.json"

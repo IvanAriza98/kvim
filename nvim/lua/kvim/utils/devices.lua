@@ -8,6 +8,7 @@
 -- - /dev/serial/by-id/* (Linux) for USB serial devices
 -- - nrfjprog (Nordic command-line tool) for NRF devices
 
+
 --- Formats USB device name from serial/by-id path.
 --- Extracts meaningful name from symlink format.
 ---
@@ -22,6 +23,8 @@ local function format_device_name(device_string)
 	return formatted_name
 end
 
+local M = {}
+
 --- Scans for connected USB serial devices (ttyUSB/ttyACM).
 --- Reads from /dev/serial/by-id for stable device paths.
 ---
@@ -32,7 +35,7 @@ end
 ---   for _, dev in ipairs(devices) do
 ---     print(dev.name, dev.path)
 ---   end
-function get_usb_devices()
+function M.get_usb_devices()
 	local devices = {}
 	local files = vim.fn.glob("/dev/serial/by-id/*", false, true)
 	for _, file in ipairs(files) do
@@ -60,7 +63,7 @@ end
 ---   if #nrf_ids > 0 then
 ---     print("Found NRF devices:", table.concat(nrf_ids, ", "))
 ---   end
-function get_nrf_devices()
+function M.get_nrf_devices()
 	local handle = io.popen("nrfjprog --ids")
 	local result = handle:read("*a")
 	handle:close()
@@ -72,3 +75,5 @@ function get_nrf_devices()
 
 	return ids
 end
+
+return M

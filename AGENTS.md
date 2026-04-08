@@ -8,12 +8,12 @@
 - **Plugin specs**: `nvim/lua/kvim/plugins/` (one file per plugin)
 - **Core config**: `nvim/lua/kvim/core/` (options, keymaps, autocmds)
 - **Custom commands**: `nvim/lua/kvim/utils/` (embedded dev tools, SSH, Python)
-- **UI layouts**: `nvim/lua/kvim/layouts/` (nui-components based menus)
+- **UI layouts**: `nvim/lua/kvim/layouts/` (nvzone/menu based menus)
 
 ## Environment
 
 - **Required**: `KVIM_HOME` environment variable pointing to config root
-- **Config path**: `{KVIM_HOME}/.config/nvim/configs.json`
+- **Config path**: `{KVIM_HOME}/nvim/configs.json`
 
 ## Code Style
 
@@ -41,7 +41,7 @@ The config includes custom build/flash/debug commands for ESP-IDF and Nordic NRF
 
 1. `mapleader` must be set before loading lazy.nvim
 2. Lazy-loaded plugins use event triggers; core modules load eagerly
-3. Layouts use deferred loading (500ms after VimEnter) to avoid startup delays
+3. Layouts use VeryLazy event trigger to avoid startup delays
 4. Config utils use dkjson for JSON parsing (no external deps for config)
 5. OpenCode integration uses `nickjvandyke/opencode.nvim` with snacks.nvim optional dep
 
