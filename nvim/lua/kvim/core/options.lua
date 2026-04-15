@@ -34,3 +34,24 @@ end
 
 vim.g.kvim_home = kvim_home
 vim.g.configs_path = vim.g.kvim_home .. "nvim/configs.json"
+
+vim.opt.tabline = "%!v:lua.MyTabline()"
+
+function _G.MyTabline()
+    local s = ""
+
+    for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
+        local ok, title = pcall(vim.api.nvim_tabpage_get_var, tab, "title")
+        local name = (ok and title) or ("Tab " .. i)
+
+        if i == vim.fn.tabpagenr() then
+            s = s .. "%#TabLineSel#"
+        else
+            s = s .. "%#TabLine#"
+        end
+
+        s = s .. " " .. name .. " %*"
+    end
+
+    return s
+end

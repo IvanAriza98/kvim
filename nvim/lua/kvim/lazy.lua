@@ -57,3 +57,7 @@ require("lazy").setup({
 -- Estos se cargan eagerly porque contienen funciones usadas frecuentemente
 require("kvim.utils")
 require("kvim.layouts")
+
+-- Cargar sistema de workspaces (dos tabs: Code y SSH)
+-- Este módulo inicializa los dos entornos al inicio
+require("kvim.workspace").setup()

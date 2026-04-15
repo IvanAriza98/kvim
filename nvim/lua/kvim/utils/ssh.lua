@@ -80,7 +80,7 @@ function ssh_terminal(direction)
 
 	local size = 30
 	if direction == "vertical" then
-		size = math.floor(vim.o.columns * 0.3)
+		size = math.floor(vim.o.columns * 0.5)
 	elseif direction == "horizontal" then
 		size = math.floor(vim.o.lines * 0.3)
 	end
@@ -162,3 +162,9 @@ end, { silent = true, noremap = true })
 vim.keymap.set("n", "<C-g>f", function()
 	transfer_file(vim.fn.input("Enter gettting directory path: "), false)
 end, { silent = true, noremap = true })
+
+return {
+    ssh_terminal = ssh_terminal,
+    transfer_file = transfer_file,
+    share_pub_key = share_pub_key,
+}

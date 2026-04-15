@@ -1,31 +1,38 @@
 {
-  "ssh":{
-    "sessions":[{
-        "key_type":"rsa",
-        "path":"~/",
-        "ip":"172.28.1.1",
-        "name":"172.28.1.1",
-        "user":"root",
-        "port":"22"
-      }],
-    "active":1
-  },
   "esp_idf":{
-    "appPath":"",
-    "port":"/dev/ttyACM1",
     "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "family":"esp32s2"
-  },
-  "nrf_sdk":{
-    "projectName":"firmware-MKPro",
-    "application":"app",
-    "baseDevicetreeOverlays":"",
-    "boardTarget":"Not set",
-    "snDevice":"1050286221",
-    "extraDevicetreeOverlays":"app/boards",
-    "workspacePath":"/home/KODVMV/ncs/workspace"
+    "appPath":"",
+    "family":"esp32s2",
+    "port":"/dev/ttyACM1"
   },
   "python":{
     "path":"/usr/bin/python3"
+  },
+  "ssh":{
+    "active":1,
+    "sessions":[{
+        "ip":"test.rebex.net",
+        "user":"demo",
+        "port":"22",
+        "key_type":"rsa",
+        "name":"#1",
+        "path":"~/"
+      },{
+        "ip":"demo.wftpserver.com",
+        "user":"demo",
+        "port":"2222",
+        "name":"#2",
+        "key_type":"rsa",
+        "path":"~/"
+      }]
+  },
+  "nrf_sdk":{
+    "projectName":"firmware-MKPro",
+    "extraDevicetreeOverlays":"app/boards",
+    "baseDevicetreeOverlays":"",
+    "snDevice":"1050286221",
+    "boardTarget":"Not set",
+    "workspacePath":"/home/KODVMV/ncs/workspace",
+    "application":"app"
   }
 }

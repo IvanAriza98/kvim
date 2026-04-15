@@ -113,6 +113,24 @@ function M.open_main_menu()
             name = "  🔐 SSH",
             items = M.get_ssh_items(),
         },
+
+        -- === Environments ===
+        {
+            name = "│ Environments",
+            hl = "Bold",
+        },
+        {
+            name = "  🛠️ dev",
+            cmd = function()
+                require("kvim.workspace").goto_code()
+            end,
+        },
+        {
+            name = "  🚀 prod",
+            cmd = function()
+                require("kvim.workspace").goto_ssh()
+            end,
+        },
     }, {
         mouse = false, -- Navegación solo con teclado
         border = true,
@@ -142,9 +160,9 @@ end
 
 -- === Submenú ESP-IDF ===
 function M.get_esp_idf_items()
-    local config_utils = require("kvim.utils.config-utils")
     local vars = require("kvim.env")
     local devices = require("kvim.utils.devices")
+    local config_utils = require("kvim.utils.config-utils")
 
     local port = config_utils.getConfigField(vars.id.ESP_IDF, vars.key.IDF_PORT) or "Not set"
     local idfPath = config_utils.getConfigField(vars.id.ESP_IDF, vars.key.IDF_PATH) or "Not set"
@@ -570,16 +588,27 @@ function M.get_ssh_items()
                         if choice then
                             for i, name in ipairs(choices) do
                                 if name == choice then
-                                    config_utils.setActiveSSH(i)
                                     vim.notify("✓ Conectando a: " .. choice, vim.log.levels.INFO)
                                     M._exec_external(function()
-                                        vim.cmd("SSHConnect")
+                                        require("kvim.workspace.ssh-manager").connect_to(i)
                                     end)
                                     break
                                 end
                             end
                         end
                     end)
+                end)
+            end,
+        },
+        {
+            name = "  🔑 Compartir clave pública",
+            cmd = function()
+                M._exec_external(function()
+                    if #sessions == 0 then
+                        vim.notify("No hay sesiones SSH. Crea una primero.", vim.log.levels.WARN)
+                        return
+                    end
+                    vim.cmd("SSHShareKey")
                 end)
             end,
         },
@@ -680,6 +709,36 @@ function M.get_ssh_items()
                         return
                     end
                     vim.cmd("SSHDownload")
+                end)
+            end,
+        },
+        -- Separador
+        {
+            name = "  ─────────────────",
+            cmd = function() end,
+        },
+        -- Cambio rápido entre sesiones
+        {
+            name = "  ⬇️  Siguiente Sesión",
+            cmd = function()
+                M._exec_external(function()
+                    vim.cmd("SSHNext")
+                end)
+            end,
+        },
+        {
+            name = "  ⬆️  Sesión Anterior",
+            cmd = function()
+                M._exec_external(function()
+                    vim.cmd("SSHPrev")
+                end)
+            end,
+        },
+        {
+            name = "  📋 Listar Sesiones",
+            cmd = function()
+                M._exec_external(function()
+                    vim.cmd("SSHList")
                 end)
             end,
         },

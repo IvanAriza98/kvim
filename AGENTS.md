@@ -43,7 +43,6 @@ The config includes custom build/flash/debug commands for ESP-IDF and Nordic NRF
 2. Lazy-loaded plugins use event triggers; core modules load eagerly
 3. Layouts use VeryLazy event trigger to avoid startup delays
 4. Config utils use dkjson for JSON parsing (no external deps for config)
-5. OpenCode integration uses `nickjvandyke/opencode.nvim` with snacks.nvim optional dep
 
 ## Testing
 

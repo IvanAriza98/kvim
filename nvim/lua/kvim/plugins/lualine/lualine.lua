@@ -8,6 +8,13 @@ return {
     config = function()
         require('lualine').setup({
             options = { theme = 'tokyonight'},         -- Tema que coincide con el colorscheme
+            sections = {
+                lualine_x = {
+                    'encoding',
+                    'fileformat',
+                    'filetype',
+                },
+            },
         })
     end,
 }
