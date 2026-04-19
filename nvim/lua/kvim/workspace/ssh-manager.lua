@@ -35,6 +35,30 @@ local function get_buffer_name(session)
     return "ssh://" .. user .. "@" .. ip
 end
 
+-- Busca un buffer existente por nombre exacto para evitar colisiones E95.
+-- @param name string Nombre exacto del buffer
+-- @return number|nil bufnr válido o nil
+local function find_buffer_by_exact_name(name)
+    if not name or name == "" then
+        return nil
+    end
+
+    local bufnr = vim.fn.bufnr(name)
+    if bufnr and bufnr > 0 and vim.api.nvim_buf_is_valid(bufnr) then
+        if vim.api.nvim_buf_get_name(bufnr) == name then
+            return bufnr
+        end
+    end
+
+    for _, candidate in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_valid(candidate) and vim.api.nvim_buf_get_name(candidate) == name then
+            return candidate
+        end
+    end
+
+    return nil
+end
+
 -- Función para verificar si un buffer SSH existe y está vivo
 -- @param bufnr number Número de buffer
 -- @return boolean
@@ -92,6 +116,9 @@ end
 local function set_buffer_metadata(bufnr, session_index, connected)
     vim.api.nvim_set_option_value("buflisted", true, { buf = bufnr })
     vim.api.nvim_set_option_value("bufhidden", "hide", { buf = bufnr })
+    -- Evitar swap/undo persistente en buffers del workspace SSH.
+    vim.api.nvim_set_option_value("swapfile", false, { buf = bufnr })
+    vim.api.nvim_set_option_value("undofile", false, { buf = bufnr })
     vim.b[bufnr].kvim_workspace = "ssh"
     vim.b[bufnr].kvim_ssh_session_index = session_index
     vim.b[bufnr].kvim_ssh_connected = connected and true or false
@@ -124,12 +151,42 @@ local function render_placeholder(bufnr, session)
 end
 
 local function create_placeholder_buffer(session_index, session)
+    local wanted_name = get_buffer_name(session)
+
+    -- Reusar directo si ya existe un buffer con ese nombre.
+    local named_buf = find_buffer_by_exact_name(wanted_name)
+    if named_buf and buffer_exists(named_buf) then
+        set_buffer_metadata(named_buf, session_index, is_ssh_connected(named_buf))
+        if not is_ssh_connected(named_buf) then
+            render_placeholder(named_buf, session)
+        end
+        return named_buf
+    end
+
     local bufnr = vim.api.nvim_create_buf(true, false)
-    vim.api.nvim_buf_set_name(bufnr, get_buffer_name(session))
-    vim.api.nvim_set_option_value("buflisted", true, { buf = bufnr })
-    vim.api.nvim_set_option_value("bufhidden", "hide", { buf = bufnr })
-    set_buffer_metadata(bufnr, session_index, false)
-    render_placeholder(bufnr, session)
+    -- Desactivar swap antes de asignar nombre ssh:// para evitar prompts.
+    vim.api.nvim_set_option_value("swapfile", false, { buf = bufnr })
+    vim.api.nvim_set_option_value("undofile", false, { buf = bufnr })
+    local ok_set_name = pcall(vim.api.nvim_buf_set_name, bufnr, wanted_name)
+
+    if not ok_set_name then
+        local reused = find_buffer_by_exact_name(wanted_name)
+        if reused and buffer_exists(reused) then
+            if buffer_exists(bufnr) then
+                pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+            end
+            bufnr = reused
+        end
+    end
+
+    if not buffer_exists(bufnr) then
+        return nil
+    end
+
+    set_buffer_metadata(bufnr, session_index, is_ssh_connected(bufnr))
+    if not is_ssh_connected(bufnr) then
+        render_placeholder(bufnr, session)
+    end
     return bufnr
 end
 
@@ -145,7 +202,18 @@ local function ensure_session_buffer(session_index, session)
         return existing
     end
 
+    local wanted_name = get_buffer_name(session)
+    local existing_by_name = find_buffer_by_exact_name(wanted_name)
+    if existing_by_name and buffer_exists(existing_by_name) then
+        ssh_buffers[session_index] = existing_by_name
+        set_buffer_metadata(existing_by_name, session_index, is_ssh_connected(existing_by_name))
+        return existing_by_name
+    end
+
     local bufnr = create_placeholder_buffer(session_index, session)
+    if not bufnr then
+        return nil
+    end
     ssh_buffers[session_index] = bufnr
     return bufnr
 end
@@ -158,6 +226,9 @@ local function open_session_buffer(session_index)
     end
 
     local bufnr = ensure_session_buffer(session_index, session)
+    if not bufnr or not buffer_exists(bufnr) then
+        return nil
+    end
     workspace.goto_ssh()
     vim.api.nvim_win_set_buf(0, bufnr)
     set_buffer_metadata(bufnr, session_index, is_ssh_connected(bufnr))

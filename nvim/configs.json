@@ -1,38 +1,52 @@
 {
-  "esp_idf":{
-    "idfPath":"/home/kodvmv/esp/esp-idf/",
-    "appPath":"",
-    "family":"esp32s2",
-    "port":"/dev/ttyACM1"
+  "nrf_sdk":{
+    "snDevice":"1050286221",
+    "baseDevicetreeOverlays":"",
+    "workspacePath":"/home/KODVMV/ncs/workspace",
+    "extraDevicetreeOverlays":"app/boards",
+    "projectName":"firmware-MKPro",
+    "boardTarget":"Not set",
+    "application":"app"
+  },
+  "code":{
+    "active":"1776622458-8147",
+    "projects":[{
+        "buffers":["/home/KODVMV/Documentos/Github/Domotik/docs/Matter.md","/home/KODVMV/Documentos/Github/Domotik/matter/docker-compose.yml"],
+        "root":"/home/KODVMV/Documentos/Github/Domotik/",
+        "id":"1776622317-8147",
+        "name":"Domotik"
+      },{
+        "buffers":["/home/KODVMV/Documentos/Github/kvim/nvim/init.lua","/home/KODVMV/Documentos/Github/kvim/nvim/lua/kvim/lazy.lua","/home/KODVMV/Documentos/Github/kvim/nvim/configs.json","/home/KODVMV/Documentos/Github/kvim/nvim/lua/kvim/core/autocmds.lua","/home/KODVMV/Documentos/Github/kvim/AGENTS.md"],
+        "id":"1776622458-8147",
+        "root":"/home/KODVMV/Documentos/Github/kvim/",
+        "name":"kvim"
+      }]
   },
   "python":{
     "path":"/usr/bin/python3"
   },
+  "esp_idf":{
+    "appPath":"",
+    "idfPath":"/home/kodvmv/esp/esp-idf/",
+    "port":"/dev/ttyACM1",
+    "family":"esp32s2"
+  },
   "ssh":{
     "active":1,
     "sessions":[{
-        "ip":"test.rebex.net",
-        "user":"demo",
         "port":"22",
-        "key_type":"rsa",
         "name":"#1",
-        "path":"~/"
-      },{
-        "ip":"demo.wftpserver.com",
+        "key_type":"rsa",
         "user":"demo",
+        "path":"~/",
+        "ip":"test.rebex.net"
+      },{
         "port":"2222",
         "name":"#2",
         "key_type":"rsa",
-        "path":"~/"
+        "user":"demo",
+        "path":"~/",
+        "ip":"demo.wftpserver.com"
       }]
-  },
-  "nrf_sdk":{
-    "projectName":"firmware-MKPro",
-    "extraDevicetreeOverlays":"app/boards",
-    "baseDevicetreeOverlays":"",
-    "snDevice":"1050286221",
-    "boardTarget":"Not set",
-    "workspacePath":"/home/KODVMV/ncs/workspace",
-    "application":"app"
   }
 }

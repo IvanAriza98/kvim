@@ -131,6 +131,16 @@ function M.open_main_menu()
                 require("kvim.workspace").goto_ssh()
             end,
         },
+        {
+            name = "  🤖 ai",
+            cmd = function()
+                require("kvim.workspace").goto_ai()
+            end,
+        },
+        {
+            name = "  📁 Code Projects",
+            items = M.get_code_projects_items(),
+        },
     }, {
         mouse = false, -- Navegación solo con teclado
         border = true,
@@ -156,6 +166,203 @@ end
 function M._exec_external(cmd)
     menu_keep_open = false
     cmd()
+end
+
+function M._get_code_projects_module()
+    local ok, code_projects = pcall(require, "kvim.workspace.code-projects")
+    if not ok then
+        vim.notify("Módulo 'kvim.workspace.code-projects' no disponible", vim.log.levels.WARN)
+        return nil
+    end
+    return code_projects
+end
+
+function M._normalize_code_projects(projects)
+    local entries = {}
+
+    for idx, project in ipairs(projects or {}) do
+        local id = project.id or project.project_id or idx
+        local name = project.name or project.project_name or ("Proyecto " .. tostring(id))
+        local root = project.root or project.path or project.project_root or ""
+
+        table.insert(entries, {
+            id = id,
+            name = name,
+            root = root,
+            display = (root ~= "") and (name .. " -> " .. root) or name,
+        })
+    end
+
+    return entries
+end
+
+function M._get_code_project_entries(code_projects)
+    local projects = {}
+
+    if type(code_projects.get_projects) == "function" then
+        projects = code_projects.get_projects() or {}
+    elseif type(code_projects.list_projects) == "function" then
+        projects = code_projects.list_projects() or {}
+    elseif type(code_projects.get_all_projects) == "function" then
+        projects = code_projects.get_all_projects() or {}
+    elseif type(code_projects.projects) == "table" then
+        projects = code_projects.projects
+    end
+
+    return M._normalize_code_projects(projects)
+end
+
+function M._pick_code_project(prompt, callback)
+    local code_projects = M._get_code_projects_module()
+    if not code_projects then
+        return
+    end
+
+    local entries = M._get_code_project_entries(code_projects)
+    if #entries == 0 then
+        vim.notify("No hay proyectos de Code creados", vim.log.levels.WARN)
+        return
+    end
+
+    local choices = {}
+    local display_to_entry = {}
+
+    for _, entry in ipairs(entries) do
+        table.insert(choices, entry.display)
+        display_to_entry[entry.display] = entry
+    end
+
+    M._open_select(choices, {
+        prompt = prompt,
+    }, function(choice)
+        if not choice then
+            return
+        end
+
+        local selected = display_to_entry[choice]
+        if selected then
+            callback(code_projects, selected)
+        end
+    end)
+end
+
+function M.get_code_projects_items()
+    return {
+        {
+            name = "  📋 Seleccionar proyecto",
+            cmd = function()
+                M._exec_external(function()
+                    local code_projects = M._get_code_projects_module()
+                    if code_projects and type(code_projects.show_project_picker) == "function" then
+                        code_projects.show_project_picker()
+                    end
+                end)
+            end,
+        },
+        {
+            name = "  ➕ Nuevo proyecto",
+            cmd = function()
+                M._exec_internal(function()
+                    local code_projects = M._get_code_projects_module()
+                    if not code_projects or type(code_projects.add_project) ~= "function" then
+                        return
+                    end
+
+                    M._open_input({
+                        prompt = "Nombre del proyecto:",
+                        default = "",
+                    }, function(name)
+                        if not name or name == "" then
+                            vim.notify("Nombre de proyecto requerido", vim.log.levels.WARN)
+                            return
+                        end
+
+                        M._open_input({
+                            prompt = "Root del proyecto:",
+                            default = vim.fn.getcwd(),
+                        }, function(root)
+                            if not root or root == "" then
+                                vim.notify("Root de proyecto requerido", vim.log.levels.WARN)
+                                return
+                            end
+
+                            code_projects.add_project(name, root)
+                            vim.notify("✓ Proyecto añadido: " .. name, vim.log.levels.INFO)
+                        end)
+                    end)
+                end)
+            end,
+        },
+        {
+            name = "  ✏️  Renombrar proyecto",
+            cmd = function()
+                M._exec_internal(function()
+                    M._pick_code_project("Renombrar proyecto:", function(code_projects, selected)
+                        if type(code_projects.rename_project) ~= "function" then
+                            return
+                        end
+
+                        M._open_input({
+                            prompt = "Nuevo nombre:",
+                            default = selected.name,
+                        }, function(new_name)
+                            if not new_name or new_name == "" then
+                                vim.notify("Nombre inválido", vim.log.levels.WARN)
+                                return
+                            end
+
+                            code_projects.rename_project(selected.id, new_name)
+                            vim.notify("✓ Proyecto renombrado", vim.log.levels.INFO)
+                        end)
+                    end)
+                end)
+            end,
+        },
+        {
+            name = "  🗑️  Eliminar proyecto",
+            cmd = function()
+                M._exec_internal(function()
+                    M._pick_code_project("Eliminar proyecto:", function(code_projects, selected)
+                        if type(code_projects.delete_project) ~= "function" then
+                            return
+                        end
+
+                        M._open_input({
+                            prompt = "Confirmar eliminar '" .. selected.name .. "'? (s/n):",
+                            default = "n",
+                        }, function(confirm)
+                            if confirm and (confirm == "s" or confirm == "S") then
+                                code_projects.delete_project(selected.id)
+                                vim.notify("✓ Proyecto eliminado", vim.log.levels.INFO)
+                            end
+                        end)
+                    end)
+                end)
+            end,
+        },
+        {
+            name = "  🔄 Siguiente proyecto",
+            cmd = function()
+                M._exec_external(function()
+                    local code_projects = M._get_code_projects_module()
+                    if code_projects and type(code_projects.next_project) == "function" then
+                        code_projects.next_project()
+                    end
+                end)
+            end,
+        },
+        {
+            name = "  ◀️ Proyecto anterior",
+            cmd = function()
+                M._exec_external(function()
+                    local code_projects = M._get_code_projects_module()
+                    if code_projects and type(code_projects.prev_project) == "function" then
+                        code_projects.prev_project()
+                    end
+                end)
+            end,
+        },
+    }
 end
 
 -- === Submenú ESP-IDF ===
