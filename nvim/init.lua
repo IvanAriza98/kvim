@@ -20,10 +20,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
     { import = "kvim.plugins" },
+    { import = "kvim.modules.git.plugins" },
 })
 
 require("kvim").setup()
--- require("kvim").register_module()
--- require("kvim").run_action()
-
-
