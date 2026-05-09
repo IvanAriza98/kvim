@@ -71,6 +71,12 @@ local defaults = {
               },
             },
         },
+
+        theme = {
+            enabled = true,
+            name = "catppuccin",
+            style = "mocha", -- mocha, macchiato, frappe, latte
+        }
 	},
 
 	keymaps = {

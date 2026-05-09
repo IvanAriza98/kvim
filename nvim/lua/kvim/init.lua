@@ -15,6 +15,11 @@ function M.setup(opts)
     require("kvim.ui").setup()
   end
 
+  -- Theme base
+  if config.ui.theme and config.ui.theme.enabled then
+    require("kvim.ui.theme").setup()
+  end
+
   for _, module_name in ipairs(config.modules) do
     require("kvim.core.modules." .. module_name)
   end
