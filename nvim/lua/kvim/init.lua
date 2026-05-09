@@ -19,9 +19,26 @@ function M.setup(opts)
   if config.ui.theme and config.ui.theme.enabled then
     require("kvim.ui.theme").setup()
   end
+  
+  -- Load extra modules ...
+  for module_name, module_opts in pairs(config.modules or {}) do
+    if module_opts.enabled then
+        local module = require("kvim.modules." .. module_name)
 
-  for _, module_name in ipairs(config.modules) do
-    require("kvim.core.modules." .. module_name)
+        if type(module) ~= "table" then
+            error("Kvim module must be a table: " .. module_name)
+        end
+
+        if not module.name or module.name == "" then
+                module.name = module_name
+        end
+
+        require("kvim.core.registry").register(module)
+        
+        if type(module.setup) == "function" then
+                module.setup(module_opts)
+        end
+    end
   end
 
   if config.keymaps and config.keymaps.enabled then
@@ -34,11 +51,11 @@ function M.register_module(module)
 end
 
 function M.run_action(module_name, action_name)
-  require("kvim.registry").run_action(module_name, action_name)
+  require("kvim.core.registry").run_action(module_name, action_name)
 end
 
 function M.get_modules()
-  return require("kvim.registry").get_modules()
+  return require("kvim.core.registry").get_modules()
 end
 
 return M

@@ -2,9 +2,7 @@
 
 local M = {}
 
-local defaults = {
-    modules = {},
-	
+local defaults = {	
 	ui = {
 		enabled = true,
 		
@@ -143,6 +141,13 @@ local defaults = {
 		height = 12,
 		position = "bottom",
 	},
+
+    modules = {
+        git = {
+            enabled = true,
+            prefix = "<leader>g",
+        },
+    },
 }
 
 local options = vim.deepcopy(defaults)

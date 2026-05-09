@@ -57,7 +57,7 @@ function M.run_action(module_name, action_name)
 	end
 
 	if action.command then
-		require("kvim.runner").run(action.command)
+		require("kvim.core.runner").run(action.command)
 		return
 	end
 	
