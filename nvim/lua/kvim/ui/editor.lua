@@ -12,17 +12,17 @@ local function setup_numbers(numbers)
 		vim.opt.number = true
 		vim.opt.relativenumber = false
 		return
-	end 	
+	end
 
 	if numbers.mode == "relative" then
 		vim.opt.number = false
-		vim.opt.relativenumber = true 
+		vim.opt.relativenumber = true
 		return
 	end
-	
+
 	if numbers.mode == "hybrid" then
-		vim.opt.number =true 
-		vim.opt.relativenumber = true 
+		vim.opt.number =true
+		vim.opt.relativenumber = true
 		return
 	end
 end
@@ -45,13 +45,13 @@ function M.setup()
 	setup_numbers(editor.numbers)
 	setup_indentation(editor.indentation)
 
+    vim.opt.fillchars = { eob = " " } -- Se eliminan los ~ de cada linea no completada
 	vim.opt.cursorline = editor.cursorline
 	vim.opt.signcolumn = editor.signcolumn or "yes"
 	vim.opt.wrap = editor.wrap
 	vim.opt.scrolloff = editor.scrolloff or 8
 	vim.opt.sidescrolloff = editor.sidescrolloff or 8
 	vim.opt.termguicolors = editor.termguicolors ~= false
-
 end
 
 return M

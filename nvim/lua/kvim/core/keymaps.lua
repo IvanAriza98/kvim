@@ -13,7 +13,7 @@ end
 function M.setup_personal(config)
 	local opts = config.keymaps.opts
 	local mappings = config.keymaps.mappings.personal
-	
+
 	map("n", mappings.save,		"<cmd>w!<CR>",	opts)
 	map("n", mappings.close_buffer, "<cmd>q!<CR>",	opts)
 	map("n", mappings.quit_all,	"<cmd>qa!<CR>",	opts)
@@ -23,10 +23,10 @@ end
 function M.setup_core(config)
 	local opts = config.keymaps.opts
 	local mappings = config.keymaps.mappings.core
-	
+
 	map("n", mappings.modules,	"<cmd>KvimModules<CR>",	opts)
 	map("n", mappings.action,	"<cmd>KvimAction<CR>",	opts)
-	
+
 	map("n", mappings.run,		"<cmd>KvimRun<CR>",     opts)
 	map("n", mappings.test,		"<cmd>KvimTest<CR>",	opts)
 	map("n", mappings.build,	"<cmd>KvimBuild<CR>",	opts)
@@ -75,8 +75,8 @@ function M.setup()
 	local config = require("kvim.config").get()
 
 	if not config.keymaps.enabled then
-		return	
-	end	
+		return
+	end
 
 	local presets = config.keymaps.presets
 
@@ -87,7 +87,7 @@ function M.setup()
 	if presets.core then
 		M.setup_core(config)
 	end
-    
+
     if presets.ui then
         M.setup_ui(config)
     end
