@@ -2,7 +2,8 @@
 
 local M = {}
 
-function M.setup()
+function M.setup(opts)
+  opts = opts or {}
   local ok, lualine = pcall(require, "lualine")
 
   if not ok then

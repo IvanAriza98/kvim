@@ -31,7 +31,7 @@ local function setup_catppuccin(theme)
       types = { "italic" },
       operators = {},
     },
-    
+
     custom_highlights = function(colors)
       return {
         -- Número de la línea actual

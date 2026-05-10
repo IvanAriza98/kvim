@@ -1,6 +1,8 @@
 local M = {}
 
-function M.setup()
+function M.setup(opts)
+  opts = opts or {}
+
   local actions = require("kvim.modules.git.actions")
 
   vim.api.nvim_create_user_command("KvimGit", function()
