@@ -51,7 +51,7 @@ function M.apply_style()
   vim.opt_local.foldcolumn = "0"
 end
 
-function M.open(position)
+local function open_split(position)
   if position == "right" then
     vim.cmd("rightbelow vsplit")
   elseif position == "left" then
@@ -63,8 +63,37 @@ function M.open(position)
   else
     vim.cmd("botright split")
   end
+end
 
-  vim.cmd("terminal")
+function M.open(position)
+  M.open_command(nil, {
+    position = position,
+    name = "KVIM Terminal [" .. (position or "bottom") .. "]",
+    listed = false,
+  })
+end
+
+function M.open_command(command, opts)
+  opts = opts or {}
+
+  local position = opts.position or "bottom"
+  local name = opts.name or "KVIM Terminal"
+  local listed = opts.listed or false
+
+  open_split(position)
+
+  if command and command ~= "" then
+    vim.cmd("terminal " .. command)
+  else
+    vim.cmd("terminal")
+  end
+
+  vim.bo.buflisted = listed
+
+  pcall(function()
+    vim.api.nvim_buf_set_name(0, name)
+  end)
+
   M.apply_style()
   vim.cmd("startinsert")
 end
