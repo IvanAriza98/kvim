@@ -147,6 +147,10 @@ local defaults = {
             enabled = true,
             prefix = "<leader>g",
         },
+
+        svn = {
+            enabled = true,
+        },
     },
 }
 
