@@ -9,7 +9,6 @@ function M.setup(opts)
   require("kvim.core.commands").setup()
 
   local config = require("kvim.config").get()
-   
   -- UI/editor base
   if config.ui and config.ui.enabled then
     require("kvim.ui").setup()
@@ -19,7 +18,11 @@ function M.setup(opts)
   if config.ui.theme and config.ui.theme.enabled then
     require("kvim.ui.theme").setup()
   end
-  
+
+  -- Load LSP
+  if config.lsp and config.lsp.enabled then
+    require("kvim.core.lsp").setup()
+  end
   -- Load extra modules ...
   for module_name, module_opts in pairs(config.modules or {}) do
     if module_opts.enabled then
@@ -34,7 +37,6 @@ function M.setup(opts)
         end
 
         require("kvim.core.registry").register(module)
-        
         if type(module.setup) == "function" then
                 module.setup(module_opts)
         end

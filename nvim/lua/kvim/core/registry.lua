@@ -60,7 +60,6 @@ function M.run_action(module_name, action_name)
 		require("kvim.core.runner").run(action.command)
 		return
 	end
-	
 	vim.notify("Kvim action has no command or callback", vim.log.levels.ERROR)
 end
 
