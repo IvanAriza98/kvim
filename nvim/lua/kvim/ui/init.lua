@@ -6,7 +6,7 @@ function M.setup()
 	local config = require("kvim.config").get()
 
 	if not config.ui or not config.ui.enabled then
-		return 
+		return
 	end
 
 	require("kvim.ui.editor").setup()

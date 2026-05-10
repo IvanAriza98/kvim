@@ -62,13 +62,17 @@ end
 function M.setup_terminal(config)
 	local opts = config.keymaps.opts
 	local mappings = config.keymaps.mappings.terminal
+    local terminal = require("kvim.core.terminal")
+
+    terminal.setup()
+    
     -- exit from terminal-mode to normal-mode 
-    map("t", mappings.exit_terminal,    "<C-\\><C-n>",                          opts)
+    map("t", mappings.exit_terminal, "<C-\\><C-n>", opts)
     -- open terminals
-    map("n", mappings.open_right,       "<cmd>rightbelow vsplit | term<CR>",    opts)
-    map("n", mappings.open_left,        "<cmd>leftabove vsplit | term<CR>",     opts)
-    map("n", mappings.open_top,         "<cmd>leftabove split | term<CR>",      opts)
-    map("n", mappings.open_bottom,      "<cmd>botright split | term<CR>",       opts)
+    map("n", mappings.open_right, function() terminal.open("right") end, opts)
+    map("n", mappings.open_left, function() terminal.open("left") end, opts)
+    map("n", mappings.open_top, function() terminal.open("top") end, opts)
+    map("n", mappings.open_bottom, function() terminal.open("bottom") end, opts)
 end
 
 function M.setup()

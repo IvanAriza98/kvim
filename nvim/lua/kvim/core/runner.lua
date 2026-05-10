@@ -12,7 +12,7 @@ local function expand_command(command)
 	command = command:gsub("{filepath}", vim.fn.shellescape(filepath))
 	command = command:gsub("{filename}", vim.fn.shellescape(filename))
 	command = command:gsub("{cwd}", vim.fn.shellescape(cwd))
-	
+
 	return command
 end
 
@@ -20,7 +20,7 @@ function M.run(command)
 	command = expand_command(command)
 
 	local config = require("kvim.config").get()
-	
+
 	if config.terminal.position == "bottom" then
 		vim.cmd("botright split")
 		vim.cmd("resize " .. config.terminal.height)
