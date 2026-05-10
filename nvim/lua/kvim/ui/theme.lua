@@ -1,23 +1,5 @@
 -- lua/kvim/ui/theme.lua
-
 local M = {}
-
-local function setup_tokyonight(theme)
-  local ok, tokyonight = pcall(require, "tokyonight")
-
-  if not ok then
-    vim.notify("Kvim: tokyonight.nvim not found", vim.log.levels.WARN)
-    return
-  end
-
-  tokyonight.setup({
-    style = theme.style or "moon",
-    transparent = theme.transparent or false,
-  })
-
-  vim.cmd.colorscheme("tokyonight")
-end
-
 
 local function setup_catppuccin(theme)
   local ok, catppuccin = pcall(require, "catppuccin")
@@ -49,6 +31,21 @@ local function setup_catppuccin(theme)
       types = { "italic" },
       operators = {},
     },
+    
+    custom_highlights = function(colors)
+      return {
+        -- Número de la línea actual
+        CursorLineNr = {
+          fg = colors.peach,
+          bold = true,
+        },
+
+        -- Resto de números de línea
+        LineNr = {
+          fg = colors.overlay0,
+        },
+      }
+    end,
 
     integrations = {
       treesitter = true,
@@ -71,11 +68,6 @@ function M.setup()
   local theme = config.ui.theme or {}
 
   if not theme.enabled then
-    return
-  end
-
-  if theme.name == "tokyonight" then
-    setup_tokyonight(theme)
     return
   end
 

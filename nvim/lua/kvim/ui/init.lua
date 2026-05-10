@@ -10,7 +10,7 @@ function M.setup()
 	end
 
 	require("kvim.ui.editor").setup()
-	-- require("kvim.ui.theme").setup()
+	require("kvim.ui.lualine").setup()
 end
 
 return M
