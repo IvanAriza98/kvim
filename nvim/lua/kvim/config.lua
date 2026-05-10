@@ -2,10 +2,9 @@
 
 local M = {}
 
-local defaults = {	
+local defaults = {
 	ui = {
 		enabled = true,
-		
         editor = {
 			numbers = {
 				enabled = true,
@@ -21,14 +20,13 @@ local defaults = {
 				autoindent = true
 			},
 
-			cursorline = true, 
+			cursorline = true,
 			signcolumn = "yes",
 			wrap = false,
 			scrolloff = 8,
 			sidescrolloff = 8,
 			termguicolors = true,
 	    },
-        
         explorer = {
             enabled = true,
 
@@ -105,14 +103,14 @@ local defaults = {
 				action = "<leader>ka",
 			},
 
-            ui = {  
+            ui = {
                 -- neo-tree
                 explorer_toggle = "<leader>e",
                 explorer_focus  = "<leader>E",
                 explorer_reveal = "<leader>fe",
                 explorer_close  = "<leader>ec",
                 explorer_git_status = "<leader>eg",
-                explorer_buffers    = "<leader>eb", 
+                explorer_buffers    = "<leader>eb",
                 -- yazi explorer
                 yazi = "<leader>y",
                 yazi_cwd = "<leader>Y",
@@ -133,9 +131,21 @@ local defaults = {
 
             },
 		},
-
-		
 	},
+
+    lsp = {
+        enabled = true,
+
+        servers = {
+            "lua_ls",
+            "clangd",
+            "pyright",
+            "ts_ls",
+            "bashls",
+            "jsonls",
+            "yamlls",
+        },
+    },
 
 	terminal = {
 		height = 12,
