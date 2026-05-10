@@ -161,6 +161,11 @@ local defaults = {
         svn = {
             enabled = true,
         },
+
+        connections = {
+            enabled = true,
+            prefix = "<leader>c",
+        },
     },
 }
 
