@@ -52,8 +52,12 @@ function M.setup(opts)
   local connections = require("kvim.connections")
   local transfer = require("kvim.modules.connections.transfer")
 
+  local function get_first_connection()
+    return connections[1]
+  end
+
   vim.api.nvim_create_user_command("KvimSSHUploadCurrent", function()
-    local conn = connections[1]
+    local conn = get_first_connection()
 
     if not conn then
       vim.notify("KVIM: no SSH connection configured", vim.log.levels.ERROR)
@@ -61,27 +65,60 @@ function M.setup(opts)
     end
 
     transfer.upload_current_file(conn)
-  end, {})
-
-  vim.api.nvim_create_user_command("KvimSSHDownloadFile", function(params)
-    local conn = connections[1]
-
-    if not conn then
-      vim.notify("KVIM: no SSH connection configured", vim.log.levels.ERROR)
-      return
-    end
-
-    local remote_file = params.args
-
-    if remote_file == "" then
-      remote_file = vim.fn.input("Remote file: ")
-    end
-
-    transfer.download_file(conn, remote_file)
   end, {
-    nargs = "?",
-    desc = "Download remote file from selected KVIM SSH connection",
+    desc = "Upload current file to SSH connection",
   })
+
+    vim.api.nvim_create_user_command("KvimSSHUploadPath", function(params)
+      local conn = get_first_connection()
+
+      if not conn then
+        vim.notify("KVIM: no SSH connection configured", vim.log.levels.ERROR)
+        return
+      end
+
+      local local_path = params.args
+
+      if local_path == "" then
+        local_path = vim.fn.input("Local path: ", "", "file")
+      end
+
+      if local_path == "" then
+        vim.notify("KVIM: upload cancelled", vim.log.levels.WARN)
+        return
+      end
+
+      transfer.upload_path(conn, local_path)
+    end, {
+      nargs = "?",
+      complete = "file",
+      desc = "Upload local file or directory to SSH connection",
+    })
+
+    vim.api.nvim_create_user_command("KvimSSHDownloadPath", function(params)
+      local conn = get_first_connection()
+
+      if not conn then
+        vim.notify("KVIM: no SSH connection configured", vim.log.levels.ERROR)
+        return
+      end
+
+      local remote_path = params.args
+
+      if remote_path == "" then
+        remote_path = vim.fn.input("Remote path: ")
+      end
+
+      if remote_path == "" then
+        vim.notify("KVIM: download cancelled", vim.log.levels.WARN)
+        return
+      end
+
+      transfer.download_path(conn, remote_path)
+    end, {
+      nargs = "?",
+      desc = "Download remote file or directory from SSH connection",
+    })
 end
 
 
