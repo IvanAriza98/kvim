@@ -14,7 +14,6 @@ return {
           "c",
           "cpp",
           "python",
-          "bash",
           "json",
           "yaml",
           "markdown",
@@ -22,11 +21,13 @@ return {
         },
 
         highlight = {
-          enable = true,
+            enable = true,
+            disable = { "bash" },
         },
 
         indent = {
-          enable = true,
+            enable = true,
+            disable = { "bash" },
         },
       })
     end,
