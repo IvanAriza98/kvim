@@ -7,6 +7,12 @@ return {
     port = 2222,
     identity_file = "~/.ssh/kvim_connections_ed25519",
     tags = { "ssh-test", "docker" },
+    transfer = {
+        method = "scp",
+        local_root = vim.fn.getcwd(),
+        remote_root = "/config/new",
+        remote_file = "/config/new/AGENTS2.md",
+    },
   },
 
   {
