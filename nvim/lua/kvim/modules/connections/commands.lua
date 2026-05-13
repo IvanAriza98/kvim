@@ -5,6 +5,7 @@ local M = {}
 function M.setup(opts)
   opts = opts or {}
 
+  local ssh = require("kvim.modules.connections.ssh")
   local state = require("kvim.modules.connections.state")
   local actions = require("kvim.modules.connections.actions")
   local transfer = require("kvim.modules.connections.transfer")
@@ -141,6 +142,36 @@ function M.setup(opts)
       state.clear_active_connection()
     end, {
       desc = "Clear active KVIM connection",
+    })
+
+    vim.api.nvim_create_user_command("KvimSSHRun", function(params)
+      local conn = state.get_active_connection()
+
+      if not conn then
+        vim.notify("KVIM Connections: no active connection selected", vim.log.levels.ERROR)
+        return
+      end
+
+      if conn.type ~= "ssh" then
+        vim.notify("KVIM Connections: active connection is not SSH", vim.log.levels.ERROR)
+        return
+      end
+
+      local remote_command = params.args
+
+      if remote_command == "" then
+        remote_command = vim.fn.input("Remote command: ")
+      end
+
+      if remote_command == "" then
+        vim.notify("KVIM Connections: SSH command cancelled", vim.log.levels.WARN)
+        return
+      end
+
+      ssh.run_command(conn, remote_command)
+    end, {
+      nargs = "*",
+      desc = "Run command on active SSH connection",
     })
 end
 
