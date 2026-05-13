@@ -14,10 +14,11 @@ function M.setup_personal(config)
 	local opts = config.keymaps.opts
 	local mappings = config.keymaps.mappings.personal
 
-	map("n", mappings.save,		"<cmd>w!<CR>",	opts)
-	map("n", mappings.close_buffer, "<cmd>q!<CR>",	opts)
-	map("n", mappings.quit_all,	"<cmd>qa!<CR>",	opts)
-	map("n", mappings.clear_search, "<cmd>noh<CR>",opts)
+	map("n", mappings.save,             "<cmd>w!<CR>",          opts)
+	map("n", mappings.close_buffer,     "<cmd>q!<CR>",          opts)
+	map("n", mappings.quit_all,         "<cmd>qa!<CR>",         opts)
+    map("n", mappings.clear_search,     "<cmd>noh<CR>",         opts)
+    map("n", mappings.delete_all_lines, "<cmd>%delete _<CR>",   opts)
 end
 
 function M.setup_core(config)
