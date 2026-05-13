@@ -165,6 +165,50 @@ function M.test_ssh_connection_picker(opts)
   end)
 end
 
+function M.set_active_connection_picker(opts)
+  opts = opts or {}
+
+  local state = require("kvim.modules.connections.state")
+
+  local connections = config.load(opts)
+
+  if not connections or vim.tbl_isempty(connections) then
+    vim.notify("KVIM Connections: no connections configured", vim.log.levels.WARN)
+    return
+  end
+
+  picker.select(connections, function(connection)
+    if not connection then
+      vim.notify("KVIM Connections: active connection selection cancelled", vim.log.levels.WARN)
+      return
+    end
+
+    state.set_active_connection(connection)
+  end)
+end
+
+function M.set_active_ssh_connection_picker(opts)
+  opts = opts or {}
+
+  local state = require("kvim.modules.connections.state")
+
+  local connections = config.load(opts)
+  local ssh_connections = config.filter_by_type(connections, "ssh")
+
+  if not ssh_connections or vim.tbl_isempty(ssh_connections) then
+    vim.notify("KVIM Connections: no SSH connections configured", vim.log.levels.WARN)
+    return
+  end
+
+  picker.select(ssh_connections, function(connection)
+    if not connection then
+      vim.notify("KVIM Connections: active SSH connection selection cancelled", vim.log.levels.WARN)
+      return
+    end
+
+    state.set_active_connection(connection)
+  end)
+end
 
 return M
 
