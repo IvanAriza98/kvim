@@ -6,6 +6,33 @@ local function shellescape(value)
   return vim.fn.shellescape(tostring(value))
 end
 
+local function build_target(connection)
+  if connection.user and connection.user ~= "" then
+    return connection.user .. "@" .. connection.host
+  end
+
+  return connection.host
+end
+
+local function append_common_ssh_args(parts, connection)
+  if connection.port then
+    table.insert(parts, "-p")
+    table.insert(parts, shellescape(connection.port))
+  end
+
+  if connection.identity_file then
+    table.insert(parts, "-i")
+    table.insert(parts, shellescape(connection.identity_file))
+  end
+
+  if connection.options and type(connection.options) == "table" then
+    for key, value in pairs(connection.options) do
+      table.insert(parts, "-o")
+      table.insert(parts, shellescape(key .. "=" .. tostring(value)))
+    end
+  end
+end
+
 function M.is_valid(connection)
   if type(connection) ~= "table" then
     return false, "connection must be a table"
@@ -31,34 +58,49 @@ function M.build_command(connection)
 
   local parts = { "ssh" }
 
-  if connection.port then
-    table.insert(parts, "-p")
-    table.insert(parts, shellescape(connection.port))
-  end
+  append_common_ssh_args(parts, connection)
 
-  if connection.identity_file then
-    table.insert(parts, "-i")
-    table.insert(parts, shellescape(connection.identity_file))
-  end
-
-  if connection.options and type(connection.options) == "table" then
-    for key, value in pairs(connection.options) do
-      table.insert(parts, "-o")
-      table.insert(parts, shellescape(key .. "=" .. tostring(value)))
-    end
-  end
-
-  local target
-
-  if connection.user and connection.user ~= "" then
-    target = connection.user .. "@" .. connection.host
-  else
-    target = connection.host
-  end
-
-  table.insert(parts, shellescape(target))
+  table.insert(parts, shellescape(build_target(connection)))
 
   return table.concat(parts, " ")
+end
+
+function M.build_run_command(connection, remote_command)
+  local valid, err = M.is_valid(connection)
+
+  if not valid then
+    return nil, err
+  end
+
+  if not remote_command or remote_command == "" then
+    return nil, "remote command is required"
+  end
+
+  local parts = { "ssh" }
+
+  append_common_ssh_args(parts, connection)
+
+  table.insert(parts, shellescape(build_target(connection)))
+  table.insert(parts, shellescape(remote_command))
+
+  return table.concat(parts, " ")
+end
+
+function M.run_command(connection, remote_command)
+  local cmd, err = M.build_run_command(connection, remote_command)
+
+  if not cmd then
+    vim.notify("KVIM Connections: " .. tostring(err), vim.log.levels.ERROR)
+    return
+  end
+
+  local terminal = require("kvim.core.terminal")
+
+  terminal.open_command(cmd, {
+    position = connection.position or "bottom",
+    name = "KVIM SSH Run [" .. (connection.name or connection.host or "ssh") .. "]",
+    listed = false,
+  })
 end
 
 function M.display(connection)
