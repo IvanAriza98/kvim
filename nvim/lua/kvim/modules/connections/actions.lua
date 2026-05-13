@@ -3,6 +3,7 @@
 local M = {}
 
 local ssh = require("kvim.modules.connections.ssh")
+local state = require("kvim.modules.connections.state")
 local config = require("kvim.modules.connections.config")
 local picker = require("kvim.modules.connections.picker")
 local serial = require("kvim.modules.connections.serial")
@@ -74,6 +75,7 @@ function M.open_connection(connection)
     return
   end
 
+  state.set_active_connection(connection)
   open_connection_terminal(connection, command)
 end
 

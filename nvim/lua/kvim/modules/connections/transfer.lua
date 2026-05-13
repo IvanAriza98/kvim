@@ -1,7 +1,5 @@
 -- lua/kvim/modules/connections/transfer.lua
 
--- lua/kvim/modules/connections/transfer.lua
-
 local M = {}
 
 local function build_ssh_target(conn, remote_path)

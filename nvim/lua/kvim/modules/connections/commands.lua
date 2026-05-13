@@ -5,7 +5,9 @@ local M = {}
 function M.setup(opts)
   opts = opts or {}
 
+  local state = require("kvim.modules.connections.state")
   local actions = require("kvim.modules.connections.actions")
+  local transfer = require("kvim.modules.connections.transfer")
 
   vim.api.nvim_create_user_command("KvimConnections", function()
     actions.open_all_picker(opts)
@@ -49,15 +51,8 @@ function M.setup(opts)
     desc = "Test selected KVIM SSH connection",
   })
 
-  local connections = require("kvim.connections")
-  local transfer = require("kvim.modules.connections.transfer")
-
-  local function get_first_connection()
-    return connections[1]
-  end
-
   vim.api.nvim_create_user_command("KvimSSHUploadCurrent", function()
-    local conn = get_first_connection()
+    local conn = state.get_active_connection()
 
     if not conn then
       vim.notify("KVIM: no SSH connection configured", vim.log.levels.ERROR)
@@ -70,7 +65,7 @@ function M.setup(opts)
   })
 
     vim.api.nvim_create_user_command("KvimSSHUploadPath", function(params)
-      local conn = get_first_connection()
+      local conn = state.get_active_connection()
 
       if not conn then
         vim.notify("KVIM: no SSH connection configured", vim.log.levels.ERROR)
@@ -96,7 +91,7 @@ function M.setup(opts)
     })
 
     vim.api.nvim_create_user_command("KvimSSHDownloadPath", function(params)
-      local conn = get_first_connection()
+      local conn = state.get_active_connection()
 
       if not conn then
         vim.notify("KVIM: no SSH connection configured", vim.log.levels.ERROR)
@@ -118,6 +113,34 @@ function M.setup(opts)
     end, {
       nargs = "?",
       desc = "Download remote file or directory from SSH connection",
+    })
+
+
+    vim.api.nvim_create_user_command("KvimConnectionSetActive", function()
+      actions.set_active_connection_picker(opts)
+    end, {
+      desc = "Select active KVIM connection",
+    })
+
+    vim.api.nvim_create_user_command("KvimSSHConnectionSetActive", function()
+      actions.set_active_ssh_connection_picker(opts)
+    end, {
+      desc = "Select active KVIM SSH connection",
+    })
+
+    vim.api.nvim_create_user_command("KvimConnectionShowActive", function()
+      vim.notify(
+        "KVIM Connections: active connection: " .. state.get_active_connection_label(),
+        vim.log.levels.INFO
+      )
+    end, {
+      desc = "Show active KVIM connection",
+    })
+
+    vim.api.nvim_create_user_command("KvimConnectionClearActive", function()
+      state.clear_active_connection()
+    end, {
+      desc = "Clear active KVIM connection",
     })
 end
 
