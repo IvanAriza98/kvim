@@ -96,7 +96,7 @@ local defaults = {
 				close_buffer = "qq",
 				quit_all = "qe",
 				clear_search = "<Esc>",
-                delete_all_lines = "dda",
+                delete_all_lines = "da",
 			},
 
 			core = {
