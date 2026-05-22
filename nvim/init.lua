@@ -20,6 +20,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
     { import = "kvim.plugins" },
+    -- TODO: automate plugin adding method
     { import = "kvim.modules.git.plugins" },
 })
 
