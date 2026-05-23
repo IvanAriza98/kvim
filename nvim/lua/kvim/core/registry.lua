@@ -24,7 +24,7 @@ function M.register(module)
 	modules[module.name] = module
 end
 
-
+-- Devuelve el mapa de módulos registrados en memoria.
 function M.get_modules()
 	return modules
 end
@@ -59,6 +59,7 @@ function M.run_action(module_name, action_name)
 			return
 		end
 
+		-- Aísla errores de callbacks para evitar que rompan el editor.
 		local ok, err = pcall(action.callback)
 		if not ok then
 			vim.notify("Kvim action callback failed: " .. module_name .. "." .. action_name .. " - " .. tostring(err), vim.log.levels.ERROR)
@@ -72,6 +73,7 @@ function M.run_action(module_name, action_name)
 			return
 		end
 
+		-- Delega la ejecución shell al runner central.
 		require("kvim.core.runner").run(action.command)
 		return
 	end

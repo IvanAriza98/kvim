@@ -9,6 +9,7 @@ function M.setup()
 		return
 	end
 
+	-- UI base: opciones de editor + barra de estado.
 	require("kvim.ui.editor").setup()
 	require("kvim.ui.lualine").setup()
 end

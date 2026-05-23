@@ -5,6 +5,7 @@ local M = {}
 function M.setup(opts)
   opts = opts or {}
 
+  -- 1) Inicializa configuración global y comandos core.
   require("kvim.config").setup(opts)
   require("kvim.core.commands").setup()
 
@@ -23,7 +24,7 @@ function M.setup(opts)
   if config.lsp and config.lsp.enabled then
     require("kvim.core.lsp").setup()
   end
-  -- Load extra modules ...
+  -- 2) Carga módulos habilitados definidos en config.modules.
   for module_name, module_opts in pairs(config.modules or {}) do
     if module_opts.enabled then
         local ok, module = pcall(require, "kvim.modules." .. module_name)
@@ -42,6 +43,7 @@ function M.setup(opts)
                 module.name = module_name
         end
 
+        -- Registro en el action registry para exponer acciones públicas.
         require("kvim.core.registry").register(module)
         if type(module.setup) == "function" then
                 local ok_setup, err = pcall(module.setup, module_opts)
@@ -54,6 +56,7 @@ function M.setup(opts)
     ::continue::
   end
 
+  -- 3) Keymaps globales al final para que comandos/módulos ya existan.
   if config.keymaps and config.keymaps.enabled then
     require("kvim.core.keymaps").setup()
   end

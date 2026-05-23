@@ -3,6 +3,7 @@
 local M = {}
 
 local function expand_command(command)
+	-- Placeholders soportados para comandos declarativos en acciones.
 	local file = vim.fn.expand("%")
 	local filepath = vim.fn.expand("%:p")
 	local filename = vim.fn.expand("%:t")
@@ -29,6 +30,7 @@ function M.run(command)
 	local position = terminal_config.position or "bottom"
 	local height = terminal_config.height or 12
 
+	-- Split inferior por defecto; en otros casos split vertical.
 	if position == "bottom" then
 		vim.cmd("botright split")
 		vim.cmd("resize " .. height)

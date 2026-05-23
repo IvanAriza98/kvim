@@ -3,6 +3,7 @@
 vim.g.mapleader = " "		-- leader 
 vim.g.maplocalleader = " "	-- local leader 
 
+-- Bootstrap de lazy.nvim en el runtimepath.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not vim.loop.fs_stat(lazypath) then
@@ -20,8 +21,9 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
     { import = "kvim.plugins" },
-    -- TODO: automate plugin adding method
+    -- Plugins de módulos que exponen spec propia.
     { import = "kvim.modules.git.plugins" },
 })
 
+-- Punto de entrada principal del framework KVIM.
 require("kvim").setup()

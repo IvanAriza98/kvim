@@ -1,6 +1,7 @@
 local M = {}
 
 function M.setup()
+  -- Dependencias opcionales: si faltan, se degrada con warning.
   local ok_mason, mason = pcall(require, "mason")
   if not ok_mason then
     vim.notify("KVIM LSP: mason.nvim not found", vim.log.levels.WARN)
@@ -13,6 +14,7 @@ function M.setup()
     return
   end
 
+  -- Setup interno desacoplado: diagnósticos, keymaps y servidores.
   require("kvim.core.lsp.diagnostics").setup()
   require("kvim.core.lsp.keymaps").setup()
   require("kvim.core.lsp.servers").setup()

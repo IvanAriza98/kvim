@@ -1,184 +1,241 @@
 # KVIM
 
-A powerful Neovim configuration designed to replace multiple specialized programs with a single CLI-based IDE. Because you shouldn't need a separate tool for every task.
+KVIM es un IDE modular sobre Neovim y Lua.
+Su arquitectura está basada en un core pequeño (`core/`) y módulos funcionales autocontenidos (`modules/`) que registran acciones, comandos y keymaps.
 
-## Features
+Este README documenta el estado **real actual** del repositorio.
 
-### General Development
-- **Smart Autocomplete** - LSP integration with intelligent code completion, snippets, and syntax highlighting
-- **Debugging** - Visual DAP interface for debugging multiple languages
-- **Multi-Cursor Editing** - VSCode-like multi-cursor support
-- **File Management** - Ultra-fast file manager with Yazi + fuzzy finder with Telescope
-- **Integrated Terminal** - Embedded terminals with directional splits and SSH support
-- **Smart Comments** - Intelligent commenting for 60+ languages
-- **TODO Highlights** - Highlight and search TODO, FIXME, NOTE, and similar markers
+---
 
-### Supported Languages
-| Language | LSP | Linter | Formatter | Debugger |
-|----------|-----|--------|-----------|----------|
-| Python | pyright | ruff | black | debugpy |
-| C/C++ | clangd | - | clang-format | codelldb |
-| Lua | lua-language-server | luacheck | stylua | nvim-dap |
-| Dart/Flutter | dart | dart analyze | dart format | dart-debug-adapter |
-| Bash | bash-language-server | shellcheck | shfmt | bash-db |
-| JSON/YAML/XML/TOML | via LSP | - | prettier | - |
+## Arquitectura actual
 
-### Embedded Systems Development
-- **ESP-IDF** - Build, flash, and monitor ESP32 projects
-- **Nordic NRF-SDK / Zephyr RTOS** - Build, flash, debug with JLink, RTT monitor
+Estructura principal:
 
-### AI Assistance
-- **OpenCode** - Integrated AI coding assistant
-
-## Quick Start
-
-### Prerequisites
-
-**Required:**
-```bash
-# Neovim (>= 0.9.0)
-# Git
-# A Nerd Font (for icons)
+```text
+.
+├── nvim/
+│   ├── init.lua
+│   ├── lazy-lock.json
+│   └── lua/kvim/
+│       ├── init.lua
+│       ├── config.lua
+│       ├── health.lua
+│       ├── connections.lua
+│       ├── core/
+│       │   ├── commands.lua
+│       │   ├── keymaps.lua
+│       │   ├── registry.lua
+│       │   ├── runner.lua
+│       │   ├── terminal.lua
+│       │   └── lsp/
+│       ├── modules/
+│       │   ├── connections/
+│       │   ├── git/
+│       │   └── svn/
+│       ├── plugins/
+│       └── ui/
+├── tests/
+├── scripts/test.sh
+├── README.md
+└── CHANGELOG.md
 ```
 
-**Recommended:**
+### Flujo de carga
+
+1. `nvim/init.lua` inicializa `lazy.nvim` e importa plugins.
+2. `require("kvim").setup()`:
+   - carga configuración global (`kvim.config`);
+   - registra comandos core;
+   - configura UI y tema;
+   - configura LSP;
+   - carga módulos habilitados en `config.modules` y los registra en el registry;
+   - aplica keymaps globales.
+
+---
+
+## Instalación
+
+> Este repositorio contiene la configuración dentro de `nvim/`, no en la raíz.
+
+### Requisitos mínimos
+
+- Neovim (recomendado: versión reciente con soporte `vim.system`)
+- Git
+
+### Dependencias recomendadas/optativas
+
+- `ripgrep` (Telescope live_grep)
+- `yazi` (file manager externo)
+- `lazygit` (módulo Git)
+- `svn` y `lazysvn` (módulo SVN)
+- `ssh`, `scp` (módulo Connections)
+- `picocom` (conexiones serie)
+
+### Ejemplo de instalación
+
 ```bash
-# ripgrep      - Enhanced search
-#lazygit      - Git UI
-# lynx         - URL preview
-#luarocks     - Lua packages
-#lsof          - Serial port detection
-```
-
-**For embedded development:**
-```bash
-# ESP-IDF or NRF-SDK installed on your system
-# nrfjprog     - Nordic programmer (NRF devices)
-# esptool.py   - ESP programmer (ESP32 devices)
-```
-
-### Installation
-
-```bash
-# Backup existing config
-mv ~/.config/nvim ~/.config/nvim.bak
-
-# Clone KVIM
-git clone https://github.com/kodvmv/kvim.git ~/.config/nvim
-
-# Start Neovim
+git clone https://github.com/kodvmv/kvim.git ~/kvim
+mkdir -p ~/.config/nvim
+cp -r ~/kvim/nvim/* ~/.config/nvim/
 nvim
 ```
 
-Lazy.nvim will automatically install all plugins on first launch.
+En el primer arranque, `lazy.nvim` instalará plugins automáticamente.
 
-## Keybindings
+---
 
-### General
-| Key | Action |
-|-----|--------|
-| `s` | Save file |
-| `q` | Quit |
-| `<ESC>` | Clear search highlight |
-| `<leader>fp` | Open Yazi at current file |
-| `<leader>cw` | Open Yazi at working directory |
-| `<leader>k` / `<leader><space>` | Open main menu |
+## Comandos disponibles (estado actual)
 
-### Terminal
-| Key | Action |
-|-----|--------|
-| `<C-t>h/j/k/l` | Open terminal in split direction |
-| `<C-t>rh/rv/rf` | SSH in hsplit/vsplit/float |
-| `<C-t>af` | Send current file via SCP |
-| `<C-x>` | Exit terminal mode |
+### Core
 
-### LSP (when server active)
-| Key | Action |
-|-----|--------|
-| `gd` | Go to definition |
-| `gD` | Go to declaration |
-| `gR` | Find references |
-| `gi` | Find implementations |
-| `gt` | Go to type definition |
-| `<leader>ca` | Code actions |
-| `<leader>rn` | Smart rename |
-| `K` | Hover documentation |
-| `[d` / `]d` | Previous/next diagnostic |
+- `:KvimModules`
+  Lista módulos registrados.
+- `:KvimAction <modulo> <accion>`
+  Ejecuta una acción registrada en el módulo.
 
-### Debug (DAP)
-| Key | Action |
-|-----|--------|
-| `<Leader>db` | Toggle breakpoint |
-| `<Leader>dc` | Continue |
-| `<Leader>di` | Step into |
-| `<Leader>do` | Step out |
-| `<Leader>ds` | Step over |
+> Nota: en keymaps core existen referencias a `KvimRun`, `KvimTest`, `KvimBuild`, `KvimFormat`, `KvimLint`, pero esos comandos no están definidos actualmente en `core/commands.lua`.
 
-### Embedded Projects (ESP-IDF / NRF)
-| Key | Action |
-|-----|--------|
-| `<F5>` | Build project |
-| `<F6>` | Flash device |
-| `<F7>` | Monitor/RTT |
-| `<F8>` | Debug session |
+### Módulo `connections`
 
-## Project Structure
+- `:KvimConnections`
+- `:KvimSshConnections`
+- `:KvimSerialConnections`
+- `:KvimConnectionsReload`
+- `:KvimConnectionsGenerateKey`
+- `:KvimConnectionsInstallKey`
+- `:KvimConnectionsTestSsh`
+- `:KvimConnectionSetActive`
+- `:KvimSSHConnectionSetActive`
+- `:KvimConnectionShowActive`
+- `:KvimConnectionClearActive`
+- `:KvimSSHRun [comando]`
+- `:KvimSSHUploadCurrent`
+- `:KvimSSHUploadPath [ruta_local]`
+- `:KvimSSHDownloadPath [ruta_remota]`
 
+### Módulo `git`
+
+- `:KvimGit`
+- `:KvimGitFile`
+- `:KvimGitConfig`
+
+### Módulo `svn`
+
+- `:KvimLazySvn`
+- `:KvimSvnInfo`
+- `:KvimSvnStatus`
+
+---
+
+## Keymaps principales actuales
+
+## Globales (config por defecto)
+
+### Personales (`config.keymaps.mappings.personal`)
+
+- `s` → guardar (`:w!`)
+- `qq` → cerrar buffer/ventana (`:q!`)
+- `qe` → salir de Neovim (`:qa!`)
+- `<Esc>` → limpiar búsqueda (`:noh`)
+- `da` → borrar todas las líneas (`:%delete _`)
+
+### UI / navegación
+
+- `<leader>e` → Neo-tree toggle
+- `<leader>E` → Neo-tree focus
+- `<leader>fe` → Neo-tree reveal
+- `<leader>ec` → Neo-tree close
+- `<leader>eg` → Neo-tree git status
+- `<leader>eb` → Neo-tree buffers
+- `<leader>y` / `<leader>Y` → Yazi / Yazi cwd
+- `<leader>ff` → Telescope find_files
+- `<leader>fg` → Telescope live_grep
+- `<leader>fb` → Telescope buffers
+- `<leader>fr` → Telescope oldfiles
+- `<leader>fh` → Telescope help_tags
+
+### Terminal core
+
+- `<C-t>h` `<C-t>j` `<C-t>k` `<C-t>l` → abrir terminal (left/bottom/top/right)
+- `<C-x>` (modo terminal) → salir a modo normal
+
+### LSP (al adjuntar servidor)
+
+- `gd`, `gD`, `gr`, `gi`, `K`
+- `<leader>rn`, `<leader>ca`
+- `<leader>lf`, `<leader>ld`
+- `[d`, `]d`
+
+## Keymaps de módulos
+
+### Connections (prefix por defecto: `<leader>c`)
+
+- `<leader>cc` → `:KvimConnections`
+- `<leader>cs` → `:KvimSshConnections`
+- `<leader>cu` → `:KvimSerialConnections`
+- `<leader>cr` → `:KvimConnectionsReload`
+- `<leader>ckg` → `:KvimConnectionsGenerateKey`
+- `<leader>cki` → `:KvimConnectionsInstallKey`
+- `<leader>ckt` → `:KvimConnectionsTestSsh`
+
+### Git
+
+- `<leader>g` → abrir LazyGit
+- `<leader>f` → LazyGit current file
+- `<leader>c` → LazyGit config
+
+### SVN (prefix interno por defecto `<leader>s`)
+
+- `<leader>sv` → LazySVN
+- `<leader>si` → SVN info
+- `<leader>ss` → SVN status
+
+---
+
+## Módulos actuales
+
+### `git`
+Integración con LazyGit mediante acciones/comandos/keymaps.
+Incluye `plugins.lua` propio para declarar plugin(s) del módulo.
+
+### `svn`
+Comandos SVN y LazySVN en terminal flotante (`svn info`, `svn status`, `lazysvn`), con validaciones de binarios y de working copy SVN.
+
+### `connections`
+Gestión de conexiones SSH/serial:
+- selección por picker;
+- conexión activa en memoria;
+- ejecución remota (`KvimSSHRun`);
+- transferencias SCP (subida/bajada de archivos o directorios).
+
+Archivo de configuración por defecto de conexiones:
+`~/.config/nvim/lua/kvim/connections.lua`
+(debe devolver una tabla Lua).
+
+---
+
+## Testing
+
+Comando recomendado:
+
+```bash
+./scripts/test.sh
 ```
-nvim/
-├── init.lua                 # Entry point
-└── lua/kvim/
-    ├── lazy.lua             # Plugin manager (lazy.nvim)
-    ├── env.lua              # Environment variables
-    ├── plugins/             # Plugin specifications
-    │   ├── ai/              # OpenCode AI assistant
-    │   ├── lsp/             # LSP configs (clangd, pyright, etc.)
-    │   ├── lualine/         # Status bar
-    │   ├── alpha/           # Dashboard
-    │   ├── nvzone-menu.lua  # Menu UI (nvzone/volt + nvzone/menu)
-    │   ├── nvim-cmp.lua     # Completion
-    │   ├── nvim-dap.lua     # Debug adapter
-    │   ├── telescope.lua    # Fuzzy finder
-    │   ├── treesitter.lua   # Syntax highlighting
-    │   ├── yazi.lua         # File manager
-    │   └── ...              # 20+ more plugins
-    ├── core/                # Neovim core configuration
-    │   ├── init.lua         # Module loader (eager loading)
-    │   ├── options.lua      # Vim settings (indent, UI, runtime)
-    │   ├── keymaps.lua      # Global keybindings
-    │   └── autocmds.lua     # Event-based autocommands
-    ├── utils/               # Custom Lua utilities
-    │   ├── config-utils.lua # JSON config CRUD (dkjson-based)
-    │   ├── devices.lua      # USB/NRF device detection
-    │   ├── esp-idf-commands.lua  # ESP-IDF build/flash/monitor
-    │   ├── nrf-sdk-commands.lua  # NRF-SDK build/flash/debug
-    │   ├── python-commands.lua   # Python tools (ruff, debugpy)
-    │   ├── ssh.lua          # SSH/SCP helpers
-    │   └── init.lua         # Utils loader
-    └── layouts/             # UI components (nvzone/menu-based)
-        ├── init.lua         # Menu keymaps (deferred loading)
-        └── menu.lua         # Main menu with submenus
+
+El script ejecuta Neovim headless con `tests/minimal_init.lua` y corre toda la suite en `tests/` usando `PlenaryBustedDirectory`, además de resumir:
+- Success
+- Failed
+- Errors
+- Total
+
+Comando alternativo directo:
+
+```bash
+nvim --headless -u tests/minimal_init.lua -c "PlenaryBustedDirectory tests" -c "qa!"
 ```
 
-### Loading Strategy
+---
 
-Layouts use **deferred loading** to minimize startup time:
-- **VeryLazy event**: nvzone/menu loads only when menu is opened
-- **FileType trigger** (100ms): syntax files load on first file open
-
-## Configuration
-
-KVIM stores configuration in `~/.config/nvim/configs.json`. On first run, it will create a default configuration. You can customize:
-
-- Project paths
-- SDK locations (ESP-IDF, NRF)
-- Default build commands
-- SSH configurations
-
-## Credits
-
-Built with [lazy.nvim](https://github.com/folke/lazy.nvim), [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig), [Telescope](https://github.com/nvim-telescope/telescope.nvim), [Yazi](https://github.com/sxyazi/yazi), and many more amazing plugins.
-
-## License
+## Licencia
 
 MIT

@@ -1,102 +1,40 @@
 # Changelog
 
-All notable changes to KVIM will be documented in this file.
+Todos los cambios relevantes de KVIM se documentan en este archivo.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
+y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
 ### Added
-- OpenCode integration for AI-assisted coding
-- Typst language support (LSP, formatting)
-- Mini Icons plugin for improved file icons
-- Smear Cursor plugin for cursor trail effect
-- Colorizer plugin for hex color preview
-- **nvzone/menu**: Modern menu system with nested submenus
-  - ESP-IDF, NRF-SDK, Python, SSH configuration menus
-  - Keyboard-only navigation
-- OpenCode agent configurations (docs-maintainer, nvim-plugins, nvim-menu, nvim-configs)
-- **SSH Multi-Session Support**:
-  - Multiple SSH sessions storage and management
-  - Session selector with active session indicator (✅)
-  - Add, edit, delete SSH sessions via menu
-  - Connect to active session or select from list
-  - File transfer (upload/download) using active session
+- Cobertura de tests para componentes de UI (`tests/ui/*`), incluyendo inicialización, editor, lualine y tema.
+- Nuevos casos de test para core LSP (`tests/core/lsp/*`) y validaciones de keymaps/diagnósticos.
+- Más cobertura en core para comandos, keymaps, terminal, registry y runner.
 
 ### Changed
-- **Menu System**: Migrated from nui-menu to nvzone/menu (volt framework)
-- Improved lazy loading system for layouts (VeryLazy event trigger)
-- Updated LSP configurations for better compatibility
-- **SSH Config Structure**: Migrated from single-object to sessions array
-  - New structure: `{ sessions: [], active: index }`
-  - Session format: `{ name, ip, user, port, path, key_type }`
-  - Automatic name generation: `ip(user)` if no name provided
+- Endurecimiento del core (hardening) con validaciones explícitas en registro y ejecución de acciones:
+  - validación de tipos en módulos/acciones;
+  - mensajes de error más claros en `registry` y `runner`;
+  - protección adicional al ejecutar callbacks de acciones.
+- Ajustes en tests globales de runner para reflejar el comportamiento actual de apertura de terminal y expansión de placeholders.
+- Consolidación de comandos y keymaps sobre la arquitectura modular vigente (`core` + `modules/*`).
 
 ### Fixed
-- Config caching mechanism with 5-second TTL
-- USB device detection path stability (/dev/serial/by-id)
-- Config path resolution (now uses KVIM_HOME relative path)
-- SSH session index adjustment after deletion
+- Correcciones en cobertura y estabilidad de tests al ejecutar toda la suite en modo headless.
+- Mejor consistencia en comportamiento de runner ante comandos inválidos.
+- Ajustes menores en flujo de LSP/diagnósticos y pruebas asociadas.
 
-### Removed
-- Legacy NUI-based layout files (main-menu.lua, configs/ directory)
+---
 
-### Added (Unreleased Features)
-
-#### Utils
-- **config-utils.lua**: JSON config CRUD operations (dkjson-based)
-  - `getConfigField(key1, key2)`: Retrieve config values
-  - `setConfigField(value, key1, key2)`: Write config values
-- **devices.lua**: Hardware device detection
-  - `get_usb_devices()`: List ttyUSB/ttyACM devices
-  - `get_nrf_devices()`: List Nordic devices via nrfjprog
-
-#### Layouts (NUI-based)
-- Deferred loading via `vim.defer_fn` for minimal startup impact
-- FileType autocmd trigger (100ms) for main-menu and cmd-buffer
-- VimEnter autocmd trigger (500ms) for config dialogs
-
-## [1.0.0] - Initial Release
+## [1.0.0] - 2026-01-01
 
 ### Added
-- **Plugin Manager**: lazy.nvim with lazy-loading by default
-- **Language Server Protocol (LSP)**: 
-  - Python (pyright)
-  - C/C++ (clangd)
-  - Lua (lua-language-server)
-  - Dart/Flutter (dart)
-  - Bash (bash-language-server)
-  - JSON/YAML/XML/TOML via LSP
-- **Debug Adapter Protocol (DAP)**:
-  - Python (debugpy)
-  - C/C++ (codelldb)
-  - Lua (nvim-dap)
-  - Dart (dart-debug-adapter)
-  - Bash (bash-db)
-- **Linting & Formatting**:
-  - Python: ruff (lint), black (format)
-  - C/C++: clang-format (format)
-  - Lua: luacheck (lint), stylua (format)
-  - Dart: dart analyze (lint), dart format (format)
-  - Bash: shellcheck (lint), shfmt (format)
-  - JSON/YAML/XML/TOML: prettier (format)
-- **File Management**: Yazi integration with fuzzy finder (Telescope)
-- **Terminal Integration**: ToggleTerm with SSH and SCP support
-- **Embedded Systems Support**:
-  - ESP-IDF: build, flash, monitor commands
-  - Nordic NRF-SDK/Zephyr RTOS: build, flash, debug, RTT monitor
-- **UI Enhancements**:
-  - Alpha dashboard
-  - Bufferline status line
-  - NUI-based menu system
-  - TokyoNight color scheme
-- **Development Tools**:
-  - Multi-cursor editing
-  - Smart comments (60+ languages)
-  - TODO highlights (TODO, FIXME, NOTE)
-  - Autopairs
-- **Configuration System**: JSON-based config stored in `~/.config/nvim/configs.json`
+- Base modular de KVIM sobre Neovim + Lua.
+- Core con registry, runner, comandos y keymaps globales.
+- Módulos iniciales: `connections`, `git` y `svn`.
+- Integración de plugins con `lazy.nvim`.
+- Suite de tests automatizados con `plenary.nvim` + `busted`.
 
 [unreleased]: https://github.com/kodvmv/kvim/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/kodvmv/kvim/releases/tag/v1.0.0

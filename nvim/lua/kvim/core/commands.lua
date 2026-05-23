@@ -3,6 +3,7 @@
 local M = {}
 
 function M.setup()
+	-- Idempotencia en recargas de configuración.
 	pcall(vim.api.nvim_del_user_command, "KvimModules")
 	pcall(vim.api.nvim_del_user_command, "KvimAction")
 
@@ -15,6 +16,7 @@ function M.setup()
 	end, {})
 
 	vim.api.nvim_create_user_command("KvimAction", function(opts)
+		-- Espera: :KvimAction <modulo> <accion>
 		local args = vim.split(opts.args, " ")
 
 		local module_name = args[1]

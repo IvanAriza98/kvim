@@ -2,6 +2,7 @@
 local M = {}
 
 local function setup_catppuccin(theme)
+  -- Theme plugin opcional.
   local ok, catppuccin = pcall(require, "catppuccin")
 
   if not ok then
@@ -76,6 +77,7 @@ function M.setup()
     return
   end
 
+  -- Guardrail para temas no soportados actualmente.
   vim.notify("Kvim: unknown theme " .. tostring(theme.name), vim.log.levels.WARN)
 end
 
