@@ -66,7 +66,7 @@ function M.setup_terminal(config)
     local terminal = require("kvim.core.terminal")
 
     terminal.setup()
-    
+
     -- exit from terminal-mode to normal-mode 
     map("t", mappings.exit_terminal, "<C-\\><C-n>", opts)
     -- open terminals
