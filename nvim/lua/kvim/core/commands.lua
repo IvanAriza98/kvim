@@ -3,6 +3,9 @@
 local M = {}
 
 function M.setup()
+	pcall(vim.api.nvim_del_user_command, "KvimModules")
+	pcall(vim.api.nvim_del_user_command, "KvimAction")
+
 	vim.api.nvim_create_user_command("KvimModules", function()
 		local modules = require("kvim").get_modules()
 
