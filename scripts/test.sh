@@ -7,7 +7,7 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 MINIMAL_INIT="$REPO_ROOT/tests/minimal_init.lua"
-TEST_DIR="$REPO_ROOT/tests/connections"
+TEST_DIR="$REPO_ROOT/tests"
 OUTPUT_FILE="$(mktemp)"
 CLEAN_OUTPUT_FILE="$(mktemp)"
 

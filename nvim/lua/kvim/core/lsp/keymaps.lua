@@ -110,7 +110,7 @@ function M.setup()
 				"n",
 				"]d",
 				function()
-					vim.diagnostic.jump({ count = -1, float = true })
+					vim.diagnostic.jump({ count = 1, float = true })
 				end,
 				vim.tbl_extend("force", opts, {
 					desc = "LSP: Next diagnostic",

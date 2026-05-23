@@ -14,8 +14,10 @@ function M.register(module)
 		return
 	end
 
-	if type(module.actions) ~= "table" then
-		vim.notify("Kvim module needs actions", vim.log.levels.ERROR)
+	if module.actions == nil then
+		module.actions = {}
+	elseif type(module.actions) ~= "table" then
+		vim.notify("Kvim module actions must be a table", vim.log.levels.ERROR)
 		return
 	end
 
@@ -52,11 +54,24 @@ function M.run_action(module_name, action_name)
 	end
 
 	if action.callback then
-		action.callback()
+		if type(action.callback) ~= "function" then
+			vim.notify("Kvim action callback must be a function", vim.log.levels.ERROR)
+			return
+		end
+
+		local ok, err = pcall(action.callback)
+		if not ok then
+			vim.notify("Kvim action callback failed: " .. module_name .. "." .. action_name .. " - " .. tostring(err), vim.log.levels.ERROR)
+		end
 		return
 	end
 
 	if action.command then
+		if type(action.command) ~= "string" or action.command == "" then
+			vim.notify("Kvim action command must be a non-empty string", vim.log.levels.ERROR)
+			return
+		end
+
 		require("kvim.core.runner").run(action.command)
 		return
 	end

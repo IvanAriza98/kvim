@@ -17,13 +17,21 @@ local function expand_command(command)
 end
 
 function M.run(command)
+	if type(command) ~= "string" or command == "" then
+		vim.notify("Kvim runner command must be a non-empty string", vim.log.levels.ERROR)
+		return
+	end
+
 	command = expand_command(command)
 
 	local config = require("kvim.config").get()
+	local terminal_config = config.terminal or {}
+	local position = terminal_config.position or "bottom"
+	local height = terminal_config.height or 12
 
-	if config.terminal.position == "bottom" then
+	if position == "bottom" then
 		vim.cmd("botright split")
-		vim.cmd("resize " .. config.terminal.height)
+		vim.cmd("resize " .. height)
 	else
 		vim.cmd("botright vertical split")
 	end

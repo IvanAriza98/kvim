@@ -26,10 +26,16 @@ function M.setup(opts)
   -- Load extra modules ...
   for module_name, module_opts in pairs(config.modules or {}) do
     if module_opts.enabled then
-        local module = require("kvim.modules." .. module_name)
+        local ok, module = pcall(require, "kvim.modules." .. module_name)
+
+        if not ok then
+            vim.notify("Kvim failed to load module '" .. module_name .. "': " .. tostring(module), vim.log.levels.ERROR)
+            goto continue
+        end
 
         if type(module) ~= "table" then
-            error("Kvim module must be a table: " .. module_name)
+            vim.notify("Kvim module must be a table: " .. module_name, vim.log.levels.ERROR)
+            goto continue
         end
 
         if not module.name or module.name == "" then
@@ -38,9 +44,14 @@ function M.setup(opts)
 
         require("kvim.core.registry").register(module)
         if type(module.setup) == "function" then
-                module.setup(module_opts)
+                local ok_setup, err = pcall(module.setup, module_opts)
+                if not ok_setup then
+                    vim.notify("Kvim module setup failed for '" .. module_name .. "': " .. tostring(err), vim.log.levels.ERROR)
+                end
         end
     end
+
+    ::continue::
   end
 
   if config.keymaps and config.keymaps.enabled then
