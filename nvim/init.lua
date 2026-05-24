@@ -23,6 +23,7 @@ require("lazy").setup({
     { import = "kvim.plugins" },
     -- Plugins de módulos que exponen spec propia.
     { import = "kvim.modules.git.plugins" },
+    { import = "kvim.modules.workspaces.plugins" },
 })
 
 -- Punto de entrada principal del framework KVIM.
