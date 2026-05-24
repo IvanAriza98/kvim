@@ -154,6 +154,11 @@ local defaults = {
 	},
 
     modules = {
+        workspaces = {
+            enabled = true,
+            prefix = "<leader>w",
+        },
+
         git = {
             enabled = true,
             prefix = "<leader>g",
