@@ -79,8 +79,12 @@ function M.open_command(command, opts)
   local position = opts.position or "bottom"
   local name = opts.name or "KVIM Terminal"
   local listed = opts.listed or false
+  local use_split = (opts.split ~= false)
+  local startinsert = (opts.startinsert ~= false)
 
-  open_split(position)
+  if use_split then
+    open_split(position)
+  end
 
   if command and command ~= "" then
     vim.cmd("terminal " .. command)
@@ -95,7 +99,9 @@ function M.open_command(command, opts)
   end)
 
   M.apply_style()
-  vim.cmd("startinsert")
+  if startinsert then
+    vim.cmd("startinsert")
+  end
 end
 
 function M.setup()

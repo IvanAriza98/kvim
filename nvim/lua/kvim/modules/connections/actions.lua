@@ -13,8 +13,22 @@ local function executable_exists(cmd)
   return vim.fn.executable(cmd) == 1
 end
 
-local function open_connection_terminal(connection, command)
+local function open_connection_terminal(connection, command, opts)
+  opts = opts or {}
   local terminal = require("kvim.core.terminal")
+
+  local split = true
+  local listed = false
+
+  local ok_ws_state, ws_state = pcall(require, "kvim.modules.workspaces.state")
+  if ok_ws_state then
+    local current_tabnr = vim.fn.tabpagenr()
+    local role = ws_state.get_tab_role(current_tabnr)
+    if role == "term" then
+      split = false
+      listed = true
+    end
+  end
 
   local name = "KVIM " .. string.upper(connection.type or "connection")
 
@@ -25,8 +39,20 @@ local function open_connection_terminal(connection, command)
   terminal.open_command(command, {
     position = connection.position or "bottom",
     name = name,
-    listed = false,
+    listed = listed,
+    split = split,
+    startinsert = opts.startinsert ~= false,
   })
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_command", command)
+  pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_cwd", vim.fn.getcwd())
+  pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_type", connection.type or "shell")
+  pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_position", connection.position or "bottom")
+
+  if connection.name and connection.name ~= "" then
+    pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_connection", connection.name)
+  end
 end
 
 local function validate_executable(connection)
@@ -51,7 +77,8 @@ local function validate_executable(connection)
   return false, "unsupported connection type: " .. tostring(connection.type)
 end
 
-function M.open_connection(connection)
+function M.open_connection(connection, opts)
+  opts = opts or {}
   local ok_exec, exec_err = validate_executable(connection)
 
   if not ok_exec then
@@ -76,7 +103,7 @@ function M.open_connection(connection)
   end
 
   state.set_active_connection(connection)
-  open_connection_terminal(connection, command)
+  open_connection_terminal(connection, command, opts)
 end
 
 function M.open_all_picker(opts)
@@ -211,5 +238,3 @@ function M.set_active_ssh_connection_picker(opts)
 end
 
 return M
-
-

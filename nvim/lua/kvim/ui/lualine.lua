@@ -184,6 +184,23 @@ function M.setup(opts)
 
   ins_left({
     function()
+      local ok_state, ws_state = pcall(require, "kvim.modules.workspaces.state")
+      if not ok_state then
+        return "ws:none"
+      end
+
+      local current = ws_state.get_current and ws_state.get_current() or nil
+      if not current or not current.name or current.name == "" then
+        return "ws:none"
+      end
+
+      return "󱂬 ws:" .. tostring(current.name)
+    end,
+    color = { fg = colors.cyan, gui = "bold" },
+  })
+
+  ins_left({
+    function()
       local msg = "No Active LSP"
       local buf_ft = vim.api.nvim_get_option_value("filetype", { buf = 0 })
       local clients = vim.lsp.get_clients({ bufnr = 0 })

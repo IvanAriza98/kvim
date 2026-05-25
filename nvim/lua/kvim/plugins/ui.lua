@@ -6,19 +6,12 @@ return {
   },
 
   {
-    "akinsho/bufferline.nvim",
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
-    },
-  },
-
-  {
     "nvim-lualine/lualine.nvim",
     dependencies = {
       "nvim-tree/nvim-web-devicons",
     },
   },
-  
+
   {
     "sphamba/smear-cursor.nvim",
     event = "VeryLazy",
