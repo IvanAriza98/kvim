@@ -84,6 +84,10 @@ function M.load(name)
         return nil, "failed to decode workspace: " .. tostring(workspace)
     end
 
+    if type(workspace.terminals) ~= "table" then
+        workspace.terminals = {}
+    end
+
     return workspace
 end
 
