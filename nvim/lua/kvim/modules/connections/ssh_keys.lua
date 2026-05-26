@@ -93,6 +93,44 @@ function M.generate_key_for_connection(connection)
   M.generate_key(key_path, comment)
 end
 
+function M.ensure_local_key_for_connection(connection)
+  if not connection or connection.type ~= "ssh" then
+    return false, "selected connection is not SSH"
+  end
+
+  if not executable_exists("ssh-keygen") then
+    return false, "ssh-keygen not found"
+  end
+
+  local key_path = M.key_path_for_connection(connection)
+  local public_key = key_path .. ".pub"
+
+  if M.key_exists(key_path) and M.public_key_exists(key_path) then
+    return true, "existing", key_path
+  end
+
+  vim.fn.mkdir(vim.fn.fnamemodify(key_path, ":h"), "p")
+
+  local comment = "kvim-" .. slugify(connection.name or connection.host)
+  local output = vim.fn.system({
+    "ssh-keygen",
+    "-t", "ed25519",
+    "-f", key_path,
+    "-C", comment,
+    "-N", "",
+  })
+
+  if vim.v.shell_error ~= 0 then
+    return false, tostring(output)
+  end
+
+  if vim.fn.filereadable(public_key) ~= 1 then
+    return false, "public key not generated"
+  end
+
+  return true, "generated", key_path
+end
+
 function M.install_key(connection)
   if not executable_exists("ssh-copy-id") then
     vim.notify("KVIM Connections: ssh-copy-id not found", vim.log.levels.ERROR)

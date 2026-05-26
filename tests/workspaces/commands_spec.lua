@@ -9,6 +9,8 @@ describe("kvim.modules.workspaces.commands", function()
             list = { callback = function() end },
             delete = { callback = function() end },
             current = { callback = function() end },
+            next = { callback = function() end },
+            prev = { callback = function() end },
         }
 
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceSave")
@@ -17,6 +19,8 @@ describe("kvim.modules.workspaces.commands", function()
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceList")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceDelete")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceCurrent")
+        pcall(vim.api.nvim_del_user_command, "KvimWorkspaceNext")
+        pcall(vim.api.nvim_del_user_command, "KvimWorkspacePrev")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalAdd")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalList")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRemove")
@@ -33,6 +37,8 @@ describe("kvim.modules.workspaces.commands", function()
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceList")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceDelete")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceCurrent")
+        pcall(vim.api.nvim_del_user_command, "KvimWorkspaceNext")
+        pcall(vim.api.nvim_del_user_command, "KvimWorkspacePrev")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalAdd")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalList")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRemove")
@@ -52,6 +58,8 @@ describe("kvim.modules.workspaces.commands", function()
         assert.is_not_nil(registered.KvimWorkspaceList)
         assert.is_not_nil(registered.KvimWorkspaceDelete)
         assert.is_not_nil(registered.KvimWorkspaceCurrent)
+        assert.is_not_nil(registered.KvimWorkspaceNext)
+        assert.is_not_nil(registered.KvimWorkspacePrev)
         assert.is_not_nil(registered.KvimWorkspaceTerminalAdd)
         assert.is_not_nil(registered.KvimWorkspaceTerminalList)
         assert.is_not_nil(registered.KvimWorkspaceTerminalRemove)

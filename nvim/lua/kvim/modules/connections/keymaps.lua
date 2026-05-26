@@ -44,6 +44,10 @@ function M.setup(opts)
     desc = "Connections: Install SSH key",
   }))
 
+  map("n", prefix .. "ks", "<cmd>KvimConnectionsSetupSshKey<CR>", vim.tbl_extend("force", keymap_opts, {
+    desc = "Connections: Setup SSH key",
+  }))
+
   map("n", prefix .. "kt", "<cmd>KvimConnectionsTestSsh<CR>", vim.tbl_extend("force", keymap_opts, {
     desc = "Connections: Test SSH connection",
   }))

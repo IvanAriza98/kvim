@@ -17,7 +17,7 @@ describe("kvim.modules.connections.ssh", function()
 
     assert.matches("ssh", cmd)
     assert.matches("-p '2222'", cmd)
-    assert.matches("-i '~/.ssh/key'", cmd)
+    assert.matches("-i '.*/%.ssh/key'", cmd)
     assert.matches("'test@127.0.0.1'", cmd)
   end)
 
@@ -54,4 +54,3 @@ describe("kvim.modules.connections.ssh", function()
   end)
 
 end)
-

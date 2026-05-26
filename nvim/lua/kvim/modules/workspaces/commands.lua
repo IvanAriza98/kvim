@@ -9,6 +9,8 @@ function M.setup()
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceList")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceDelete")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceCurrent")
+    pcall(vim.api.nvim_del_user_command, "KvimWorkspaceNext")
+    pcall(vim.api.nvim_del_user_command, "KvimWorkspacePrev")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalAdd")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalList")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRemove")
@@ -56,6 +58,20 @@ function M.setup()
     end, {
         nargs = 0,
         desc = "Show current KVIM workspace",
+    })
+
+    vim.api.nvim_create_user_command("KvimWorkspaceNext", function()
+        actions.next.callback()
+    end, {
+        nargs = 0,
+        desc = "Load next KVIM workspace",
+    })
+
+    vim.api.nvim_create_user_command("KvimWorkspacePrev", function()
+        actions.prev.callback()
+    end, {
+        nargs = 0,
+        desc = "Load previous KVIM workspace",
     })
 
     vim.api.nvim_create_user_command("KvimWorkspaceTerminalAdd", function()

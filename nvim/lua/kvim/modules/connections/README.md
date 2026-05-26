@@ -68,12 +68,31 @@ return {
 - `:KvimSshConnections` → abre picker solo SSH.
 - `:KvimSerialConnections` → abre picker solo serie.
 - `:KvimConnectionsReload` → recarga archivo de configuración.
+- `:KvimConnectionsList` → lista conexiones con tipo y nombre.
+- `:KvimConnectionsAdd` → asistente interactivo para añadir conexión SSH o serie.
+- `:KvimConnectionsDel [name]` → elimina conexión por selector o por nombre.
 
 ### SSH keys / test
 
 - `:KvimConnectionsGenerateKey`
 - `:KvimConnectionsInstallKey`
+- `:KvimConnectionsSetupSshKey`
 - `:KvimConnectionsTestSsh`
+
+`KvimConnectionsInstallKey` además auto-completa valores SSH recomendados en la conexión seleccionada si faltan:
+
+- `identity_file` (ruta de clave gestionada por KVIM para esa conexión)
+- `options.IdentitiesOnly = "yes"`
+
+Esto evita que `ssh` use otras claves por defecto cuando hay múltiples identidades cargadas.
+
+`KvimConnectionsSetupSshKey` orquesta el flujo completo de alta de clave SSH:
+
+1. asegura `identity_file` y `options.IdentitiesOnly = "yes"` si faltan;
+2. si no existe clave local (privada/pública), lanza `ssh-keygen` para la conexión;
+3. si la clave local ya existe, ejecuta `ssh-copy-id` para instalar la pública en remoto.
+
+El flujo es idempotente y no sobreescribe `identity_file`/`options` ya definidos por el usuario.
 
 ### Conexión activa
 
@@ -101,6 +120,7 @@ Prefijo configurable por módulo (`opts.prefix`), valor por defecto: `<leader>c`
 - `<leader>cr` → `:KvimConnectionsReload`
 - `<leader>ckg` → `:KvimConnectionsGenerateKey`
 - `<leader>cki` → `:KvimConnectionsInstallKey`
+- `<leader>cks` → `:KvimConnectionsSetupSshKey`
 - `<leader>ckt` → `:KvimConnectionsTestSsh`
 
 ---

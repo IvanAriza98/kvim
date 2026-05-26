@@ -89,6 +89,18 @@ function M.setup(opts)
         desc = "Workspaces: Mostrar workspace actual",
     })
 
+    map("n", prefix .. "n", "<cmd>KvimWorkspaceNext<CR>", {
+        silent = true,
+        noremap = true,
+        desc = "Workspaces: Siguiente workspace",
+    })
+
+    map("n", prefix .. "p", "<cmd>KvimWorkspacePrev<CR>", {
+        silent = true,
+        noremap = true,
+        desc = "Workspaces: Workspace anterior",
+    })
+
     map("n", prefix .. "t", "<cmd>KvimWorkspaceTerminalList<CR>", {
         silent = true,
         noremap = true,

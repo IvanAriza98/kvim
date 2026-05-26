@@ -21,8 +21,13 @@ local function append_common_ssh_args(parts, connection)
   end
 
   if connection.identity_file then
+    local identity_file = connection.identity_file
+    if type(identity_file) == "string" and identity_file ~= "" then
+      identity_file = vim.fn.expand(identity_file)
+    end
+
     table.insert(parts, "-i")
-    table.insert(parts, shellescape(connection.identity_file))
+    table.insert(parts, shellescape(identity_file))
   end
 
   if connection.options and type(connection.options) == "table" then

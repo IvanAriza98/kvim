@@ -34,6 +34,25 @@ function M.setup(opts)
     desc = "Reload KVIM connections config",
   })
 
+  vim.api.nvim_create_user_command("KvimConnectionsList", function()
+    actions.list_connections(opts)
+  end, {
+    desc = "List KVIM connections (name and type)",
+  })
+
+  vim.api.nvim_create_user_command("KvimConnectionsAdd", function()
+    actions.add_connection(opts)
+  end, {
+    desc = "Add KVIM connection to config",
+  })
+
+  vim.api.nvim_create_user_command("KvimConnectionsDel", function(params)
+    actions.delete_connection(opts, params.args)
+  end, {
+    nargs = "?",
+    desc = "Delete KVIM connection from config",
+  })
+
   vim.api.nvim_create_user_command("KvimConnectionsGenerateKey", function()
     actions.generate_ssh_key_picker(opts)
   end, {
@@ -44,6 +63,12 @@ function M.setup(opts)
     actions.install_ssh_key_picker(opts)
   end, {
     desc = "Install SSH public key for selected KVIM connection",
+  })
+
+  vim.api.nvim_create_user_command("KvimConnectionsSetupSshKey", function()
+    actions.setup_ssh_key_picker(opts)
+  end, {
+    desc = "Setup SSH key (ensure local key and install remote key)",
   })
 
   vim.api.nvim_create_user_command("KvimConnectionsTestSsh", function()

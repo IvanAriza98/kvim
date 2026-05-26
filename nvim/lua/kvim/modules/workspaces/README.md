@@ -19,6 +19,8 @@ Módulo MVP para guardar y restaurar workspaces de proyecto.
 - `:KvimWorkspaceList`
 - `:KvimWorkspaceDelete <name>`
 - `:KvimWorkspaceCurrent`
+- `:KvimWorkspaceNext`
+- `:KvimWorkspacePrev`
 - `:KvimWorkspaceTerminalAdd`
 - `:KvimWorkspaceTerminalList`
 - `:KvimWorkspaceTerminalRemove <name>`
@@ -29,6 +31,8 @@ Módulo MVP para guardar y restaurar workspaces de proyecto.
 - `<leader>ws` guardar workspace actual
 - `<leader>wl` listar workspaces
 - `<leader>wc` mostrar workspace actual
+- `<leader>wn` cargar siguiente workspace
+- `<leader>wp` cargar workspace anterior
 - `<leader>wt` listar recetas de terminal
 - `<leader>wr` restaurar recetas de terminal
 

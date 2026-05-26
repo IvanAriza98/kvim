@@ -596,6 +596,55 @@ M.list = {
     end,
 }
 
+local function switch_workspace_by_offset(offset)
+    local workspaces, err = storage.list()
+    if not workspaces then
+        vim.notify("KVIM Workspaces: failed to list workspaces: " .. tostring(err), vim.log.levels.ERROR)
+        return nil, err
+    end
+
+    if #workspaces == 0 then
+        vim.notify("KVIM Workspaces: no workspaces found", vim.log.levels.INFO)
+        return nil, "no workspaces"
+    end
+
+    if #workspaces == 1 then
+        return M.load.callback(workspaces[1])
+    end
+
+    local current = state.get_current()
+    local current_name = current and current.name or nil
+    local current_index = nil
+
+    if current_name then
+        for index, name in ipairs(workspaces) do
+            if name == current_name then
+                current_index = index
+                break
+            end
+        end
+    end
+
+    if not current_index then
+        current_index = 1
+    end
+
+    local target_index = ((current_index - 1 + offset) % #workspaces) + 1
+    return M.load.callback(workspaces[target_index])
+end
+
+M.next = {
+    callback = function()
+        return switch_workspace_by_offset(1)
+    end,
+}
+
+M.prev = {
+    callback = function()
+        return switch_workspace_by_offset(-1)
+    end,
+}
+
 M.delete = {
     callback = function(name)
         if not name or name == "" then
