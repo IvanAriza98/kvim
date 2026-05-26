@@ -13,6 +13,25 @@ return {
   },
 
   {
+    "rcarriga/nvim-notify",
+    event = "VeryLazy",
+    config = function()
+      local ok, notify = pcall(require, "notify")
+      if not ok then
+        return
+      end
+
+      notify.setup({
+        timeout = 3000,
+        render = "default",
+        stages = "fade_in_slide_out",
+      })
+
+      vim.notify = notify
+    end,
+  },
+
+  {
     "sphamba/smear-cursor.nvim",
     event = "VeryLazy",
     opts = {
