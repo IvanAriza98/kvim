@@ -3,6 +3,7 @@ describe("kvim.modules.connections.state", function()
 
   before_each(function()
     state.clear_active_connection()
+    state.clear_connection_buffer("ssh-test")
   end)
 
   it("starts without active connection", function()
@@ -37,6 +38,19 @@ describe("kvim.modules.connections.state", function()
 
     assert.are.same(conn, state.get_active_connection())
     assert.is_true(state.has_active_connection())
+  end)
+
+  it("stores connection buffer by name", function()
+    state.set_connection_buffer("ssh-test", 42)
+
+    assert.are.equal(42, state.get_connection_buffer("ssh-test"))
+  end)
+
+  it("clears connection buffer by name", function()
+    state.set_connection_buffer("ssh-test", 42)
+    state.clear_connection_buffer("ssh-test")
+
+    assert.is_nil(state.get_connection_buffer("ssh-test"))
   end)
 
 end)

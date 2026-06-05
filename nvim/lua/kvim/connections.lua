@@ -15,5 +15,15 @@ return { {
     port = 2222,
     type = "ssh",
     user = "test"
+  }, {
+    host = "127.0.0.1",
+    identity_file = "/home/KODVMV/.ssh/kvim_docker-test-2_ed25519",
+    name = "docker-test-2",
+    options = {
+      IdentitiesOnly = "yes"
+    },
+    port = 2223,
+    type = "ssh",
+    user = "test2"
   } }
 

@@ -3,6 +3,7 @@
 local M = {}
 
 local active_connection = nil
+local connection_buffers = {}
 
 function M.set_active_connection(conn)
   if not conn then
@@ -33,6 +34,34 @@ end
 function M.clear_active_connection()
   active_connection = nil
   vim.notify("KVIM: active connection cleared", vim.log.levels.INFO)
+end
+
+function M.set_connection_buffer(name, bufnr)
+  if type(name) ~= "string" or name == "" then
+    return
+  end
+
+  if type(bufnr) ~= "number" then
+    return
+  end
+
+  connection_buffers[name] = bufnr
+end
+
+function M.get_connection_buffer(name)
+  if type(name) ~= "string" or name == "" then
+    return nil
+  end
+
+  return connection_buffers[name]
+end
+
+function M.clear_connection_buffer(name)
+  if type(name) ~= "string" or name == "" then
+    return
+  end
+
+  connection_buffers[name] = nil
 end
 
 function M.get_active_connection_label()

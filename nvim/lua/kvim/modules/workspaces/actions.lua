@@ -4,6 +4,9 @@ local storage = require("kvim.modules.workspaces.storage")
 local state = require("kvim.modules.workspaces.state")
 local config = require("kvim.modules.workspaces.config")
 
+local term_sessions_views = {}
+local resolve_connection_for_command
+
 local function safe_buf_var(bufnr, varname)
     local ok, value = pcall(vim.api.nvim_buf_get_var, bufnr, varname)
     if not ok then
@@ -198,6 +201,384 @@ local function goto_role_tab(role)
     return tabnr
 end
 
+local function build_term_placeholder_lines(winid)
+    local width = vim.api.nvim_win_get_width(winid)
+    local height = vim.api.nvim_win_get_height(winid)
+    local content = {
+        "KVIM Term",
+        "",
+        "No hay terminales activas en este workspace.",
+        "",
+        "Acciones sugeridas",
+        ":KvimConnections",
+        ":KvimConnectionsReconnect <name>",
+        ":KvimWorkspaceTerminalRestore",
+    }
+
+    local lines = {}
+    local top_padding = math.max(0, math.floor((height - #content) / 2))
+    for _ = 1, top_padding do
+        table.insert(lines, "")
+    end
+
+    for _, line in ipairs(content) do
+        local left_padding = math.max(0, math.floor((width - #line) / 2))
+        table.insert(lines, string.rep(" ", left_padding) .. line)
+    end
+
+    return lines
+end
+
+local function build_centered_lines(winid, content)
+    local width = vim.api.nvim_win_get_width(winid)
+    local height = vim.api.nvim_win_get_height(winid)
+    local lines = {}
+    local top_padding = math.max(0, math.floor((height - #content) / 2))
+
+    for _ = 1, top_padding do
+        table.insert(lines, "")
+    end
+
+    for _, line in ipairs(content) do
+        local left_padding = math.max(0, math.floor((width - #line) / 2))
+        table.insert(lines, string.rep(" ", left_padding) .. line)
+    end
+
+    return lines
+end
+
+local function find_existing_term_placeholder_buffer()
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_valid(bufnr) then
+            local ok, value = pcall(vim.api.nvim_buf_get_var, bufnr, "kvim_term_placeholder")
+            if ok and value == true then
+                return bufnr
+            end
+        end
+    end
+
+    return nil
+end
+
+local function open_term_placeholder()
+    local winid = vim.api.nvim_get_current_win()
+    local bufnr = find_existing_term_placeholder_buffer()
+    if not bufnr then
+        bufnr = vim.api.nvim_create_buf(false, true)
+        pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_term_placeholder", true)
+        pcall(vim.api.nvim_buf_set_name, bufnr, "KVIM Term")
+        vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
+        vim.api.nvim_set_option_value("bufhidden", "hide", { buf = bufnr })
+        vim.api.nvim_set_option_value("swapfile", false, { buf = bufnr })
+        vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr })
+        vim.api.nvim_set_option_value("buflisted", false, { buf = bufnr })
+    else
+        vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr })
+    end
+
+    vim.api.nvim_win_set_buf(winid, bufnr)
+
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, build_term_placeholder_lines(winid))
+    vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
+    vim.wo.number = false
+    vim.wo.relativenumber = false
+    vim.wo.cursorline = false
+    vim.wo.signcolumn = "no"
+    vim.wo.foldcolumn = "0"
+    return bufnr
+end
+
+local function collect_workspace_ssh_sessions(workspace)
+    local recipes = (workspace and workspace.terminals) or {}
+    local names = {}
+    local ordered_names = {}
+
+    for _, recipe in ipairs(recipes) do
+        if recipe.type == "ssh" then
+            local connection_name = recipe.connection
+            if (not connection_name or connection_name == "") and type(recipe.command) == "string" and recipe.command ~= "" then
+                connection_name = resolve_connection_for_command(recipe.command)
+            end
+
+            if type(connection_name) == "string" and connection_name ~= "" and not names[connection_name] then
+                names[connection_name] = true
+                table.insert(ordered_names, connection_name)
+            end
+        end
+    end
+
+    if #ordered_names == 0 then
+        return {}
+    end
+
+    local ok_conn_config, conn_config = pcall(require, "kvim.modules.connections.config")
+    if not ok_conn_config then
+        return {}
+    end
+
+    local all_connections = conn_config.load({})
+    local by_name = {}
+    for _, connection in ipairs(all_connections or {}) do
+        if connection.type == "ssh" and connection.name then
+            by_name[connection.name] = connection
+        end
+    end
+
+    local entries = {}
+    for _, connection_name in ipairs(ordered_names) do
+        local connection = by_name[connection_name]
+        if connection then
+            table.insert(entries, {
+                connection = connection,
+                connection_name = connection.name,
+                user = connection.user or "",
+                host = connection.host or "",
+                port = connection.port or 22,
+                reachable = false,
+            })
+        end
+    end
+
+    return entries
+end
+
+local function check_ssh_session_reachability(entry)
+    if type(entry) ~= "table" or type(entry.host) ~= "string" or entry.host == "" then
+        return false
+    end
+
+    local address = entry.host .. ":" .. tostring(entry.port or 22)
+    local ok, channel = pcall(vim.fn.sockconnect, "tcp", address, { rpc = false, timeout = 300 })
+    if not ok or channel <= 0 then
+        return false
+    end
+
+    pcall(vim.fn.chanclose, channel)
+    return true
+end
+
+local function refresh_workspace_ssh_session_states(entries)
+    for _, entry in ipairs(entries or {}) do
+        entry.reachable = check_ssh_session_reachability(entry)
+    end
+end
+
+local function build_term_sessions_lines(entries, selected_index, winid)
+    local content = {
+        "KVIM Term",
+        "",
+        "Sesiones SSH del workspace",
+        "",
+    }
+
+    for index, entry in ipairs(entries or {}) do
+        local bullet = entry.reachable and "●" or "○"
+        local user = entry.user ~= "" and entry.user or "unknown"
+        local line = string.format(
+            "%s %s    %s@%s:%s",
+            bullet,
+            tostring(entry.connection_name or "unnamed"),
+            user,
+            tostring(entry.host or "?"),
+            tostring(entry.port or 22)
+        )
+
+        if index == selected_index then
+            line = "> " .. line
+        else
+            line = "  " .. line
+        end
+
+        table.insert(content, line)
+    end
+
+    table.insert(content, "")
+    table.insert(content, "Acciones")
+    table.insert(content, "[Enter] conectar/reconectar")
+    table.insert(content, "[j/k] moverse")
+    table.insert(content, "[r] refrescar estados")
+
+    return build_centered_lines(winid, content)
+end
+
+local function apply_term_view_window_options()
+    vim.wo.number = false
+    vim.wo.relativenumber = false
+    vim.wo.cursorline = false
+    vim.wo.signcolumn = "no"
+    vim.wo.foldcolumn = "0"
+end
+
+local function render_term_sessions_view(bufnr, workspace, selected_index)
+    local view = term_sessions_views[bufnr]
+    if not view then
+        return nil, "term sessions view not found"
+    end
+
+    local winid = vim.api.nvim_get_current_win()
+    selected_index = math.max(1, math.min(selected_index or 1, #view.entries))
+    view.selected_index = selected_index
+    view.workspace_name = workspace and workspace.name or view.workspace_name
+
+    vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr })
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, build_term_sessions_lines(view.entries, selected_index, winid))
+    vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
+    apply_term_view_window_options()
+    return true
+end
+
+local function activate_term_session(bufnr)
+    local view = term_sessions_views[bufnr]
+    if not view then
+        return nil, "term sessions view not found"
+    end
+
+    local entry = view.entries[view.selected_index]
+    if not entry or type(entry.connection_name) ~= "string" or entry.connection_name == "" then
+        return nil, "selected session not found"
+    end
+
+    local ok_actions, conn_actions = pcall(require, "kvim.modules.connections.actions")
+    if not ok_actions then
+        return nil, "connections actions not available"
+    end
+
+    local ok_reconnect, reconnect_err = conn_actions.reconnect_connection({}, entry.connection_name)
+    if ok_reconnect then
+        return true
+    end
+
+    if reconnect_err ~= "terminal buffer not found: " .. entry.connection_name then
+        return nil, reconnect_err
+    end
+
+    conn_actions.open_connection(entry.connection, { startinsert = false })
+    return true
+end
+
+local function attach_term_sessions_keymaps(bufnr, workspace)
+    local function rerender(delta)
+        local view = term_sessions_views[bufnr]
+        if not view or #view.entries == 0 then
+            return
+        end
+
+        local next_index = ((view.selected_index - 1 + delta) % #view.entries) + 1
+        render_term_sessions_view(bufnr, workspace, next_index)
+    end
+
+    vim.keymap.set("n", "j", function()
+        rerender(1)
+    end, { buffer = bufnr, silent = true, nowait = true, desc = "Term sessions: siguiente" })
+
+    vim.keymap.set("n", "k", function()
+        rerender(-1)
+    end, { buffer = bufnr, silent = true, nowait = true, desc = "Term sessions: anterior" })
+
+    vim.keymap.set("n", "r", function()
+        local view = term_sessions_views[bufnr]
+        if not view then
+            return
+        end
+
+        refresh_workspace_ssh_session_states(view.entries)
+        render_term_sessions_view(bufnr, workspace, view.selected_index)
+    end, { buffer = bufnr, silent = true, nowait = true, desc = "Term sessions: refrescar" })
+
+    vim.keymap.set("n", "<CR>", function()
+        activate_term_session(bufnr)
+    end, { buffer = bufnr, silent = true, nowait = true, desc = "Term sessions: conectar" })
+end
+
+local function open_term_sessions_view(workspace)
+    local entries = collect_workspace_ssh_sessions(workspace)
+    if #entries == 0 then
+        return open_term_placeholder()
+    end
+
+    refresh_workspace_ssh_session_states(entries)
+
+    local winid = vim.api.nvim_get_current_win()
+    local bufnr = nil
+    for existing_bufnr, view in pairs(term_sessions_views) do
+        if vim.api.nvim_buf_is_valid(existing_bufnr) and view.workspace_name == workspace.name then
+            bufnr = existing_bufnr
+            break
+        end
+    end
+
+    if not bufnr then
+        bufnr = vim.api.nvim_create_buf(false, true)
+        pcall(vim.api.nvim_buf_set_name, bufnr, "KVIM Term Sessions")
+        vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
+        vim.api.nvim_set_option_value("bufhidden", "hide", { buf = bufnr })
+        vim.api.nvim_set_option_value("swapfile", false, { buf = bufnr })
+        vim.api.nvim_set_option_value("buflisted", false, { buf = bufnr })
+        term_sessions_views[bufnr] = {
+            workspace_name = workspace.name,
+            entries = entries,
+            selected_index = 1,
+        }
+        attach_term_sessions_keymaps(bufnr, workspace)
+    else
+        term_sessions_views[bufnr].workspace_name = workspace.name
+        term_sessions_views[bufnr].entries = entries
+        term_sessions_views[bufnr].selected_index = math.min(term_sessions_views[bufnr].selected_index or 1, #entries)
+    end
+
+    vim.api.nvim_win_set_buf(winid, bufnr)
+    render_term_sessions_view(bufnr, workspace, term_sessions_views[bufnr].selected_index or 1)
+    return bufnr
+end
+
+local function term_tab_has_active_terminal(tabnr)
+    if type(tabnr) ~= "number" then
+        return false
+    end
+
+    local ok_list, winids = pcall(vim.api.nvim_tabpage_list_wins, tabnr)
+    if not ok_list then
+        return false
+    end
+
+    for _, winid in ipairs(winids) do
+        local bufnr = vim.api.nvim_win_get_buf(winid)
+        if vim.api.nvim_buf_is_valid(bufnr) and get_buf_buftype(bufnr) == "terminal" then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function ensure_term_tab_window()
+    if type(state.prune_invalid_tab_roles) == "function" then
+        state.prune_invalid_tab_roles()
+    end
+
+    local term_tab = state.find_tab_by_role("term")
+    if not term_tab then
+        return nil
+    end
+
+    goto_role_tab("term")
+
+    local workspace = state.get_current()
+    if workspace then
+        local entries = collect_workspace_ssh_sessions(workspace)
+        if #entries > 0 then
+            open_term_sessions_view(workspace)
+            return true
+        end
+    end
+
+    if not term_tab_has_active_terminal(term_tab) then
+        open_term_placeholder()
+    end
+
+    return true
+end
+
 local function resolve_connection_by_name(name)
     local cfg = config.get()
     if not (cfg.integrations and cfg.integrations.connections) then
@@ -239,7 +620,7 @@ local function looks_like_ssh_command(command)
     return command:match("^%s*ssh%s") ~= nil
 end
 
-local function resolve_connection_for_command(command)
+resolve_connection_for_command = function(command)
     local cfg = config.get()
     if not (cfg.integrations and cfg.integrations.connections) then
         return nil
@@ -357,6 +738,20 @@ local function restore_shell_recipe(recipe)
         startinsert = false,
     })
 
+    if recipe.type == "ssh" and recipe.connection and recipe.connection ~= "" then
+        local bufnr = vim.api.nvim_get_current_buf()
+        pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_connection_managed", true)
+        pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_connection_name", recipe.connection)
+        pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_connection_type", "ssh")
+        pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_connection", recipe.connection)
+        pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_type", "ssh")
+
+        local ok_conn_state, conn_state = pcall(require, "kvim.modules.connections.state")
+        if ok_conn_state then
+            conn_state.set_connection_buffer(recipe.connection, bufnr)
+        end
+    end
+
     return true
 end
 
@@ -374,6 +769,19 @@ local function restore_ssh_recipe(recipe)
             end
 
             conn_actions.open_connection(connection, { startinsert = false })
+
+            local bufnr = vim.api.nvim_get_current_buf()
+            pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_connection_managed", true)
+            pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_connection_name", connection.name)
+            pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_connection_type", "ssh")
+            pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_connection", connection.name)
+            pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_workspace_recipe_type", "ssh")
+
+            local ok_conn_state, conn_state = pcall(require, "kvim.modules.connections.state")
+            if ok_conn_state then
+                conn_state.set_connection_buffer(connection.name, bufnr)
+            end
+
             return true
         end
 
@@ -436,6 +844,17 @@ local function restore_terminals(workspace)
     if code_tab then
         goto_tabnr(code_tab)
         set_active_tab_role("code")
+    end
+
+    local term_tab = state.find_tab_by_role("term")
+    if term_tab and restored == 0 then
+        goto_tabnr(term_tab)
+        set_active_tab_role("term")
+        open_term_placeholder()
+        if code_tab then
+            goto_tabnr(code_tab)
+            set_active_tab_role("code")
+        end
     end
 
     refresh_bufferline()
@@ -789,6 +1208,10 @@ M.terminal_restore = {
 
 M.goto_code_tab = {
     callback = function()
+        if type(state.prune_invalid_tab_roles) == "function" then
+            state.prune_invalid_tab_roles()
+        end
+
         local tabnr = state.find_tab_by_role("code")
         if not tabnr then
             local workspace = state.get_current()
@@ -812,6 +1235,10 @@ M.goto_code_tab = {
 
 M.goto_term_tab = {
     callback = function()
+        if type(state.prune_invalid_tab_roles) == "function" then
+            state.prune_invalid_tab_roles()
+        end
+
         local tabnr = state.find_tab_by_role("term")
         if not tabnr then
             local workspace = state.get_current()
@@ -827,7 +1254,7 @@ M.goto_term_tab = {
             return nil
         end
 
-        goto_role_tab("term")
+        ensure_term_tab_window()
         refresh_bufferline()
         return true
     end,

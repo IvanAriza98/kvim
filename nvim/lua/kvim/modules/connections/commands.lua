@@ -34,6 +34,13 @@ function M.setup(opts)
     desc = "Reload KVIM connections config",
   })
 
+  vim.api.nvim_create_user_command("KvimConnectionsReconnect", function(params)
+    actions.reconnect_connection(opts, params.args)
+  end, {
+    nargs = 1,
+    desc = "Reconnect KVIM SSH connection in existing terminal",
+  })
+
   vim.api.nvim_create_user_command("KvimConnectionsList", function()
     actions.list_connections(opts)
   end, {

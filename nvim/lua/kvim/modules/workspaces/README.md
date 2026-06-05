@@ -48,6 +48,10 @@ Las recetas de terminal tipo `ssh` pueden usar:
 - `connection = "Nombre de conexión"` para resolver contra el módulo `connections`.
 - `command = "ssh user@host"` como fallback opcional.
 
+Si añades una conexión SSH nueva desde `:KvimConnectionsAdd` mientras hay un workspace activo, KVIM puede ofrecer adjuntarla automáticamente al workspace como receta SSH del tab `term`.
+
+Si una conexión SSH global se elimina con `:KvimConnectionsDel`, KVIM limpia también las recetas SSH de los workspaces que referencien esa conexión por nombre.
+
 Si `connections` no está disponible o la conexión no existe, se usa `command` si está definido.
 
 ## Nota sobre captura automática de terminales
@@ -65,6 +69,8 @@ Cada workspace usa por defecto dos tabs lógicas:
 - `term`
 
 Al cargar un workspace, KVIM restaura el contenido y deja el foco final en `code`.
+
+Si el tab `term` no tiene terminales activas o restaurables, KVIM muestra un placeholder centrado reutilizable con acciones sugeridas para abrir o restaurar terminales. Ese placeholder no muestra numeración de líneas.
 
 ## Storage
 

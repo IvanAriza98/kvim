@@ -68,9 +68,10 @@ return {
 - `:KvimSshConnections` → abre picker solo SSH.
 - `:KvimSerialConnections` → abre picker solo serie.
 - `:KvimConnectionsReload` → recarga archivo de configuración.
+- `:KvimConnectionsReconnect <name>` → reintenta una conexión SSH en el mismo buffer de terminal asociado.
 - `:KvimConnectionsList` → lista conexiones con tipo y nombre.
-- `:KvimConnectionsAdd` → asistente interactivo para añadir conexión SSH o serie.
-- `:KvimConnectionsDel [name]` → elimina conexión por selector o por nombre.
+- `:KvimConnectionsAdd` → asistente interactivo para añadir conexión SSH o serie. Si hay un workspace activo y la conexión es SSH, KVIM puede ofrecer añadirla también al workspace actual como receta de terminal.
+- `:KvimConnectionsDel [name]` → elimina conexión por selector o por nombre. Si la conexión SSH estaba referenciada por recetas de workspaces, KVIM limpia también esas referencias.
 
 ### SSH keys / test
 
@@ -128,7 +129,12 @@ Prefijo configurable por módulo (`opts.prefix`), valor por defecto: `<leader>c`
 ## Notas de comportamiento real
 
 - La conexión activa se mantiene en memoria de sesión (estado runtime), no persistida en disco.
+- `KvimConnectionsReload` recarga la configuración; `KvimConnectionsReconnect <name>` reutiliza la misma ubicación visual del terminal SSH ya abierta por KVIM.
+- `KvimConnectionsReconnect <name>` intenta redescubrir buffers terminal restaurados por sesión/workspace usando metadata del buffer si el mapping runtime se perdió.
+- Si la metadata no está completa, `KvimConnectionsReconnect <name>` también puede intentar identificar el terminal restaurado a partir del comando SSH guardado en el recipe del workspace.
+- Cuando reconecta sobre una terminal muerta, `KvimConnectionsReconnect <name>` limpia/deslista el buffer anterior para evitar duplicados visibles de la misma conexión.
 - `KvimSSHRun` requiere conexión activa y de tipo `ssh`.
+- Si el proceso del terminal anterior ya terminó, `KvimConnectionsReconnect <name>` recrea una nueva terminal SSH en esa misma ventana y actualiza la asociación interna con la conexión.
 - En transferencias:
   - `upload` detecta si la ruta local es archivo/directorio;
   - `download` usa `scp -r` para cubrir ambos casos.

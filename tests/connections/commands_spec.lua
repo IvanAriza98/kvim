@@ -7,6 +7,7 @@ describe("kvim.modules.connections.commands", function()
     local registered = vim.api.nvim_get_commands({})
 
     assert.is_not_nil(registered.KvimConnections)
+    assert.is_not_nil(registered.KvimConnectionsReconnect)
     assert.is_not_nil(registered.KvimConnectionsList)
     assert.is_not_nil(registered.KvimConnectionsAdd)
     assert.is_not_nil(registered.KvimConnectionsDel)

@@ -4,6 +4,16 @@ local current_workspace = nil
 local tab_roles = {}
 local active_tab_role = nil
 
+local function tabnr_exists(tabnr)
+    for _, tabpage in ipairs(vim.api.nvim_list_tabpages()) do
+        if vim.api.nvim_tabpage_get_number(tabpage) == tabnr then
+            return true
+        end
+    end
+
+    return false
+end
+
 function M.set_current(workspace)
     current_workspace = workspace
 end
@@ -30,12 +40,22 @@ end
 
 function M.find_tab_by_role(role)
     for tabnr, tab_role in pairs(tab_roles) do
-        if tab_role == role then
+        if not tabnr_exists(tabnr) then
+            tab_roles[tabnr] = nil
+        elseif tab_role == role then
             return tabnr
         end
     end
 
     return nil
+end
+
+function M.prune_invalid_tab_roles()
+    for tabnr, _ in pairs(tab_roles) do
+        if not tabnr_exists(tabnr) then
+            tab_roles[tabnr] = nil
+        end
+    end
 end
 
 function M.get_all_tab_roles()
