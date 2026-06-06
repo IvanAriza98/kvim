@@ -267,6 +267,7 @@ local function open_term_placeholder()
         bufnr = vim.api.nvim_create_buf(false, true)
         pcall(vim.api.nvim_buf_set_var, bufnr, "kvim_term_placeholder", true)
         pcall(vim.api.nvim_buf_set_name, bufnr, "KVIM Term")
+        vim.api.nvim_set_option_value("filetype", "kvim-term", { buf = bufnr })
         vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
         vim.api.nvim_set_option_value("bufhidden", "hide", { buf = bufnr })
         vim.api.nvim_set_option_value("swapfile", false, { buf = bufnr })
@@ -285,6 +286,7 @@ local function open_term_placeholder()
     vim.wo.cursorline = false
     vim.wo.signcolumn = "no"
     vim.wo.foldcolumn = "0"
+    vim.wo.colorcolumn = ""
     return bufnr
 end
 
@@ -407,6 +409,7 @@ local function apply_term_view_window_options()
     vim.wo.cursorline = false
     vim.wo.signcolumn = "no"
     vim.wo.foldcolumn = "0"
+    vim.wo.colorcolumn = ""
 end
 
 local function render_term_sessions_view(bufnr, workspace, selected_index)
@@ -510,6 +513,7 @@ local function open_term_sessions_view(workspace)
     if not bufnr then
         bufnr = vim.api.nvim_create_buf(false, true)
         pcall(vim.api.nvim_buf_set_name, bufnr, "KVIM Term Sessions")
+        vim.api.nvim_set_option_value("filetype", "kvim-term-sessions", { buf = bufnr })
         vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
         vim.api.nvim_set_option_value("bufhidden", "hide", { buf = bufnr })
         vim.api.nvim_set_option_value("swapfile", false, { buf = bufnr })

@@ -11,6 +11,7 @@ describe("kvim.modules.workspaces.actions", function()
     local buffer_vars
     local window_options
     local keymaps
+    local buffer_options
 
     before_each(function()
         storage_calls = { save = 0, load = 0 }
@@ -29,6 +30,7 @@ describe("kvim.modules.workspaces.actions", function()
             foldcolumn = "1",
         }
         keymaps = {}
+        buffer_options = {}
         local tab_roles = {}
 
         package.loaded["kvim.modules.workspaces.storage"] = {
@@ -196,7 +198,12 @@ describe("kvim.modules.workspaces.actions", function()
         end
 
         _G.__orig_set_option_value = vim.api.nvim_set_option_value
-        vim.api.nvim_set_option_value = function() end
+        vim.api.nvim_set_option_value = function(name, value, opts)
+            if opts and opts.buf then
+                buffer_options[opts.buf] = buffer_options[opts.buf] or {}
+                buffer_options[opts.buf][name] = value
+            end
+        end
 
         _G.__orig_buf_set_lines = vim.api.nvim_buf_set_lines
         vim.api.nvim_buf_set_lines = function(bufnr, _, _, _, lines)
@@ -439,6 +446,8 @@ describe("kvim.modules.workspaces.actions", function()
         assert.matches("No hay terminales activas", text)
         assert.is_false(window_options.number)
         assert.is_false(window_options.relativenumber)
+        assert.are.same("kvim-term", buffer_options[created_buffers[1]].filetype)
+        assert.are.same("", window_options.colorcolumn)
     end)
 
     it("goto_term_tab prunes stale term tab role and does not fail", function()
@@ -482,5 +491,7 @@ describe("kvim.modules.workspaces.actions", function()
         assert.matches("Sesiones SSH del workspace", text)
         assert.matches("ssh%-dev", text)
         assert.matches("test@127%.0%.0%.1:2222", text)
+        assert.are.same("kvim-term-sessions", buffer_options[created_buffers[1]].filetype)
+        assert.are.same("", window_options.colorcolumn)
     end)
 end)

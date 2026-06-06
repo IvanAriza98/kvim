@@ -145,20 +145,44 @@ return {
                 "starter",
                 "checkhealth",
                 "lspinfo",
+                "snacks_dashboard",
+                "kvim-term",
+                "kvim-term-sessions",
             },
 
             scope = "file",
 
-            custom_colorcolumn = {
-                lua = "100",
-                python = "100",
-                c = "100",
-                cpp = "100",
-                sh = "100",
-                bash = "100",
-                markdown = "120",
-                gitcommit = "72",
-            },
+            custom_colorcolumn = function()
+                local programming_filetypes = {
+                    python = true,
+                    lua = true,
+                    c = true,
+                    cpp = true,
+                    sh = true,
+                    bash = true,
+                    javascript = true,
+                    typescript = true,
+                    javascriptreact = true,
+                    typescriptreact = true,
+                    go = true,
+                    rust = true,
+                    java = true,
+                    json = true,
+                    yaml = true,
+                    toml = true,
+                }
+
+                local ft = vim.bo.filetype
+                if programming_filetypes[ft] then
+                    return "100"
+                end
+
+                if ft == "gitcommit" then
+                    return "72"
+                end
+
+                return "9999"
+            end,
 
             editorconfig = true,
         },
