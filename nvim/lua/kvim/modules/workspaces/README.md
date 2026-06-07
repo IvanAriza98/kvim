@@ -33,8 +33,10 @@ Módulo MVP para guardar y restaurar workspaces de proyecto.
 - `<leader>wc` mostrar workspace actual
 - `<leader>wn` cargar siguiente workspace
 - `<leader>wp` cargar workspace anterior
+- `<leader>wa` añadir receta de terminal
 - `<leader>wt` listar recetas de terminal
 - `<leader>wr` restaurar recetas de terminal
+- `<leader>wh` abrir hub del tab `term`
 
 Navegación rápida por tabs de workspace:
 

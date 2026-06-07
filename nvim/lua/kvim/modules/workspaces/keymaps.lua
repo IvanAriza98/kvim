@@ -107,10 +107,22 @@ function M.setup(opts)
         desc = "Workspaces: Listar recetas de terminal",
     })
 
+    map("n", prefix .. "a", "<cmd>KvimWorkspaceTerminalAdd<CR>", {
+        silent = true,
+        noremap = true,
+        desc = "Workspaces: Añadir receta de terminal",
+    })
+
     map("n", prefix .. "r", "<cmd>KvimWorkspaceTerminalRestore<CR>", {
         silent = true,
         noremap = true,
         desc = "Workspaces: Restaurar terminales",
+    })
+
+    map("n", prefix .. "h", "<cmd>KvimWorkspaceTermHome<CR>", {
+        silent = true,
+        noremap = true,
+        desc = "Workspaces: Ir al hub Term",
     })
 
     map("n", "<leader>1", function()

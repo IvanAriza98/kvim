@@ -13,6 +13,24 @@ return {
   },
 
   {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    config = function()
+      local ok, wk = pcall(require, "which-key")
+      if not ok then
+        return
+      end
+
+      wk.setup({})
+      wk.add({
+        { "<leader>c", group = "Connections" },
+        { "<leader>ck", group = "Connections SSH Keys" },
+        { "<leader>w", group = "Workspaces" },
+      })
+    end,
+  },
+
+  {
     "rcarriga/nvim-notify",
     event = "VeryLazy",
     config = function()

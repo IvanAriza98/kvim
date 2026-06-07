@@ -25,6 +25,7 @@ describe("kvim.modules.workspaces.commands", function()
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalList")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRemove")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRestore")
+        pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTermHome")
 
         package.loaded["kvim.modules.workspaces.commands"] = nil
         commands = require("kvim.modules.workspaces.commands")
@@ -43,6 +44,7 @@ describe("kvim.modules.workspaces.commands", function()
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalList")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRemove")
         pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRestore")
+        pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTermHome")
 
         package.loaded["kvim.modules.workspaces.commands"] = nil
         package.loaded["kvim.modules.workspaces.actions"] = nil
@@ -64,5 +66,6 @@ describe("kvim.modules.workspaces.commands", function()
         assert.is_not_nil(registered.KvimWorkspaceTerminalList)
         assert.is_not_nil(registered.KvimWorkspaceTerminalRemove)
         assert.is_not_nil(registered.KvimWorkspaceTerminalRestore)
+        assert.is_not_nil(registered.KvimWorkspaceTermHome)
     end)
 end)

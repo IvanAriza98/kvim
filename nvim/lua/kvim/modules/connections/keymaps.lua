@@ -36,6 +36,18 @@ function M.setup(opts)
     desc = "Connections: Reload config",
   }))
 
+  map("n", prefix .. "l", "<cmd>KvimConnectionsList<CR>", vim.tbl_extend("force", keymap_opts, {
+    desc = "Connections: List connections",
+  }))
+
+  map("n", prefix .. "a", "<cmd>KvimConnectionsAdd<CR>", vim.tbl_extend("force", keymap_opts, {
+    desc = "Connections: Add connection",
+  }))
+
+  map("n", prefix .. "d", "<cmd>KvimConnectionsDel<CR>", vim.tbl_extend("force", keymap_opts, {
+    desc = "Connections: Delete connection",
+  }))
+
   map("n", prefix .. "kg", "<cmd>KvimConnectionsGenerateKey<CR>", vim.tbl_extend("force", keymap_opts, {
     desc = "Connections: Generate SSH key",
   }))
@@ -50,6 +62,10 @@ function M.setup(opts)
 
   map("n", prefix .. "kt", "<cmd>KvimConnectionsTestSsh<CR>", vim.tbl_extend("force", keymap_opts, {
     desc = "Connections: Test SSH connection",
+  }))
+
+  map("n", prefix .. "A", "<cmd>KvimConnectionShowActive<CR>", vim.tbl_extend("force", keymap_opts, {
+    desc = "Connections: Show active connection",
   }))
 end
 

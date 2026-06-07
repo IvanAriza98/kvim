@@ -17,11 +17,6 @@ function M.setup(opts)
     desc = "Git: Current file",
   })
 
-  vim.keymap.set("n", "<leader>c", function()
-    kvim.run_action("git", "config")
-  end, {
-    desc = "Git: LazyGit config",
-  })
 end
 
 return M

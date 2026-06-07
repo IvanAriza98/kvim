@@ -15,6 +15,7 @@ function M.setup()
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalList")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRemove")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTerminalRestore")
+    pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTermHome")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTabCode")
     pcall(vim.api.nvim_del_user_command, "KvimWorkspaceTabTerm")
 
@@ -126,6 +127,13 @@ function M.setup()
     end, {
         nargs = 0,
         desc = "Restore workspace terminal recipes",
+    })
+
+    vim.api.nvim_create_user_command("KvimWorkspaceTermHome", function()
+        actions.goto_term_tab.callback()
+    end, {
+        nargs = 0,
+        desc = "Open workspace term sessions home",
     })
 
     vim.api.nvim_create_user_command("KvimWorkspaceTabCode", function()

@@ -119,10 +119,14 @@ Prefijo configurable por módulo (`opts.prefix`), valor por defecto: `<leader>c`
 - `<leader>cs` → `:KvimSshConnections`
 - `<leader>cu` → `:KvimSerialConnections`
 - `<leader>cr` → `:KvimConnectionsReload`
+- `<leader>cl` → `:KvimConnectionsList`
+- `<leader>ca` → `:KvimConnectionsAdd`
+- `<leader>cd` → `:KvimConnectionsDel`
 - `<leader>ckg` → `:KvimConnectionsGenerateKey`
 - `<leader>cki` → `:KvimConnectionsInstallKey`
 - `<leader>cks` → `:KvimConnectionsSetupSshKey`
 - `<leader>ckt` → `:KvimConnectionsTestSsh`
+- `<leader>cA` → `:KvimConnectionShowActive`
 
 ---
 
