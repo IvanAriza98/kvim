@@ -3,6 +3,15 @@ return {
     "folke/snacks.nvim",
     priority = 1000,
     lazy = false,
+    keys = {
+        {
+            "<leader>h",
+            function ()
+                Snacks.dashboard()
+            end,
+            desc = "Open dashboard",
+        },
+    },
     opts = {
       dashboard = {
         enabled = true,
@@ -16,6 +25,7 @@ return {
 ╚═╝  ╚═╝  ╚═══╝  ╚═╝╚═╝     ╚═╝
           ]],
           keys = {
+            { icon = " ", key = "n", desc = "New File", action = ":enew" },
             { icon = " ", key = "f", desc = "Find File", action = ":Telescope find_files" },
             { icon = "󰈞 ", key = "r", desc = "Recent Files", action = ":Telescope oldfiles" },
             { icon = "󰱼 ", key = "g", desc = "Live Grep", action = ":Telescope live_grep" },
