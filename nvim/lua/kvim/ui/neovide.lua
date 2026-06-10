@@ -1,5 +1,30 @@
 local M = {}
 
+local function apply_terminal_palette()
+    local palette = {
+        "#45475a", -- black
+        "#f38ba8", -- red
+        "#a6e3a1", -- green
+        "#f9e2af", -- yellow
+        "#89b4fa", -- blue
+        "#f5c2e7", -- magenta
+        "#94e2d5", -- cyan
+        "#bac2de", -- white
+        "#585b70", -- bright black
+        "#f38ba8", -- bright red
+        "#a6e3a1", -- bright green
+        "#f9e2af", -- bright yellow
+        "#89b4fa", -- bright blue
+        "#f5c2e7", -- bright magenta
+        "#94e2d5", -- bright cyan
+        "#a6adc8", -- bright white
+    }
+
+    for index, color in ipairs(palette) do
+        vim.g["terminal_color_" .. tostring(index - 1)] = color
+    end
+end
+
 function M.setup()
     if not vim.g.neovide then
         return
@@ -39,6 +64,8 @@ function M.setup()
     if neovide.fullscreen ~= nil then
         vim.g.neovide_fullscreen = neovide.fullscreen
     end
+
+    apply_terminal_palette()
 end
 
 return M

@@ -7,6 +7,31 @@ return {
             "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons",
         },
+        opts = {
+            close_if_last_window = false,
+            enable_git_status = true,
+            git_status_async = true,
+            git_status_scope_to_path = true,
+            filesystem = {
+                async_directory_scan = "auto",
+                scan_mode = "shallow",
+                follow_current_file = {
+                    enabled = false,
+                    leave_dirs_open = false,
+                },
+                filtered_items = {
+                    visible = false,
+                    hide_dotfiles = true,
+                    hide_gitignored = true,
+                    hide_hidden = true,
+                },
+                use_libuv_file_watcher = false,
+            },
+            window = {
+                width = 32,
+                auto_expand_width = false,
+            },
+        },
     },
 
     {
