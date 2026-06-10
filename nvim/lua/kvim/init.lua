@@ -30,7 +30,8 @@ function M.setup(opts)
         local ok, module = pcall(require, "kvim.modules." .. module_name)
 
         if not ok then
-            vim.notify("Kvim failed to load module '" .. module_name .. "': " .. tostring(module), vim.log.levels.ERROR)
+            vim.notify("Kvim failed to load module '" .. module_name .. "': " .. tostring(module),
+                    vim.log.levels.ERROR)
             goto continue
         end
 
@@ -48,7 +49,8 @@ function M.setup(opts)
         if type(module.setup) == "function" then
                 local ok_setup, err = pcall(module.setup, module_opts)
                 if not ok_setup then
-                    vim.notify("Kvim module setup failed for '" .. module_name .. "': " .. tostring(err), vim.log.levels.ERROR)
+                    vim.notify("Kvim module setup failed for '" .. module_name .. "': "
+                        .. tostring(err), vim.log.levels.ERROR)
                 end
         end
     end
