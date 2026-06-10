@@ -72,7 +72,18 @@ local defaults = {
             enabled = true,
             name = "catppuccin",
             style = "mocha", -- mocha, macchiato, frappe, latte
-        }
+        },
+
+        neovide = {
+            enabled = true,
+            scale_factor = 1.0,
+            transparency = 1.0,
+            cursor_animation_length = 0.08,
+            scroll_animation_length = 0.15,
+            hide_mouse_when_typing = true,
+            remember_window_size = true,
+            fullscreen = false,
+        },
 	},
 
 	keymaps = {

@@ -51,6 +51,9 @@ return {
 
   {
     "sphamba/smear-cursor.nvim",
+    enabled = function()
+      return not vim.g.neovide
+    end,
     event = "VeryLazy",
     opts = {
       stiffness = 0.8,
