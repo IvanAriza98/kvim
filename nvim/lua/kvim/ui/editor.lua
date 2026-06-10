@@ -45,6 +45,7 @@ function M.setup()
 	setup_numbers(editor.numbers)
 	setup_indentation(editor.indentation)
 
+    vim.opt.clipboard:append("unnamedplus")
     vim.opt.fillchars = { eob = " " } -- Se eliminan los ~ de cada linea no completada
 	vim.opt.cursorline = editor.cursorline
 	vim.opt.signcolumn = editor.signcolumn or "yes"
