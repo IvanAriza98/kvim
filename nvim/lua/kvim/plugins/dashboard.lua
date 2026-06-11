@@ -30,7 +30,14 @@ return {
             { icon = "󰈞 ", key = "r", desc = "Recent Files", action = ":Telescope oldfiles" },
             { icon = "󰱼 ", key = "g", desc = "Live Grep", action = ":Telescope live_grep" },
             { icon = " ", key = "e", desc = "Explorer", action = ":Neotree toggle" },
-            { icon = " ", key = "c", desc = "Config", action = ":e ~/.config/nvim/init.lua" },
+            {
+                icon = " ",
+                key = "c",
+                desc = "Config",
+                action = function()
+                    vim.cmd.edit(vim.fn.fnameescape(vim.fn.stdpath("config") .. "/init.lua"))
+                end,
+            },
             { icon = " ", key = "q", desc = "Quit", action = ":qa" },
           },
         },

@@ -28,7 +28,7 @@ Según funcionalidad:
 Archivo por defecto de conexiones:
 
 ```text
-~/.config/nvim/lua/kvim/connections.lua
+~/.config/kvim/lua/kvim/connections.lua
 ```
 
 Debe devolver una **tabla Lua** con conexiones.

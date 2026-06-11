@@ -2,6 +2,34 @@
 
 local M = {}
 
+local function load_local_overrides()
+    local local_config_path = vim.fn.stdpath("config") .. "/lua/kvim/local.lua"
+
+    if vim.fn.filereadable(local_config_path) ~= 1 then
+        return {}
+    end
+
+    local ok, local_config = pcall(require, "kvim.local")
+
+    if not ok then
+        vim.notify(
+            "Kvim failed to load local config 'kvim.local': " .. tostring(local_config),
+            vim.log.levels.ERROR
+        )
+        return {}
+    end
+
+    if type(local_config) ~= "table" then
+        vim.notify(
+            "Kvim local config 'kvim.local' must return a table",
+            vim.log.levels.ERROR
+        )
+        return {}
+    end
+
+    return local_config
+end
+
 local defaults = {
 	ui = {
 		enabled = true,
@@ -189,7 +217,7 @@ local defaults = {
 local options = vim.deepcopy(defaults)
 
 function M.setup(opts)
-	options = vim.tbl_deep_extend("force", defaults, opts or {})
+	options = vim.tbl_deep_extend("force", defaults, load_local_overrides(), opts or {})
 end
 
 function M.get()
