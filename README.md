@@ -71,16 +71,84 @@ Estructura principal:
 - `ssh`, `scp` (módulo Connections)
 - `picocom` (conexiones serie)
 
-### Ejemplo de instalación
+### Ejemplo de instalación manual
 
 ```bash
 git clone https://github.com/kodvmv/kvim.git ~/kvim
-mkdir -p ~/.config/nvim
-cp -r ~/kvim/nvim/* ~/.config/nvim/
-nvim
+mkdir -p ~/.config/kvim
+cp -r ~/kvim/nvim/* ~/.config/kvim/
+NVIM_APPNAME=kvim nvim
 ```
 
 En el primer arranque, `lazy.nvim` instalará plugins automáticamente.
+
+> El contrato del instalador Linux vive en `package/linux/install.sh`.
+
+En la fase actual, ese script ya puede:
+
+1. preparar `~/.config/kvim`
+2. copiar el contenido de `nvim/`
+3. generar `~/.config/kvim/lua/kvim/local.lua`
+4. seleccionar módulos básicos para la instalación
+5. verificar dependencias requeridas y advertir dependencias opcionales por módulo
+6. generar `~/.local/bin/kvim` para ejecutar KVIM en terminal
+7. soportar `kvim --gui` para abrir KVIM con `neovide`
+8. generar `~/.local/share/applications/kvim.desktop`
+9. advertir si `~/.local/bin` no está en `PATH` y ofrecer añadirlo al shell del usuario
+
+En Arch Linux también puede instalar dependencias opcionales soportadas con:
+
+```bash
+bash package/linux/install.sh --install-optional-deps
+```
+
+Actualmente:
+
+1. `lazygit` se instala con `pacman`
+2. `lazysvn` se descarga como binario release a `~/.local/bin/lazysvn`
+
+Uso del launcher:
+
+```bash
+kvim
+kvim --gui
+kvim file.lua
+kvim --gui file.lua
+```
+
+Diagnóstico recomendado tras instalar:
+
+```vim
+:checkhealth kvim
+```
+
+### Override local de instalación
+
+KVIM puede cargar un archivo opcional de override local en:
+
+```text
+~/.config/kvim/lua/kvim/local.lua
+```
+
+Ese archivo permite personalizar una instalación sin modificar los defaults del repo.
+La precedencia de configuración es:
+
+1. defaults de `kvim.config`
+2. override local `kvim.local`
+3. `opts` pasados a `require("kvim").setup(...)`
+
+Ejemplo mínimo para controlar módulos:
+
+```lua
+return {
+    modules = {
+        workspaces = { enabled = true },
+        git = { enabled = false },
+        svn = { enabled = false },
+        connections = { enabled = false },
+    },
+}
+```
 
 ---
 
@@ -209,7 +277,7 @@ Gestión de conexiones SSH/serial:
 - transferencias SCP (subida/bajada de archivos o directorios).
 
 Archivo de configuración por defecto de conexiones:
-`~/.config/nvim/lua/kvim/connections.lua`
+`~/.config/kvim/lua/kvim/connections.lua`
 (debe devolver una tabla Lua).
 
 ---
