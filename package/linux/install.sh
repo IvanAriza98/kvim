@@ -9,6 +9,10 @@ CONFIG_DIR="${HOME}/.config/kvim"
 SHARE_DIR="${HOME}/.local/share/kvim"
 BIN_DIR="${HOME}/.local/bin"
 APPLICATIONS_DIR="${HOME}/.local/share/applications"
+ICON_SOURCE_FILE="${REPO_ROOT}/assets/kvim-logo.png"
+ICON_DIR="${HOME}/.local/share/icons/hicolor/256x256/apps"
+ICON_FILE="${ICON_DIR}/kvim.png"
+STATE_FILE="${SHARE_DIR}/install-state"
 LOCAL_CONFIG_FILE="${CONFIG_DIR}/lua/kvim/local.lua"
 LAUNCHER_FILE="${BIN_DIR}/kvim"
 DESKTOP_FILE="${APPLICATIONS_DIR}/kvim.desktop"
@@ -20,8 +24,13 @@ ENABLE_GIT="false"
 ENABLE_SVN="false"
 ENABLE_CONNECTIONS="false"
 NON_INTERACTIVE="false"
-INSTALL_OPTIONAL_DEPS="false"
+INSTALL_OPTIONAL_DEPS="true"
 WARNING_COUNT=0
+PATH_UPDATED="false"
+PATH_RC_FILE=""
+INSTALLED_LAZYGIT="false"
+INSTALLED_LAZYSVN="false"
+LAZY_PREINSTALL_OK="false"
 
 usage() {
     cat <<EOF
@@ -40,7 +49,8 @@ Options:
   --disable-svn          Disable svn module
   --enable-connections   Enable connections module
   --disable-connections  Disable connections module
-  --install-optional-deps Install supported optional dependencies on Arch Linux
+  --install-optional-deps Install supported module dependencies on Arch Linux
+  --skip-optional-deps   Skip automatic module dependency installation
   -h, --help             Show this help
 EOF
 }
@@ -157,7 +167,35 @@ append_local_bin_to_path() {
     fi
 
     printf '\n# Added by KVIM installer\n%s\n' "$path_export_line" >> "$rc_file"
+    PATH_UPDATED="true"
+    PATH_RC_FILE="$rc_file"
     log "Added ~/.local/bin to PATH in ${rc_file}"
+}
+
+write_install_state() {
+    mkdir -p "$SHARE_DIR"
+
+    cat > "$STATE_FILE" <<EOF
+CONFIG_DIR="${CONFIG_DIR}"
+SHARE_DIR="${SHARE_DIR}"
+BIN_DIR="${BIN_DIR}"
+APPLICATIONS_DIR="${APPLICATIONS_DIR}"
+ICON_FILE="${ICON_FILE}"
+STATE_FILE="${STATE_FILE}"
+LOCAL_CONFIG_FILE="${LOCAL_CONFIG_FILE}"
+LAUNCHER_FILE="${LAUNCHER_FILE}"
+DESKTOP_FILE="${DESKTOP_FILE}"
+PATH_RC_FILE="${PATH_RC_FILE}"
+PATH_UPDATED="${PATH_UPDATED}"
+INSTALLED_LAZYGIT="${INSTALLED_LAZYGIT}"
+INSTALLED_LAZYSVN="${INSTALLED_LAZYSVN}"
+LAZY_PREINSTALL_OK="${LAZY_PREINSTALL_OK}"
+INSTALL_OPTIONAL_DEPS="${INSTALL_OPTIONAL_DEPS}"
+ENABLE_WORKSPACES="${ENABLE_WORKSPACES}"
+ENABLE_GIT="${ENABLE_GIT}"
+ENABLE_SVN="${ENABLE_SVN}"
+ENABLE_CONNECTIONS="${ENABLE_CONNECTIONS}"
+EOF
 }
 
 parse_args() {
@@ -193,6 +231,9 @@ parse_args() {
             --install-optional-deps)
                 INSTALL_OPTIONAL_DEPS="true"
                 ;;
+            --skip-optional-deps)
+                INSTALL_OPTIONAL_DEPS="false"
+                ;;
             -h|--help)
                 usage
                 exit 0
@@ -209,7 +250,7 @@ parse_args() {
 
 ask_yes_no() {
     prompt="$1"
-    default_value="$2"
+    default_value="${2:-false}"
 
     if [ "$NON_INTERACTIVE" = "true" ] || [ ! -t 0 ]; then
         printf '%s' "$default_value"
@@ -217,13 +258,7 @@ ask_yes_no() {
     fi
 
     while true; do
-        if [ "$default_value" = "true" ]; then
-            suffix="[Y/n]"
-        else
-            suffix="[y/N]"
-        fi
-
-        printf '%s %s ' "$prompt" "$suffix" >&2
+        printf '%s [y/N] ' "$prompt" >&2
         IFS= read -r answer
 
         case "$answer" in
@@ -241,7 +276,7 @@ ask_yes_no() {
                 ;;
         esac
 
-        printf 'Please answer yes or no.\n' >&2
+        printf 'Please answer yes(y) or no(N).\n' >&2
     done
 }
 
@@ -291,7 +326,19 @@ check_nvim_version() {
 }
 
 check_lazy_bootstrap() {
-    log "lazy.nvim will be bootstrapped automatically on first start"
+    log "lazy.nvim can be preinstalled during setup and will bootstrap on first start if needed"
+}
+
+preinstall_lazy_plugins() {
+    log "Preinstalling lazy.nvim plugins for KVIM"
+
+    if NVIM_APPNAME=kvim nvim --headless "+Lazy! sync" +qa >/dev/null 2>&1; then
+        LAZY_PREINSTALL_OK="true"
+        log "lazy.nvim plugins preinstalled successfully"
+        return 0
+    fi
+
+    warn "lazy.nvim plugin preinstall failed; first launch may still install plugins"
 }
 
 check_dependencies() {
@@ -338,6 +385,38 @@ install_lazygit_arch() {
 
     log "Installing lazygit with pacman"
     sudo pacman -S --needed lazygit
+    INSTALLED_LAZYGIT="true"
+}
+
+install_subversion_arch() {
+    if command_exists "svn"; then
+        log "subversion already installed"
+        return 0
+    fi
+
+    log "Installing subversion with pacman"
+    sudo pacman -S --needed subversion
+}
+
+install_connections_arch() {
+    missing_connections_packages=""
+
+    if ! command_exists "ssh" || ! command_exists "scp" || ! command_exists "ssh-keygen" || ! command_exists "ssh-copy-id"; then
+        missing_connections_packages="openssh"
+    fi
+
+    if ! command_exists "picocom"; then
+        missing_connections_packages="${missing_connections_packages} picocom"
+    fi
+
+    if [ -z "${missing_connections_packages# }" ]; then
+        log "connections dependencies already installed"
+        return 0
+    fi
+
+    log "Installing connections dependencies with pacman"
+    # shellcheck disable=SC2086
+    sudo pacman -S --needed ${missing_connections_packages}
 }
 
 get_lazysvn_latest_tag() {
@@ -377,6 +456,7 @@ install_lazysvn_release() {
 
     cp "$bin_path" "${BIN_DIR}/lazysvn"
     chmod +x "${BIN_DIR}/lazysvn"
+    INSTALLED_LAZYSVN="true"
     rm -rf "$temp_dir"
     trap - RETURN
 
@@ -385,11 +465,13 @@ install_lazysvn_release() {
 
 install_optional_dependencies() {
     if [ "$INSTALL_OPTIONAL_DEPS" != "true" ]; then
+        log "Skipping automatic module dependency installation"
         return 0
     fi
 
     if [ "$(get_os_id)" != "arch" ]; then
-        fail "--install-optional-deps is currently supported only on Arch Linux"
+        warn "Automatic module dependency installation is currently supported only on Arch Linux"
+        return 0
     fi
 
     log "Installing supported optional dependencies for Arch Linux"
@@ -401,10 +483,19 @@ install_optional_dependencies() {
     fi
 
     if [ "$ENABLE_SVN" = "true" ]; then
+        check_required_runtime_for_optional_install "sudo"
+        check_required_runtime_for_optional_install "pacman"
+        install_subversion_arch
         check_required_runtime_for_optional_install "curl"
         check_required_runtime_for_optional_install "tar"
         check_required_runtime_for_optional_install "find"
         install_lazysvn_release
+    fi
+
+    if [ "$ENABLE_CONNECTIONS" = "true" ]; then
+        check_required_runtime_for_optional_install "sudo"
+        check_required_runtime_for_optional_install "pacman"
+        install_connections_arch
     fi
 }
 
@@ -424,6 +515,7 @@ ensure_local_bin_on_path() {
     if [ "$add_to_path" = "true" ]; then
         append_local_bin_to_path "$rc_file"
     else
+        PATH_RC_FILE="$rc_file"
         warn "Skipped PATH update. Add this manually if needed: ${path_export_line}"
     fi
 }
@@ -435,6 +527,7 @@ prepare_directories() {
     mkdir -p "$SHARE_DIR"
     mkdir -p "$BIN_DIR"
     mkdir -p "$APPLICATIONS_DIR"
+    mkdir -p "$ICON_DIR"
 }
 
 install_kvim_config() {
@@ -501,6 +594,16 @@ EOF
     chmod +x "$LAUNCHER_FILE"
 }
 
+install_icon() {
+    if [ ! -f "$ICON_SOURCE_FILE" ]; then
+        warn "KVIM icon source not found: ${ICON_SOURCE_FILE}"
+        return 0
+    fi
+
+    log "Installing KVIM icon to ${ICON_FILE}"
+    cp "$ICON_SOURCE_FILE" "$ICON_FILE"
+}
+
 write_desktop_entry() {
     log "Writing desktop entry to ${DESKTOP_FILE}"
 
@@ -510,6 +613,7 @@ Type=Application
 Name=KVIM
 Comment=KVIM IDE for Neovim
 Exec=${LAUNCHER_FILE} --gui %F
+Icon=kvim
 Terminal=false
 Categories=Development;IDE;TextEditor;
 StartupNotify=true
@@ -548,14 +652,17 @@ EOF
 main() {
     parse_args "$@"
     select_modules
-    check_dependencies
     prepare_directories
     install_optional_dependencies
+    check_dependencies
     install_kvim_config
     write_local_override
+    preinstall_lazy_plugins
     write_launcher
+    install_icon
     write_desktop_entry
     ensure_local_bin_on_path
+    write_install_state
     print_summary
 }
 
