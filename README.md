@@ -80,7 +80,8 @@ cp -r ~/kvim/nvim/* ~/.config/kvim/
 NVIM_APPNAME=kvim nvim
 ```
 
-En el primer arranque, `lazy.nvim` instalará plugins automáticamente.
+El instalador intenta preinstalar los plugins de `lazy.nvim` durante la instalación.
+Si esa fase falla, KVIM seguirá bootstrappeando plugins en el primer arranque.
 
 > El contrato del instalador Linux vive en `package/linux/install.sh`.
 
@@ -96,7 +97,15 @@ En la fase actual, ese script ya puede:
 8. generar `~/.local/share/applications/kvim.desktop`
 9. advertir si `~/.local/bin` no está en `PATH` y ofrecer añadirlo al shell del usuario
 
-En Arch Linux también puede instalar dependencias opcionales soportadas con:
+En Arch Linux instala por defecto las dependencias soportadas de los módulos seleccionados.
+
+Si quieres omitir ese comportamiento:
+
+```bash
+bash package/linux/install.sh --skip-optional-deps
+```
+
+También puedes forzarlo explícitamente con:
 
 ```bash
 bash package/linux/install.sh --install-optional-deps
@@ -105,7 +114,25 @@ bash package/linux/install.sh --install-optional-deps
 Actualmente:
 
 1. `lazygit` se instala con `pacman`
-2. `lazysvn` se descarga como binario release a `~/.local/bin/lazysvn`
+2. `subversion` se instala con `pacman`
+3. `openssh` y `picocom` se instalan con `pacman` cuando se habilita `connections`
+4. `lazysvn` se descarga como binario release a `~/.local/bin/lazysvn`
+
+Desinstalación:
+
+```bash
+bash package/linux/uninstall.sh
+bash package/linux/uninstall.sh --purge --yes
+```
+
+Notas:
+
+1. el desinstalador elimina launcher, desktop entry y estado de KVIM en rutas de usuario
+2. `~/.config/kvim` se elimina por defecto como parte de la desinstalación gestionada
+3. `lazygit` se desinstala automáticamente si `install-state` indica que lo instaló KVIM
+4. `lazysvn` se elimina si `install-state` indica que lo instaló KVIM o si se usa `--remove-lazysvn`
+5. el icono del escritorio se instala en `~/.local/share/icons/hicolor/256x256/apps/kvim.png`
+6. el instalador registra estado en `~/.local/share/kvim/install-state`
 
 Uso del launcher:
 
