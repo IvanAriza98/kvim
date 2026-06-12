@@ -66,6 +66,7 @@ Usa los siguientes subagentes cuando corresponda:
 - `@kvim-module`: creación, edición, eliminación o refactorización de módulos.
 - `@kvim-tester`: creación, actualización o revisión de tests.
 - `@kvim-docs`: documentación técnica, README, guías de uso, changelog o documentación de módulos.
+- `@kvim-intaller`: creación, edición y mantenimiento de los instaladores como desinstaladores.
 
 ## Flujo obligatorio
 
