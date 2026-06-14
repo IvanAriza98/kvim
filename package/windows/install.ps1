@@ -1,6 +1,32 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+Add-Type -AssemblyName System.Drawing
+
+if (-not ([System.Management.Automation.PSTypeName]'Kvim.NativeFonts').Type) {
+    Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+
+namespace Kvim {
+    public static class NativeFonts {
+        public const uint FR_PRIVATE = 0x10;
+        public const uint WM_FONTCHANGE = 0x001D;
+        public static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);
+
+        [DllImport("gdi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int AddFontResourceEx(string lpszFilename, uint fl, IntPtr pdv);
+
+        [DllImport("gdi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool RemoveFontResourceEx(string name, uint fl, IntPtr pdv);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+    }
+}
+"@
+}
+
 $script:Step = "bootstrap"
 $script:RepoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
 $script:ConfigDir = Join-Path $env:LOCALAPPDATA "kvim"
@@ -8,6 +34,9 @@ $script:StateDir = $script:ConfigDir
 $script:BinDir = Join-Path $script:ConfigDir "bin"
 $script:AssetsDir = Join-Path $script:ConfigDir "assets"
 $script:LogsDir = Join-Path $script:ConfigDir "logs"
+$script:FontSourceDir = Join-Path $script:RepoRoot "assets\fonts"
+$script:WindowsFontDir = Join-Path $env:WINDIR "Fonts"
+$script:WindowsTerminalFragmentFile = ""
 $script:StateFile = Join-Path $script:StateDir "install-state"
 $script:ProgressFile = Join-Path $script:LogsDir "install.log"
 $script:StartMenuDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs"
@@ -17,6 +46,10 @@ $script:IconFile = Join-Path $script:AssetsDir "kvim-logo.png"
 $script:LocalConfigFile = Join-Path $script:ConfigDir "lua\kvim\local.lua"
 $script:LauncherFile = Join-Path $script:BinDir "kvim.bat"
 $script:MinNvimVersion = [Version]"0.10.0"
+$script:FontFamily = "FiraCode Nerd Font Mono"
+$script:NeovideFontSize = 12
+$script:TerminalFontSize = 11
+$script:WindowsTerminalProfileGuid = "{2a05876a-4370-4ec3-a0d1-2a711d7fd530}"
 
 $script:EnableWorkspaces = $true
 $script:EnableGit = $false
@@ -27,7 +60,10 @@ $script:ShowHelp = $false
 $script:NeovideFound = $false
 $script:InstalledNeovim = $false
 $script:InstalledNodejs = $false
+$script:InstalledNeovide = $false
+$script:FontsInstalled = $false
 $script:PathUpdated = $false
+$script:WindowsTerminalProfileConfigured = $false
 $script:NvimCmd = "nvim"
 $script:NodeCmd = "node"
 $script:NpmCmd = "npm"
@@ -400,6 +436,17 @@ function Install-NodejsWithWinget {
     return $true
 }
 
+function Install-NeovideWithWinget {
+    Write-Log "Installing Neovide with winget"
+    & winget install --id Neovide.Neovide -e --accept-package-agreements --accept-source-agreements --force
+    if ($LASTEXITCODE -ne 0) {
+        return $false
+    }
+
+    $script:InstalledNeovide = $true
+    return $true
+}
+
 function Ensure-Nodejs {
     if (Test-NodeCommands) {
         Write-Log "Node.js and npm are available"
@@ -446,6 +493,34 @@ function Check-OptionalDependency {
     Write-Log "Found optional dependency: $CommandName"
 }
 
+function Ensure-OptionalNeovide {
+    Check-OptionalDependency -CommandName "neovide"
+    if ($script:NeovideFound) {
+        return
+    }
+
+    Write-WarnLog "Neovide not found; attempting installation with winget"
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Write-WarnLog "winget is not available; continuing without neovide"
+        return
+    }
+
+    if (-not (Install-NeovideWithWinget)) {
+        Write-WarnLog "Could not install neovide with winget; continuing without neovide"
+        return
+    }
+
+    Refresh-SessionPath
+    if (Get-Command neovide -ErrorAction SilentlyContinue) {
+        $script:NeovideFound = $true
+        Write-Log "Neovide ready"
+        return
+    }
+
+    $script:InstalledNeovide = $false
+    Write-WarnLog "Neovide was installed but is not yet usable in the current session; continuing without neovide"
+}
+
 function Prepare-Directories {
     Write-Log "Preparing Windows user directories"
     foreach ($path in @($script:ConfigDir, $script:BinDir, $script:AssetsDir, (Split-Path -Parent $script:LocalConfigFile), $script:LogsDir)) {
@@ -479,6 +554,14 @@ function Write-LocalOverride {
     Write-Log "Writing local module override to $($script:LocalConfigFile)"
     $content = @"
 return {
+    ui = {
+        font = {
+            enabled = true,
+            family = "${script:FontFamily}",
+            neovide_size = ${script:NeovideFontSize},
+            terminal_size = ${script:TerminalFontSize},
+        },
+    },
     modules = {
         workspaces = { enabled = $(Format-Bool $script:EnableWorkspaces) },
         git = { enabled = $(Format-Bool $script:EnableGit) },
@@ -509,6 +592,162 @@ function Copy-Icon {
     }
 
     Write-Log "KVIM icon copied successfully"
+}
+
+function Get-ManagedWindowsFontDefinitions {
+    return @(
+        @{ File = "FiraCodeNerdFontMono-Light.ttf"; RegistryName = "FiraCode Nerd Font Mono Light (TrueType)" },
+        @{ File = "FiraCodeNerdFontMono-Regular.ttf"; RegistryName = "FiraCode Nerd Font Mono (TrueType)" },
+        @{ File = "FiraCodeNerdFontMono-Medium.ttf"; RegistryName = "FiraCode Nerd Font Mono Medium (TrueType)" },
+        @{ File = "FiraCodeNerdFontMono-SemiBold.ttf"; RegistryName = "FiraCode Nerd Font Mono SemiBold (TrueType)" },
+        @{ File = "FiraCodeNerdFontMono-Bold.ttf"; RegistryName = "FiraCode Nerd Font Mono Bold (TrueType)" },
+        @{ File = "FiraCodeNerdFontMono-Retina.ttf"; RegistryName = "FiraCode Nerd Font Mono Retina (TrueType)" }
+    )
+}
+
+function Get-FontFamilyFromFile {
+    param([string]$FontFile)
+
+    try {
+        $collection = New-Object System.Drawing.Text.PrivateFontCollection
+        $collection.AddFontFile($FontFile)
+        if ($collection.Families.Length -gt 0) {
+            return $collection.Families[0].Name
+        }
+    } catch {
+        Write-WarnLog "Could not read font family from $FontFile"
+    }
+
+    return $null
+}
+
+function Register-CurrentSessionFont {
+    param([string]$FontPath)
+
+    $result = [Kvim.NativeFonts]::AddFontResourceEx($FontPath, 0, [IntPtr]::Zero)
+    if ($result -le 0) {
+        Write-WarnLog "Could not load font into current session: $FontPath"
+    }
+}
+
+function Broadcast-FontChange {
+    [void][Kvim.NativeFonts]::SendMessage(
+        [Kvim.NativeFonts]::HWND_BROADCAST,
+        [Kvim.NativeFonts]::WM_FONTCHANGE,
+        [IntPtr]::Zero,
+        [IntPtr]::Zero
+    )
+}
+
+function Install-ManagedFonts {
+    if (-not (Test-Path -LiteralPath $script:FontSourceDir)) {
+        Write-WarnLog "KVIM font source directory not found: $($script:FontSourceDir)"
+        return
+    }
+
+    Write-Log "Installing KVIM fonts globally into $($script:WindowsFontDir)"
+    New-Item -ItemType Directory -Force -Path $script:WindowsFontDir | Out-Null
+    $fontRegistryPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Fonts"
+    $copiedAny = $false
+    $detectedFamily = $null
+
+    foreach ($font in (Get-ManagedWindowsFontDefinitions)) {
+        $source = Join-Path $script:FontSourceDir $font.File
+        if (-not (Test-Path -LiteralPath $source)) {
+            continue
+        }
+
+        $destination = Join-Path $script:WindowsFontDir $font.File
+        try {
+            Copy-Item -LiteralPath $source -Destination $destination -Force
+            New-ItemProperty -Path $fontRegistryPath -Name $font.RegistryName -Value $font.File -PropertyType String -Force | Out-Null
+        } catch {
+            Write-WarnLog "Could not install global font '$($font.File)'. Administrator privileges may be required."
+            continue
+        }
+        Register-CurrentSessionFont -FontPath $destination
+
+        if (-not $detectedFamily -and $font.File -eq "FiraCodeNerdFontMono-Regular.ttf") {
+            $detectedFamily = Get-FontFamilyFromFile -FontFile $destination
+        }
+        if (-not $detectedFamily) {
+            $detectedFamily = Get-FontFamilyFromFile -FontFile $destination
+        }
+
+        $copiedAny = $true
+    }
+
+    if (-not $copiedAny) {
+        Write-WarnLog "No global KVIM fonts were installed. Administrator privileges may be required."
+        return
+    }
+
+    if ($detectedFamily) {
+        $script:FontFamily = $detectedFamily
+        Write-Log "Detected Windows font family for KVIM: $($script:FontFamily)"
+    } else {
+        Write-WarnLog "Could not detect the installed font family name; keeping configured family '$($script:FontFamily)'"
+    }
+
+    Broadcast-FontChange
+    $script:FontsInstalled = $true
+    Write-Log "KVIM fonts installed successfully"
+}
+
+function Resolve-WindowsTerminalFragmentFile {
+    $candidateBases = @(
+        (Join-Path $env:LOCALAPPDATA "Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\Fragments\KVIM"),
+        (Join-Path $env:LOCALAPPDATA "Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\Fragments\KVIM"),
+        (Join-Path $env:LOCALAPPDATA "Microsoft\Windows Terminal\Fragments\KVIM")
+    )
+
+    foreach ($base in $candidateBases) {
+        $parent = Split-Path -Parent $base
+        if (Test-Path -LiteralPath $parent) {
+            return (Join-Path $base "kvim.json")
+        }
+    }
+
+    return $null
+}
+
+function Configure-WindowsTerminalProfile {
+    if (-not (Get-Command wt -ErrorAction SilentlyContinue)) {
+        Write-WarnLog "Windows Terminal not found; skipping KVIM profile configuration"
+        return
+    }
+
+    $fragmentFile = Resolve-WindowsTerminalFragmentFile
+    if (-not $fragmentFile) {
+        Write-WarnLog "Could not resolve a Windows Terminal fragments directory; skipping KVIM profile configuration"
+        return
+    }
+
+    $script:WindowsTerminalFragmentFile = $fragmentFile
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $fragmentFile) | Out-Null
+
+    $commandline = 'cmd.exe /c "' + $script:LauncherFile + '"'
+    $profile = [ordered]@{
+        '$schema' = 'https://aka.ms/terminal-profiles-schema'
+        profiles = @(
+            [ordered]@{
+                guid = $script:WindowsTerminalProfileGuid
+                name = 'KVIM'
+                commandline = $commandline
+                startingDirectory = '%USERPROFILE%'
+                font = [ordered]@{
+                    face = $script:FontFamily
+                    size = $script:TerminalFontSize
+                }
+                icon = if (Test-Path -LiteralPath $script:IconFile) { $script:IconFile } else { $null }
+            }
+        )
+    }
+
+    $json = $profile | ConvertTo-Json -Depth 6
+    Set-Content -LiteralPath $fragmentFile -Value $json
+    $script:WindowsTerminalProfileConfigured = $true
+    Write-Log "Windows Terminal KVIM profile written to $fragmentFile"
 }
 
 function Write-Launcher {
@@ -603,17 +842,26 @@ function Write-InstallState {
         "BIN_DIR=$($script:BinDir)",
         "ASSETS_DIR=$($script:AssetsDir)",
         "LOGS_DIR=$($script:LogsDir)",
+        "FONT_SOURCE_DIR=$($script:FontSourceDir)",
+        "WINDOWS_FONT_DIR=$($script:WindowsFontDir)",
         "START_MENU_DIR=$($script:StartMenuDir)",
         "SHORTCUT_FILE=$($script:ShortcutFile)",
+        "WINDOWS_TERMINAL_FRAGMENT_FILE=$($script:WindowsTerminalFragmentFile)",
         "STATE_FILE=$($script:StateFile)",
         "PROGRESS_FILE=$($script:ProgressFile)",
         "LOCAL_CONFIG_FILE=$($script:LocalConfigFile)",
         "LAUNCHER_FILE=$($script:LauncherFile)",
         "ICON_FILE=$($script:IconFile)",
+        "FONT_FAMILY=$($script:FontFamily)",
+        "NEOVIDE_FONT_SIZE=$($script:NeovideFontSize)",
+        "TERMINAL_FONT_SIZE=$($script:TerminalFontSize)",
         "NEOVIDE_FOUND=$(Format-Bool $script:NeovideFound)",
         "INSTALLED_NEOVIM=$(Format-Bool $script:InstalledNeovim)",
         "INSTALLED_NODEJS=$(Format-Bool $script:InstalledNodejs)",
+        "INSTALLED_NEOVIDE=$(Format-Bool $script:InstalledNeovide)",
+        "FONTS_INSTALLED=$(Format-Bool $script:FontsInstalled)",
         "PATH_UPDATED=$(Format-Bool $script:PathUpdated)",
+        "WINDOWS_TERMINAL_PROFILE_CONFIGURED=$(Format-Bool $script:WindowsTerminalProfileConfigured)",
         "ENABLE_WORKSPACES=$(Format-Bool $script:EnableWorkspaces)",
         "ENABLE_GIT=$(Format-Bool $script:EnableGit)",
         "ENABLE_SVN=$(Format-Bool $script:EnableSvn)",
@@ -636,6 +884,8 @@ function Print-Summary {
     Write-Host "  Config:       $($script:ConfigDir)"
     Write-Host "  Launcher:     $($script:LauncherFile)"
     Write-Host "  Start Menu:   $($script:ShortcutFile)"
+    Write-Host "  Windows font: $($script:WindowsFontDir)"
+    Write-Host "  WT profile:   $($script:WindowsTerminalFragmentFile)"
     Write-Host "  Local config: $($script:LocalConfigFile)"
     Write-Host "  Icon:         $($script:IconFile)"
     Write-Host "  State file:   $($script:StateFile)"
@@ -649,9 +899,15 @@ function Print-Summary {
     Write-Host ""
     Write-Host "Optional dependencies:"
     Write-Host "  neovide: $(Format-Bool $script:NeovideFound)"
+    Write-Host "  font family: $($script:FontFamily)"
+    Write-Host "  neovide font size: $($script:NeovideFontSize)"
+    Write-Host "  terminal font size: $($script:TerminalFontSize)"
     Write-Host "  neovim installed by KVIM: $(Format-Bool $script:InstalledNeovim)"
     Write-Host "  nodejs installed by KVIM: $(Format-Bool $script:InstalledNodejs)"
+    Write-Host "  neovide installed by KVIM: $(Format-Bool $script:InstalledNeovide)"
+    Write-Host "  fonts installed by KVIM: $(Format-Bool $script:FontsInstalled)"
     Write-Host "  path updated: $(Format-Bool $script:PathUpdated)"
+    Write-Host "  Windows Terminal KVIM profile: $(Format-Bool $script:WindowsTerminalProfileConfigured)"
     Write-Host ""
     Write-Host "Run KVIM with:"
     Write-Host "  $($script:LauncherFile)"
@@ -675,7 +931,7 @@ try {
     Check-RequiredDependency -CommandName "git"
 
     Set-Step "check_optional_neovide"
-    Check-OptionalDependency -CommandName "neovide"
+    Ensure-OptionalNeovide
 
     Set-Step "prepare_directories"
     Prepare-Directories
@@ -689,8 +945,14 @@ try {
     Set-Step "copy_icon"
     Copy-Icon
 
+    Set-Step "install_fonts"
+    Install-ManagedFonts
+
     Set-Step "write_launcher"
     Write-Launcher
+
+    Set-Step "configure_windows_terminal_profile"
+    Configure-WindowsTerminalProfile
 
     Set-Step "ensure_user_path"
     Ensure-UserPath

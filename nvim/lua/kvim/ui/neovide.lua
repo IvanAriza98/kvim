@@ -31,10 +31,28 @@ function M.setup()
     end
 
     local config = require("kvim.config").get()
+    local font_utils = require("kvim.ui.font")
+    local font = font_utils.get_config()
     local neovide = ((config.ui or {}).neovide) or {}
 
     if neovide.enabled == false then
         return
+    end
+
+    if font.enabled ~= false and type(font.family) == "string" and font.family ~= "" then
+        local guifont_value = font_utils.format_guifont(font.family, font.neovide_size or 12)
+        local ok, err = pcall(function()
+            vim.o.guifont = guifont_value
+        end)
+
+        if not ok then
+            vim.schedule(function()
+                vim.notify(
+                    string.format("KVIM could not apply Neovide font '%s': %s", guifont_value, tostring(err)),
+                    vim.log.levels.WARN
+                )
+            end)
+        end
     end
 
     if neovide.scale_factor ~= nil then

@@ -43,11 +43,14 @@ Actualmente hace lo siguiente:
 - instala Node.js LTS con `winget` si hace falta;
 - exige `git`;
 - detecta `neovide` como opcional;
+- intenta instalar `neovide` con `winget` si falta;
 - crea `%LOCALAPPDATA%\kvim`;
 - copia `nvim/` dentro de `%LOCALAPPDATA%\kvim`;
 - genera `%LOCALAPPDATA%\kvim\lua\kvim\local.lua`;
 - copia `assets/kvim-logo.png` a `%LOCALAPPDATA%\kvim\assets\kvim-logo.png` si existe;
+- instala variantes `FiraCode Nerd Font Mono` globalmente cuando tiene permisos suficientes;
 - genera el launcher `%LOCALAPPDATA%\kvim\bin\kvim.bat`;
+- crea un perfil específico `KVIM` en Windows Terminal;
 - añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario;
 - crea `KVIM.lnk` en el menú inicio del usuario;
 - escribe un manifiesto `install-state`;
@@ -57,6 +60,9 @@ El desinstalador actual:
 
 - carga `install-state` si existe;
 - elimina launcher, shortcut, icono, estado y directorio raíz `%LOCALAPPDATA%\kvim`;
+- elimina las fuentes gestionadas por KVIM cuando el estado lo indica;
+- elimina el perfil específico `KVIM` de Windows Terminal cuando el estado lo indica;
+- desinstala `neovide` con `winget` solo si el estado indica que KVIM lo instaló;
 - quita `%LOCALAPPDATA%\kvim\bin` del `PATH` de usuario si el estado indica que KVIM lo añadió;
 - desinstala `Neovim` y `Node.js LTS` con `winget` solo si `install-state` indica que KVIM los instaló.
 
@@ -74,6 +80,7 @@ El flujo Windows usa estas rutas:
 %LOCALAPPDATA%\kvim\logs\install.log
 %LOCALAPPDATA%\kvim\lua\kvim\local.lua
 %LOCALAPPDATA%\kvim\install-state
+%WINDIR%\Fonts
 %APPDATA%\Microsoft\Windows\Start Menu\Programs\KVIM.lnk
 %TEMP%\kvim-uninstall.log
 ```
@@ -145,16 +152,18 @@ Orden real del script:
 2. valida o instala `nvim`;
 3. valida o instala `node` y `npm`;
 4. verifica `git`;
-5. detecta `neovide` como opcional;
+5. detecta `neovide` como opcional y lo intenta instalar con `winget` si falta;
 6. crea directorios de trabajo bajo `%LOCALAPPDATA%\kvim`;
 7. copia `nvim\*` a `%LOCALAPPDATA%\kvim`;
 8. escribe `lua\kvim\local.lua`;
 9. copia el icono si existe en el repo;
-10. escribe `%LOCALAPPDATA%\kvim\bin\kvim.bat`;
-11. añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario;
-12. crea `KVIM.lnk` en el menú inicio;
-13. escribe `install-state`;
-14. imprime resumen final.
+10. instala fuentes gestionadas por KVIM para el usuario actual;
+11. escribe `%LOCALAPPDATA%\kvim\bin\kvim.bat`;
+12. crea un perfil específico `KVIM` en Windows Terminal;
+13. añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario;
+14. crea `KVIM.lnk` en el menú inicio;
+15. escribe `install-state`;
+16. imprime resumen final.
 
 Comportamiento importante:
 
@@ -210,10 +219,29 @@ Si falta `winget` y Neovim o Node.js no están disponibles, el instalador falla.
 
 Estado real:
 
-- `neovide` solo se detecta;
-- no se instala automáticamente;
+- si `neovide` falta, el instalador intenta instalarlo con `winget`;
+- si esa instalación falla, el flujo continúa sin `neovide`;
 - no se valida ninguna dependencia opcional específica de `git`, `svn` o `connections`;
 - tampoco se instala ninguna dependencia adicional por módulo.
+
+## Configuración de fuentes
+
+KVIM usa actualmente esta familia como base común para GUI y terminales soportados:
+
+- `FiraCode Nerd Font Mono`
+
+Tamaños por defecto actuales:
+
+- `neovide_size = 12`
+- `terminal_size = 11`
+
+La instalación Windows aplica esta familia a:
+
+- `neovide`, a través de la configuración Lua generada/cargada por KVIM;
+- un perfil específico `KVIM` en Windows Terminal.
+
+La instalación Windows no puede cambiar la fuente de todos los perfiles existentes de Windows Terminal ni de una sesión ya abierta en otro perfil.
+La instalación global de fuentes puede requerir permisos de administrador.
 
 ## Configuración local generada
 
@@ -285,6 +313,9 @@ El manifiesto actual registra al menos:
 - si `neovide` fue detectado;
 - si Neovim fue instalado por KVIM;
 - si Node.js fue instalado por KVIM;
+- si neovide fue instalado por KVIM;
+- si las fuentes fueron instaladas por KVIM;
+- si el perfil específico de Windows Terminal fue configurado por KVIM;
 - si KVIM añadió `%LOCALAPPDATA%\kvim\bin` al `PATH`.
 
 Ese archivo es la fuente de verdad para la desinstalación gestionada.
@@ -365,6 +396,22 @@ Consecuencias reales:
 - si `neovide` no está disponible, el launcher hará fallback a terminal;
 - si la creación COM del shortcut falla, la instalación continúa con warning.
 
+## Perfil específico de Windows Terminal
+
+El instalador intenta crear un fragmento de perfil específico `KVIM` para Windows Terminal.
+
+Comportamiento actual:
+
+- usa la familia `FiraCode Nerd Font Mono`;
+- usa tamaño de terminal `11` por defecto;
+- crea un perfil separado para KVIM en lugar de alterar el perfil por defecto del usuario;
+- el perfil apunta al launcher de KVIM.
+
+Consecuencia importante:
+
+- esta integración no cambia la fuente de una sesión de Windows Terminal ya abierta en otro perfil;
+- la fuente se aplica cuando KVIM se abre desde el perfil específico `KVIM`.
+
 ## Criterios actuales de uninstall de dependencias
 
 El desinstalador solo intenta quitar dependencias externas cuando `install-state` indica que KVIM las instaló.
@@ -373,6 +420,12 @@ Criterios actuales:
 
 - `INSTALLED_NEOVIM=true` -> intenta `winget uninstall --id Neovim.Neovim`;
 - `INSTALLED_NODEJS=true` -> intenta `winget uninstall --id OpenJS.NodeJS.LTS`.
+- `INSTALLED_NEOVIDE=true` -> intenta `winget uninstall --id Neovide.Neovide`.
+
+Además, si el estado lo indica, el desinstalador retira:
+
+- las fuentes `FiraCode Nerd Font Mono` gestionadas por KVIM a nivel global;
+- el fragmento del perfil específico `KVIM` en Windows Terminal.
 
 No desinstala automáticamente:
 
@@ -398,6 +451,7 @@ Si `winget` no está disponible durante el uninstall:
 - `%LOCALAPPDATA%\kvim` se sobreescribe al copiar `nvim\*`;
 - el launcher GUI reenvía argumentos solo hasta `%9`;
 - el launcher depende de `nvim` y `neovide` en `PATH`;
+- la integración con Windows Terminal es específica del perfil `KVIM`, no del perfil por defecto del usuario;
 - no hay acceso directo en escritorio;
 - no hay asociación de archivos ni integración con “Open with”;
 - si falla la sesión justo después de `winget`, puede quedar dependencia instalada sin perfil KVIM terminado;

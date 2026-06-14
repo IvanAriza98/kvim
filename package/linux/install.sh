@@ -10,14 +10,22 @@ SHARE_DIR="${HOME}/.local/share/kvim"
 BIN_DIR="${HOME}/.local/bin"
 APPLICATIONS_DIR="${HOME}/.local/share/applications"
 ICON_SOURCE_FILE="${REPO_ROOT}/assets/kvim-logo.png"
+FONT_SOURCE_DIR="${REPO_ROOT}/assets/fonts"
 ICON_DIR="${HOME}/.local/share/icons/hicolor/256x256/apps"
 ICON_FILE="${ICON_DIR}/kvim.png"
+FONTS_DIR="${HOME}/.local/share/fonts/kvim"
+FOOT_CONFIG_DIR="${HOME}/.config/foot"
+FOOT_CONFIG_FILE="${FOOT_CONFIG_DIR}/foot.ini"
+FOOT_KVIM_INCLUDE_FILE="${FOOT_CONFIG_DIR}/kvim.ini"
 STATE_FILE="${SHARE_DIR}/install-state"
 LOCAL_CONFIG_FILE="${CONFIG_DIR}/lua/kvim/local.lua"
 LAUNCHER_FILE="${BIN_DIR}/kvim"
 DESKTOP_FILE="${APPLICATIONS_DIR}/kvim.desktop"
 MIN_NVIM_VERSION="0.10.0"
 LAZYSVN_REPO_API="https://api.github.com/repos/sawirricardo/lazysvn/releases/latest"
+FONT_FAMILY="FiraCode Nerd Font Mono"
+NEOVIDE_FONT_SIZE="12"
+TERMINAL_FONT_SIZE="11"
 
 ENABLE_WORKSPACES="true"
 ENABLE_GIT="false"
@@ -30,7 +38,10 @@ PATH_UPDATED="false"
 PATH_RC_FILE=""
 INSTALLED_LAZYGIT="false"
 INSTALLED_LAZYSVN="false"
+INSTALLED_NEOVIDE="false"
 LAZY_PREINSTALL_OK="false"
+FONTS_INSTALLED="false"
+FOOT_CONFIG_UPDATED="false"
 
 usage() {
     cat <<EOF
@@ -181,6 +192,9 @@ SHARE_DIR="${SHARE_DIR}"
 BIN_DIR="${BIN_DIR}"
 APPLICATIONS_DIR="${APPLICATIONS_DIR}"
 ICON_FILE="${ICON_FILE}"
+FONTS_DIR="${FONTS_DIR}"
+FOOT_CONFIG_FILE="${FOOT_CONFIG_FILE}"
+FOOT_KVIM_INCLUDE_FILE="${FOOT_KVIM_INCLUDE_FILE}"
 STATE_FILE="${STATE_FILE}"
 LOCAL_CONFIG_FILE="${LOCAL_CONFIG_FILE}"
 LAUNCHER_FILE="${LAUNCHER_FILE}"
@@ -189,7 +203,13 @@ PATH_RC_FILE="${PATH_RC_FILE}"
 PATH_UPDATED="${PATH_UPDATED}"
 INSTALLED_LAZYGIT="${INSTALLED_LAZYGIT}"
 INSTALLED_LAZYSVN="${INSTALLED_LAZYSVN}"
+INSTALLED_NEOVIDE="${INSTALLED_NEOVIDE}"
 LAZY_PREINSTALL_OK="${LAZY_PREINSTALL_OK}"
+FONTS_INSTALLED="${FONTS_INSTALLED}"
+FOOT_CONFIG_UPDATED="${FOOT_CONFIG_UPDATED}"
+FONT_FAMILY="${FONT_FAMILY}"
+NEOVIDE_FONT_SIZE="${NEOVIDE_FONT_SIZE}"
+TERMINAL_FONT_SIZE="${TERMINAL_FONT_SIZE}"
 INSTALL_OPTIONAL_DEPS="${INSTALL_OPTIONAL_DEPS}"
 ENABLE_WORKSPACES="${ENABLE_WORKSPACES}"
 ENABLE_GIT="${ENABLE_GIT}"
@@ -419,6 +439,22 @@ install_connections_arch() {
     sudo pacman -S --needed ${missing_connections_packages}
 }
 
+install_neovide_arch() {
+    if command_exists "neovide"; then
+        log "neovide already installed"
+        return 0
+    fi
+
+    log "Installing neovide with pacman"
+    if sudo pacman -S --needed neovide; then
+        INSTALLED_NEOVIDE="true"
+        return 0
+    fi
+
+    warn "Could not install neovide automatically; continuing without neovide"
+    return 0
+}
+
 get_lazysvn_latest_tag() {
     curl -fsSL "$LAZYSVN_REPO_API" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n 1
 }
@@ -497,6 +533,10 @@ install_optional_dependencies() {
         check_required_runtime_for_optional_install "pacman"
         install_connections_arch
     fi
+
+    check_required_runtime_for_optional_install "sudo"
+    check_required_runtime_for_optional_install "pacman"
+    install_neovide_arch
 }
 
 ensure_local_bin_on_path() {
@@ -528,6 +568,74 @@ prepare_directories() {
     mkdir -p "$BIN_DIR"
     mkdir -p "$APPLICATIONS_DIR"
     mkdir -p "$ICON_DIR"
+    mkdir -p "$FONTS_DIR"
+    mkdir -p "$FOOT_CONFIG_DIR"
+}
+
+install_user_fonts() {
+    log "Installing KVIM fonts into ${FONTS_DIR}"
+
+    if [ ! -d "$FONT_SOURCE_DIR" ]; then
+        warn "KVIM font source directory not found: ${FONT_SOURCE_DIR}"
+        return 0
+    fi
+
+    found_fonts="false"
+    for font_file in "$FONT_SOURCE_DIR"/FiraCodeNerdFontMono-*.ttf; do
+        if [ ! -f "$font_file" ]; then
+            continue
+        fi
+
+        cp "$font_file" "$FONTS_DIR/"
+        found_fonts="true"
+    done
+
+    if [ "$found_fonts" != "true" ]; then
+        warn "No FiraCode Nerd Font Mono font files were found in ${FONT_SOURCE_DIR}"
+        return 0
+    fi
+
+    FONTS_INSTALLED="true"
+
+    if command_exists "fc-cache"; then
+        log "Refreshing font cache with fc-cache"
+        fc-cache -f "$FONTS_DIR" >/dev/null 2>&1 || warn "fc-cache failed for ${FONTS_DIR}"
+    else
+        warn "fc-cache not found; the new fonts may not be visible until the font cache is refreshed manually"
+    fi
+}
+
+ensure_foot_include_line() {
+    if [ -f "$FOOT_CONFIG_FILE" ] && grep -Fq '# Added by KVIM installer - foot font include' "$FOOT_CONFIG_FILE"; then
+        log "foot font include already present in ${FOOT_CONFIG_FILE}"
+        return 0
+    fi
+
+    if [ ! -f "$FOOT_CONFIG_FILE" ]; then
+        printf '# Added by KVIM installer - foot font include\ninclude=%s\n' "$FOOT_KVIM_INCLUDE_FILE" > "$FOOT_CONFIG_FILE"
+        return 0
+    fi
+
+    temp_file="$(mktemp)"
+    {
+        printf '# Added by KVIM installer - foot font include\ninclude=%s\n\n' "$FOOT_KVIM_INCLUDE_FILE"
+        cat "$FOOT_CONFIG_FILE"
+    } > "$temp_file"
+    mv "$temp_file" "$FOOT_CONFIG_FILE"
+}
+
+configure_foot_font() {
+    log "Configuring foot to use ${FONT_FAMILY}"
+
+    cat > "$FOOT_KVIM_INCLUDE_FILE" <<EOF
+# Added by KVIM installer - managed foot font settings
+[main]
+font=${FONT_FAMILY}:size=${TERMINAL_FONT_SIZE}
+EOF
+
+    ensure_foot_include_line
+    FOOT_CONFIG_UPDATED="true"
+    log "foot font configuration written to ${FOOT_KVIM_INCLUDE_FILE}"
 }
 
 install_kvim_config() {
@@ -631,6 +739,8 @@ Installed paths:
   Local config: ${LOCAL_CONFIG_FILE}
   Launcher:     ${LAUNCHER_FILE}
   Desktop:      ${DESKTOP_FILE}
+  Fonts dir:    ${FONTS_DIR}
+  foot config:  ${FOOT_KVIM_INCLUDE_FILE}
 
 Selected modules:
   workspaces:  ${ENABLE_WORKSPACES}
@@ -643,6 +753,9 @@ Dependency checks:
   Warnings:              ${WARNING_COUNT}
   lazy.nvim:             bootstrap on first start
   Optional installs:     ${INSTALL_OPTIONAL_DEPS}
+  Font family:           ${FONT_FAMILY}
+  Neovide font size:     ${NEOVIDE_FONT_SIZE}
+  foot font size:        ${TERMINAL_FONT_SIZE}
 
 Next planned installer phases will add:
   - health checks inside KVIM
@@ -658,6 +771,8 @@ main() {
     install_kvim_config
     write_local_override
     preinstall_lazy_plugins
+    install_user_fonts
+    configure_foot_font
     write_launcher
     install_icon
     write_desktop_entry

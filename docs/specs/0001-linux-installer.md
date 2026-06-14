@@ -38,6 +38,9 @@ Actualmente hace lo siguiente:
 - genera el launcher `~/.local/bin/kvim`;
 - soporta `kvim --gui` usando `neovide`;
 - genera `~/.local/share/applications/kvim.desktop`;
+- instala `FiraCode Nerd Font Mono` en `~/.local/share/fonts/kvim`;
+- configura `foot` para usar esa familia mediante un include gestionado;
+- intenta instalar `neovide` automáticamente en Arch Linux si falta;
 - comprueba si `~/.local/bin` está en `PATH` y puede añadirlo al shell del usuario;
 - intenta preinstalar plugins de `lazy.nvim` en modo headless;
 - instala por defecto en Arch Linux las dependencias soportadas de los módulos seleccionados, salvo que se desactive explícitamente;
@@ -59,6 +62,9 @@ El instalador usa estas rutas:
 ~/.local/bin/lazysvn
 ~/.local/share/icons/hicolor/256x256/apps/kvim.png
 ~/.local/share/applications/kvim.desktop
+~/.local/share/fonts/kvim
+~/.config/foot/foot.ini
+~/.config/foot/kvim.ini
 ```
 
 Notas:
@@ -102,6 +108,9 @@ Comportamiento actual:
 - elimina `~/.local/share/kvim`;
 - elimina `~/.config/kvim` por defecto;
 - elimina `~/.local/share/icons/hicolor/256x256/apps/kvim.png`;
+- elimina `~/.local/share/fonts/kvim` si fue gestionado por KVIM;
+- elimina la inclusión gestionada de `foot` si fue gestionada por KVIM;
+- desinstala `neovide` si el manifiesto indica que KVIM lo instaló;
 - quita el bloque de `PATH` si el manifiesto indica que KVIM lo añadió;
 - desinstala `lazygit` si el manifiesto indica que KVIM lo instaló;
 - puede eliminar `~/.local/bin/lazysvn` si fue instalado por KVIM o si se fuerza con `--remove-lazysvn`;
@@ -152,11 +161,14 @@ Orden real del script:
 6. copia la configuración KVIM a `~/.config/kvim`;
 7. escribe `local.lua`;
 8. intenta preinstalar plugins de `lazy.nvim` en modo headless;
-9. escribe el launcher `kvim`;
-10. escribe el `desktop entry`;
-11. comprueba `PATH` y ofrece añadir `~/.local/bin`;
-12. escribe `install-state`;
-13. imprime resumen final.
+9. instala fuentes de usuario para KVIM;
+10. configura `foot` para usar esa familia;
+11. intenta instalar `neovide` automáticamente en Arch Linux si falta;
+12. escribe el launcher `kvim`;
+13. escribe el `desktop entry`;
+14. comprueba `PATH` y ofrece añadir `~/.local/bin`;
+15. escribe `install-state`;
+16. imprime resumen final.
 
 ## Dependencias
 
@@ -169,7 +181,8 @@ Además, `nvim` debe cumplir `>= 0.10.0`.
 
 ### Opcionales generales
 
-- `neovide`: recomendado para `kvim --gui` y para el lanzador de escritorio.
+- `neovide`: recomendado para `kvim --gui` y para el lanzador de escritorio; en Arch Linux el instalador intenta provisionarlo automáticamente.
+- `fc-cache`: recomendado para refrescar la caché de fuentes tras instalar `FiraCode Nerd Font Mono`.
 
 ### Opcionales por módulo
 
@@ -257,6 +270,26 @@ kvim --gui file.lua
 ```
 
 Si se usa `kvim --gui` y `neovide` no existe en `PATH`, el launcher termina con error.
+
+## Fuentes y terminal soportado
+
+La instalación Linux actual usa como familia común:
+
+- `FiraCode Nerd Font Mono`
+
+Comportamiento actual:
+
+- las fuentes se copian a `~/.local/share/fonts/kvim`;
+- si existe `fc-cache`, el instalador intenta refrescar la caché de fuentes;
+- `neovide` puede usar esa familia a través de la configuración Lua de KVIM;
+- `foot` se configura mediante `~/.config/foot/kvim.ini` y una línea `include=` gestionada en `~/.config/foot/foot.ini`.
+- si `neovide` falta y el sistema es Arch Linux, el instalador intenta instalarlo con `pacman`;
+- si la instalación de `neovide` falla, KVIM sigue instalándose sin GUI.
+
+Límite importante:
+
+- no existe un mecanismo universal para cambiar la fuente solo para el proceso `kvim` en cualquier terminal TUI;
+- la integración actual de terminal está implementada específicamente para `foot`.
 
 ## Uso de `NVIM_APPNAME=kvim`
 

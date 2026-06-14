@@ -102,6 +102,13 @@ local defaults = {
             style = "mocha", -- mocha, macchiato, frappe, latte
         },
 
+        font = {
+            enabled = true,
+            family = "FiraCode Nerd Font Mono",
+            neovide_size = 12,
+            terminal_size = 11,
+        },
+
         neovide = {
             enabled = true,
             scale_factor = 1.0,

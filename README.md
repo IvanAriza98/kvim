@@ -102,14 +102,16 @@ Este entrypoint Windows actual hace:
 1. garantiza `nvim >= 0.10.0` usando `winget` si falta o es demasiado antiguo
 2. garantiza `node` y `npm` usando `winget` si faltan
 3. verifica `git`
-4. detecta `neovide` como opcional
+4. detecta `neovide` como opcional e intenta instalarlo automáticamente si falta
 5. copia la configuración `nvim/`
 6. genera `local.lua`
 7. genera `kvim.bat`
-8. añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario
-9. crea acceso directo en el menú inicio del usuario
-10. copia el icono de KVIM
-11. escribe `install-state`
+8. instala `FiraCode Nerd Font Mono` globalmente en Windows si tiene permisos suficientes
+9. crea un perfil específico `KVIM` en Windows Terminal
+10. añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario
+11. crea acceso directo en el menú inicio del usuario
+12. copia el icono de KVIM
+13. escribe `install-state`
 
 Importante:
 
@@ -119,6 +121,15 @@ Importante:
 
 En Windows, `kvim --gui` intenta usar `neovide` y, si no está disponible o falla al arrancar, hace fallback a terminal con `nvim`.
 
+Fuentes actuales:
+
+- KVIM configura `neovide` para usar `FiraCode Nerd Font Mono` tanto en Windows como en Linux.
+- En Linux, el instalador instala esa familia para el usuario actual y configura `foot` para usarla.
+- En Windows, el instalador intenta instalar esa familia globalmente en el sistema y crea un perfil específico `KVIM` en Windows Terminal con esa fuente.
+- En Windows, si `neovide` falta, el instalador intenta instalarlo con `winget`.
+- En Linux, si `neovide` falta, el instalador intenta instalarlo automáticamente solo en Arch Linux.
+- No existe un mecanismo universal para cambiar la fuente solo para el proceso `kvim` en cualquier terminal; la integración TUI actual es específica para `foot` y `Windows Terminal`.
+
 Diagnóstico recomendado si falla la instalación en Windows:
 
 1. revisa la salida con prefijos `[kvim-windows-installer]`
@@ -126,7 +137,8 @@ Diagnóstico recomendado si falla la instalación en Windows:
 3. revisa `%LOCALAPPDATA%\kvim\logs\install.log` si existe
 4. si el fallo ocurrió justo después de `winget`, abre una terminal nueva y vuelve a ejecutar `package\windows\install.ps1`
 
-Además, el uninstall Windows v1 retirará `Neovim` y `Node.js` solo si `install-state` indica que fueron instalados por KVIM.
+Además, el uninstall Windows v1 retirará `Neovim`, `Node.js` y `neovide` solo si `install-state` indica que fueron instalados por KVIM.
+También retirará las fuentes gestionadas por KVIM y el perfil específico `KVIM` de Windows Terminal cuando el estado indique que fueron configurados por KVIM.
 
 Todavía no cubre:
 
@@ -144,7 +156,10 @@ En la fase actual, ese script ya puede:
 6. generar `~/.local/bin/kvim` para ejecutar KVIM en terminal
 7. soportar `kvim --gui` para abrir KVIM con `neovide`
 8. generar `~/.local/share/applications/kvim.desktop`
-9. advertir si `~/.local/bin` no está en `PATH` y ofrecer añadirlo al shell del usuario
+9. instalar `FiraCode Nerd Font Mono` para el usuario actual
+10. configurar `foot` para usar esa familia
+11. intentar instalar `neovide` automáticamente en Arch Linux si falta
+12. advertir si `~/.local/bin` no está en `PATH` y ofrecer añadirlo al shell del usuario
 
 En Arch Linux instala por defecto las dependencias soportadas de los módulos seleccionados.
 
@@ -185,10 +200,14 @@ Notas:
 1. el desinstalador elimina launcher, desktop entry y estado de KVIM en rutas de usuario
 2. `~/.config/kvim` se elimina por defecto como parte de la desinstalación gestionada
 3. en Windows, `Neovim` y `Node.js` se desinstalan automáticamente solo si `install-state` indica que los instaló KVIM
-4. `lazygit` se desinstala automáticamente si `install-state` indica que lo instaló KVIM
-5. `lazysvn` se elimina si `install-state` indica que lo instaló KVIM o si se usa `--remove-lazysvn`
-6. el icono del escritorio se instala en `~/.local/share/icons/hicolor/256x256/apps/kvim.png`
-7. el instalador registra estado en `~/.local/share/kvim/install-state`
+4. en Windows, `neovide` se desinstala automáticamente solo si `install-state` indica que lo instaló KVIM
+5. en Windows, las fuentes globales gestionadas por KVIM y el perfil `KVIM` de Windows Terminal se retiran si `install-state` indica que fueron configurados por KVIM
+6. en Linux, las fuentes de usuario de KVIM y la inclusión gestionada de `foot` se retiran si `install-state` indica que fueron configuradas por KVIM
+7. en Linux, `neovide` se desinstala automáticamente solo si `install-state` indica que lo instaló KVIM
+8. `lazygit` se desinstala automáticamente si `install-state` indica que lo instaló KVIM
+9. `lazysvn` se elimina si `install-state` indica que lo instaló KVIM o si se usa `--remove-lazysvn`
+10. el icono del escritorio se instala en `~/.local/share/icons/hicolor/256x256/apps/kvim.png`
+11. el instalador registra estado en `~/.local/share/kvim/install-state`
 
 Uso del launcher:
 

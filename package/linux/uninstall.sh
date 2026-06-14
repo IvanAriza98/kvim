@@ -12,6 +12,10 @@ STATE_FILE="${SHARE_DIR}/install-state"
 LAUNCHER_FILE="${BIN_DIR}/kvim"
 DESKTOP_FILE="${APPLICATIONS_DIR}/kvim.desktop"
 LAZYSVN_FILE="${BIN_DIR}/lazysvn"
+FONTS_DIR="${HOME}/.local/share/fonts/kvim"
+FOOT_CONFIG_DIR="${HOME}/.config/foot"
+FOOT_CONFIG_FILE="${FOOT_CONFIG_DIR}/foot.ini"
+FOOT_KVIM_INCLUDE_FILE="${FOOT_CONFIG_DIR}/kvim.ini"
 
 NON_INTERACTIVE="false"
 PURGE="false"
@@ -22,6 +26,9 @@ PATH_UPDATED="false"
 PATH_RC_FILE=""
 INSTALLED_LAZYGIT="false"
 INSTALLED_LAZYSVN="false"
+INSTALLED_NEOVIDE="false"
+FONTS_INSTALLED="false"
+FOOT_CONFIG_UPDATED="false"
 
 usage() {
     cat <<EOF
@@ -163,6 +170,8 @@ KVIM uninstall plan:
     - ${LAZYSVN_FILE} (if installed by KVIM or with --remove-lazysvn)
     - PATH block in ${PATH_RC_FILE:-<auto-detected>} (if managed by KVIM or with --remove-path)
     - lazygit via pacman (if installed by KVIM)
+    - neovide via pacman (if installed by KVIM)
+    - ${FONTS_DIR} and foot font include (if managed by KVIM)
 EOF
 }
 
@@ -200,6 +209,45 @@ remove_icon_file() {
     remove_file_if_exists "$ICON_FILE"
 }
 
+remove_fonts_dir_if_managed() {
+    if [ "$FONTS_INSTALLED" != "true" ] && [ "$PURGE" != "true" ]; then
+        return 0
+    fi
+
+    remove_dir_if_exists "$FONTS_DIR"
+
+    if command -v fc-cache >/dev/null 2>&1; then
+        fc-cache -f "$HOME/.local/share/fonts" >/dev/null 2>&1 || warn "fc-cache failed while cleaning ${FONTS_DIR}"
+    fi
+}
+
+remove_foot_font_include() {
+    if [ "$FOOT_CONFIG_UPDATED" != "true" ] && [ "$PURGE" != "true" ]; then
+        return 0
+    fi
+
+    remove_file_if_exists "$FOOT_KVIM_INCLUDE_FILE"
+
+    if [ ! -f "$FOOT_CONFIG_FILE" ]; then
+        return 0
+    fi
+
+    if ! grep -Fq '# Added by KVIM installer - foot font include' "$FOOT_CONFIG_FILE"; then
+        return 0
+    fi
+
+    temp_file="$(mktemp)"
+
+    awk -v include_line="include=${FOOT_KVIM_INCLUDE_FILE}" '
+        $0 == "# Added by KVIM installer - foot font include" { next }
+        $0 == include_line { next }
+        { print }
+    ' "$FOOT_CONFIG_FILE" > "$temp_file"
+
+    mv "$temp_file" "$FOOT_CONFIG_FILE"
+    log "Removed KVIM foot font include from ${FOOT_CONFIG_FILE}"
+}
+
 remove_config_dir() {
     if [ ! -d "$CONFIG_DIR" ]; then
         log "Already absent: ${CONFIG_DIR}"
@@ -227,6 +275,32 @@ remove_lazygit_if_managed() {
     fi
 
     log "Removed lazygit via pacman"
+}
+
+remove_neovide_if_managed() {
+    if [ "$HAS_STATE" != "true" ] || [ "$INSTALLED_NEOVIDE" != "true" ]; then
+        log "Keeping neovide (not marked as installed by KVIM)"
+        return 0
+    fi
+
+    if ! command -v pacman >/dev/null 2>&1; then
+        warn "Cannot remove neovide automatically: pacman not found"
+        return 0
+    fi
+
+    if [ "$NON_INTERACTIVE" = "true" ]; then
+        if ! sudo pacman -R --noconfirm neovide; then
+            warn "Could not remove neovide automatically"
+            return 0
+        fi
+    else
+        if ! sudo pacman -R neovide; then
+            warn "Could not remove neovide automatically"
+            return 0
+        fi
+    fi
+
+    log "Removed neovide via pacman"
 }
 
 remove_lazysvn_if_managed() {
@@ -321,8 +395,11 @@ main() {
     remove_launcher
     remove_desktop_entry
     remove_icon_file
+    remove_fonts_dir_if_managed
+    remove_foot_font_include
     remove_config_dir
     remove_lazygit_if_managed
+    remove_neovide_if_managed
     remove_lazysvn_if_managed
     handle_path_cleanup
     remove_share_dir
