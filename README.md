@@ -88,8 +88,6 @@ Si esa fase falla, KVIM seguirá bootstrappeando plugins en el primer arranque.
 Instalador Windows v1 disponible en:
 
 ```text
-package/windows/install.bat
-package/windows/uninstall.bat
 package/windows/install.ps1
 package/windows/uninstall.ps1
 ```
@@ -98,8 +96,6 @@ En Windows, la implementación real del instalador/desinstalador vive ahora en P
 
 - `package/windows/install.ps1`
 - `package/windows/uninstall.ps1`
-
-Los archivos `.bat` se conservan como wrappers de compatibilidad para `cmd.exe` o doble clic.
 
 Este entrypoint Windows actual hace:
 
@@ -128,7 +124,7 @@ Diagnóstico recomendado si falla la instalación en Windows:
 1. revisa la salida con prefijos `[kvim-windows-installer]`
 2. comprueba el último paso mostrado con `step:<nombre-del-paso>`
 3. revisa `%LOCALAPPDATA%\kvim\logs\install.log` si existe
-4. si el fallo ocurrió justo después de `winget`, abre una terminal nueva y vuelve a ejecutar `package\windows\install.ps1` o `package\windows\install.bat`
+4. si el fallo ocurrió justo después de `winget`, abre una terminal nueva y vuelve a ejecutar `package\windows\install.ps1`
 
 Además, el uninstall Windows v1 retirará `Neovim` y `Node.js` solo si `install-state` indica que fueron instalados por KVIM.
 
@@ -180,8 +176,7 @@ bash package/linux/uninstall.sh --purge --yes
 
 En Windows, el uninstall v1 se ejecuta directamente sin confirmación interactiva:
 
-```bat
-package\windows\uninstall.bat
+```powershell
 powershell -ExecutionPolicy Bypass -File package\windows\uninstall.ps1
 ```
 
