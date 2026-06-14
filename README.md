@@ -85,6 +85,59 @@ Si esa fase falla, KVIM seguirá bootstrappeando plugins en el primer arranque.
 
 > El contrato del instalador Linux vive en `package/linux/install.sh`.
 
+Instalador Windows v1 disponible en:
+
+```text
+package/windows/install.bat
+package/windows/uninstall.bat
+package/windows/install.ps1
+package/windows/uninstall.ps1
+```
+
+En Windows, la implementación real del instalador/desinstalador vive ahora en PowerShell:
+
+- `package/windows/install.ps1`
+- `package/windows/uninstall.ps1`
+
+Los archivos `.bat` se conservan como wrappers de compatibilidad para `cmd.exe` o doble clic.
+
+Este entrypoint Windows actual hace:
+
+1. garantiza `nvim >= 0.10.0` usando `winget` si falta o es demasiado antiguo
+2. garantiza `node` y `npm` usando `winget` si faltan
+3. verifica `git`
+4. detecta `neovide` como opcional
+5. copia la configuración `nvim/`
+6. genera `local.lua`
+7. genera `kvim.bat`
+8. añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario
+9. crea acceso directo en el menú inicio del usuario
+10. copia el icono de KVIM
+11. escribe `install-state`
+
+Importante:
+
+- `%LOCALAPPDATA%\kvim` no se crea al principio, sino después de validar dependencias obligatorias.
+- Si `winget` instala Neovim o Node.js pero el binario todavía no queda usable en la sesión actual, el instalador aborta antes de copiar KVIM.
+- En ese caso puedes ver el paquete como instalado por `winget` y aun así no tener todavía launcher, config ni `install-state` de KVIM.
+
+En Windows, `kvim --gui` intenta usar `neovide` y, si no está disponible o falla al arrancar, hace fallback a terminal con `nvim`.
+
+Diagnóstico recomendado si falla la instalación en Windows:
+
+1. revisa la salida con prefijos `[kvim-windows-installer]`
+2. comprueba el último paso mostrado con `step:<nombre-del-paso>`
+3. revisa `%LOCALAPPDATA%\kvim\logs\install.log` si existe
+4. si el fallo ocurrió justo después de `winget`, abre una terminal nueva y vuelve a ejecutar `package\windows\install.ps1` o `package\windows\install.bat`
+
+Además, el uninstall Windows v1 retirará `Neovim` y `Node.js` solo si `install-state` indica que fueron instalados por KVIM.
+
+Todavía no cubre:
+
+1. instalación automática de dependencias por módulo
+2. accesos directos de Windows más avanzados que el menú inicio
+3. integración avanzada de uninstall fuera de `%LOCALAPPDATA%\kvim`
+
 En la fase actual, ese script ya puede:
 
 1. preparar `~/.config/kvim`
@@ -125,14 +178,22 @@ bash package/linux/uninstall.sh
 bash package/linux/uninstall.sh --purge --yes
 ```
 
+En Windows, el uninstall v1 se ejecuta directamente sin confirmación interactiva:
+
+```bat
+package\windows\uninstall.bat
+powershell -ExecutionPolicy Bypass -File package\windows\uninstall.ps1
+```
+
 Notas:
 
 1. el desinstalador elimina launcher, desktop entry y estado de KVIM en rutas de usuario
 2. `~/.config/kvim` se elimina por defecto como parte de la desinstalación gestionada
-3. `lazygit` se desinstala automáticamente si `install-state` indica que lo instaló KVIM
-4. `lazysvn` se elimina si `install-state` indica que lo instaló KVIM o si se usa `--remove-lazysvn`
-5. el icono del escritorio se instala en `~/.local/share/icons/hicolor/256x256/apps/kvim.png`
-6. el instalador registra estado en `~/.local/share/kvim/install-state`
+3. en Windows, `Neovim` y `Node.js` se desinstalan automáticamente solo si `install-state` indica que los instaló KVIM
+4. `lazygit` se desinstala automáticamente si `install-state` indica que lo instaló KVIM
+5. `lazysvn` se elimina si `install-state` indica que lo instaló KVIM o si se usa `--remove-lazysvn`
+6. el icono del escritorio se instala en `~/.local/share/icons/hicolor/256x256/apps/kvim.png`
+7. el instalador registra estado en `~/.local/share/kvim/install-state`
 
 Uso del launcher:
 

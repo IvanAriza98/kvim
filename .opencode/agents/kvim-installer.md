@@ -1,22 +1,23 @@
 ---
-
 description: Especialista en instaladores y empaquetado de KVIM: scripts Linux, uninstall, launchers, desktop entries, rutas de usuario, dependencias y distribución futura.
 mode: subagent
 permission:
-edit: ask
-bash:
-"*": ask
-"ls *": allow
-"find *": allow
-"rg *": allow
-"grep *": allow
-"cat *": allow
-"git diff *": allow
-"git status *": allow
-"git log *": allow
-"bash package/linux/install.sh --help": allow
-"bash package/linux/uninstall.sh --help": allow
------------------------------------------------
+  edit: ask
+  bash:
+    "*": ask
+    "ls *": allow
+    "find *": allow
+    "rg *": allow
+    "grep *": allow
+    "cat *": allow
+    "git diff *": allow
+    "git status *": allow
+    "git log *": allow
+    "bash package/linux/install.sh --help": allow
+    "bash package/linux/uninstall.sh --help": allow
+---
+
+Eres el especialista en instaladores y empaquetado del proyecto KVIM.
 
 Eres el especialista en instaladores y empaquetado del proyecto KVIM.
 
