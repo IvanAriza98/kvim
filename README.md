@@ -1,217 +1,191 @@
-# KVIM
+<p align="center">
+  <img src="assets/kvim-logo.png" alt="KVIM logo" width="140" />
+</p>
 
-KVIM es un IDE modular sobre Neovim y Lua.
-Su arquitectura está basada en un core pequeño (`core/`) y módulos funcionales autocontenidos (`modules/`) que registran acciones, comandos y keymaps.
+<h1 align="center">KVIM</h1>
 
-Este README documenta el estado **real actual** del repositorio.
+<p align="center">
+  IDE modular sobre <strong>Neovim + Lua</strong>, pensado para ofrecer una base moderna,
+  extensible y utilizable desde el primer arranque.
+</p>
 
----
-
-## Arquitectura actual
-
-Estructura principal:
-
-```text
-.
-├── nvim/
-│   ├── init.lua
-│   ├── lazy-lock.json
-│   └── lua/kvim/
-│       ├── init.lua
-│       ├── config.lua
-│       ├── health.lua
-│       ├── connections.lua
-│       ├── core/
-│       │   ├── commands.lua
-│       │   ├── keymaps.lua
-│       │   ├── registry.lua
-│       │   ├── runner.lua
-│       │   ├── terminal.lua
-│       │   └── lsp/
-│       ├── modules/
-│       │   ├── connections/
-│       │   ├── git/
-│       │   └── svn/
-│       ├── plugins/
-│       └── ui/
-├── tests/
-├── scripts/test.sh
-├── README.md
-└── CHANGELOG.md
-```
-
-### Flujo de carga
-
-1. `nvim/init.lua` inicializa `lazy.nvim` e importa plugins.
-2. `require("kvim").setup()`:
-   - carga configuración global (`kvim.config`);
-   - registra comandos core;
-   - configura UI y tema;
-   - configura LSP;
-   - carga módulos habilitados en `config.modules` y los registra en el registry;
-   - aplica keymaps globales.
+<p align="center">
+  UI cuidada · LSP · Telescope · Neo-tree · Yazi · Workspaces · Git · SVN · Connections
+</p>
 
 ---
 
-## Instalación
+## ¿Qué es KVIM?
 
-> Este repositorio contiene la configuración dentro de `nvim/`, no en la raíz.
+KVIM es una distribución/configuración modular de Neovim construida alrededor de un core pequeño y módulos funcionales independientes.
+
+La idea no es “tener mil cosas por defecto”, sino ofrecer una base clara para:
+
+- editar con una UI moderna;
+- navegar rápido por archivos, buffers y búsquedas;
+- trabajar con LSP y autocompletado;
+- abrir flujos de Git, SVN y conexiones remotas desde el editor;
+- extender el sistema mediante módulos propios.
+
+> Estado real actual: KVIM ya es usable y tiene testing automatizado, pero sigue evolucionando y algunas partes todavía están en consolidación.
+
+---
+
+## Propuesta de valor
+
+### Para usuario final
+- **Arranque rápido con Neovim moderno**, sin montar todo desde cero.
+- **Experiencia visual cuidada** con tema, barra de estado, explorador y dashboard.
+- **Módulos prácticos** para workspaces, Git, SVN y conexiones SSH/serie.
+- **Instaladores para Linux y Windows** dentro del propio repo.
+- **Personalización local** sin tocar los defaults del proyecto.
+
+### Para quien quiera profundizar
+- **Arquitectura modular real**, no solo carpetas decorativas.
+- **Comandos, acciones y keymaps** desacoplados por módulo.
+- **Integración con `lazy.nvim`** y specs separadas por áreas.
+- **Suite de tests headless** con `plenary.nvim` + `busted`.
+
+---
+
+## Características destacadas
+
+### Base de editor y UI
+- Tema **Catppuccin**
+- **Lualine**
+- **Neo-tree**
+- **Yazi**
+- **Telescope**
+- **Treesitter**
+- Folds con **nvim-ufo**
+- Dashboard con **snacks.nvim**
+
+### Desarrollo
+- LSP con:
+  - `lua_ls`
+  - `clangd`
+  - `pyright`
+  - `ts_ls`
+  - `bashls`
+  - `jsonls`
+  - `yamlls`
+- Gestión de servidores con **mason.nvim**
+- Autocompletado con **blink.cmp**
+
+### Módulos actuales
+- **workspaces**: guardar/cargar workspaces y restaurar terminales reproducibles
+- **git**: integración con LazyGit
+- **svn**: `svn info`, `svn status` y LazySVN
+- **connections**: SSH, serie, claves SSH, transferencia SCP y comando remoto
+
+---
+
+## Vista rápida
+
+### Screenshots / placeholders
+
+> Actualmente el repositorio incluye logo, pero no una galería formal de screenshots en el README.
+
+Bloques visuales recomendables para futuras capturas:
+
+- dashboard inicial
+- layout con Neo-tree + Telescope + Lualine
+- módulo Workspaces
+- picker/conexión SSH del módulo Connections
+
+---
+
+## Instalación rápida
+
+> KVIM vive dentro de la carpeta `nvim/` del repositorio y está pensado para ejecutarse con `NVIM_APPNAME=kvim` o mediante los launchers que generan los instaladores.
 
 ### Requisitos mínimos
+- **Neovim >= 0.10.0**
+- **Git**
 
-- Neovim (recomendado: versión reciente con soporte `vim.system`)
-- Git
+### Dependencias recomendadas según uso
+- `ripgrep` → búsquedas con Telescope
+- `yazi` → gestor de archivos
+- `lazygit` → módulo Git
+- `svn` y `lazysvn` → módulo SVN
+- `ssh`, `scp`, `ssh-keygen`, `ssh-copy-id` o `ssh` → módulo Connections
+- `picocom` → conexiones serie
+- `neovide` → modo GUI opcional
 
-### Dependencias recomendadas/optativas
+---
 
-- `ripgrep` (Telescope live_grep)
-- `yazi` (file manager externo)
-- `lazygit` (módulo Git)
-- `svn` y `lazysvn` (módulo SVN)
-- `ssh`, `scp` (módulo Connections)
-- `picocom` (conexiones serie)
+### Linux
 
-### Ejemplo de instalación manual
+#### Instalación rápida
+```bash
+git clone https://github.com/kodvmv/kvim.git
+cd kvim
+bash package/linux/install.sh --yes
+kvim
+```
+
+#### Activar módulos extra durante la instalación
+Por defecto, el instalador Linux parte con **workspaces habilitado** y **git/svn/connections deshabilitados** salvo que se indiquen.
 
 ```bash
-git clone https://github.com/kodvmv/kvim.git ~/kvim
-mkdir -p ~/.config/kvim
-cp -r ~/kvim/nvim/* ~/.config/kvim/
-NVIM_APPNAME=kvim nvim
+bash package/linux/install.sh --yes \
+  --enable-git \
+  --enable-svn \
+  --enable-connections
 ```
 
-El instalador intenta preinstalar los plugins de `lazy.nvim` durante la instalación.
-Si esa fase falla, KVIM seguirá bootstrappeando plugins en el primer arranque.
+#### Notas reales del instalador Linux
+- copia la configuración a `~/.config/kvim`
+- genera `~/.config/kvim/lua/kvim/local.lua`
+- crea launcher `~/.local/bin/kvim`
+- soporta `kvim --gui` con fallback a terminal si `neovide` no está disponible
+- instala y configura fuentes para la integración prevista
+- en **Arch Linux** puede instalar dependencias opcionales soportadas, incluido `neovide`
 
-> El contrato del instalador Linux vive en `package/linux/install.sh`.
-
-Instalador Windows v1 disponible en:
-
-```text
-package/windows/install.ps1
-package/windows/uninstall.ps1
-```
-
-En Windows, la implementación real del instalador/desinstalador vive ahora en PowerShell:
-
-- `package/windows/install.ps1`
-- `package/windows/uninstall.ps1`
-
-Este entrypoint Windows actual hace:
-
-1. garantiza `nvim >= 0.10.0` usando `winget` si falta o es demasiado antiguo
-2. garantiza `node` y `npm` usando `winget` si faltan
-3. verifica `git`
-4. detecta `neovide` como opcional e intenta instalarlo automáticamente si falta
-5. copia la configuración `nvim/`
-6. genera `local.lua`
-7. genera `kvim.bat`
-8. instala `FiraCode Nerd Font Mono` globalmente en Windows si tiene permisos suficientes
-9. crea un perfil específico `KVIM` en Windows Terminal
-10. añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario
-11. crea acceso directo en el menú inicio del usuario
-12. copia el icono de KVIM
-13. escribe `install-state`
-
-Importante:
-
-- `%LOCALAPPDATA%\kvim` no se crea al principio, sino después de validar dependencias obligatorias.
-- Si `winget` instala Neovim o Node.js pero el binario todavía no queda usable en la sesión actual, el instalador aborta antes de copiar KVIM.
-- En ese caso puedes ver el paquete como instalado por `winget` y aun así no tener todavía launcher, config ni `install-state` de KVIM.
-
-En Windows y Linux, `kvim --gui` intenta usar `neovide` y, si no está disponible o falla al arrancar, hace fallback a terminal con `nvim`.
-
-Fuentes actuales:
-
-- KVIM configura `neovide` para usar `FiraCode Nerd Font Mono` tanto en Windows como en Linux.
-- En Linux, el instalador instala esa familia para el usuario actual y configura `foot` para usarla.
-- En Windows, el instalador intenta instalar esa familia globalmente en el sistema y crea un perfil específico `KVIM` en Windows Terminal con esa fuente.
-- En Windows, si `neovide` falta, el instalador intenta instalarlo con `winget`.
-- En Linux, si `neovide` falta, el instalador intenta instalarlo automáticamente solo en Arch Linux.
-- No existe un mecanismo universal para cambiar la fuente solo para el proceso `kvim` en cualquier terminal; la integración TUI actual es específica para `foot` y `Windows Terminal`.
-
-Diagnóstico recomendado si falla la instalación en Windows:
-
-1. revisa la salida con prefijos `[kvim-windows-installer]`
-2. comprueba el último paso mostrado con `step:<nombre-del-paso>`
-3. revisa `%LOCALAPPDATA%\kvim\logs\install.log` si existe
-4. si el fallo ocurrió justo después de `winget`, abre una terminal nueva y vuelve a ejecutar `package\windows\install.ps1`
-
-Además, el uninstall Windows v1 retirará `Neovim`, `Node.js` y `neovide` solo si `install-state` indica que fueron instalados por KVIM.
-También retirará las fuentes gestionadas por KVIM y el perfil específico `KVIM` de Windows Terminal cuando el estado indique que fueron configurados por KVIM.
-
-Todavía no cubre:
-
-1. instalación automática de dependencias por módulo
-2. accesos directos de Windows más avanzados que el menú inicio
-3. integración avanzada de uninstall fuera de `%LOCALAPPDATA%\kvim`
-
-En la fase actual, ese script ya puede:
-
-1. preparar `~/.config/kvim`
-2. copiar el contenido de `nvim/`
-3. generar `~/.config/kvim/lua/kvim/local.lua`
-4. seleccionar módulos básicos para la instalación
-5. verificar dependencias requeridas y advertir dependencias opcionales por módulo
-6. generar `~/.local/bin/kvim` para ejecutar KVIM en terminal
-7. soportar `kvim --gui` para abrir KVIM con `neovide`
-8. generar `~/.local/share/applications/kvim.desktop`
-9. instalar `FiraCode Nerd Font Mono` para el usuario actual
-10. configurar `foot` para usar esa familia
-11. intentar instalar `neovide` automáticamente en Arch Linux si falta
-12. advertir si `~/.local/bin` no está en `PATH` y ofrecer añadirlo al shell del usuario
-
-En Arch Linux instala por defecto las dependencias soportadas de los módulos seleccionados.
-
-Si quieres omitir ese comportamiento:
-
+Si quieres evitar la instalación automática de dependencias opcionales en Arch:
 ```bash
-bash package/linux/install.sh --skip-optional-deps
+bash package/linux/install.sh --yes --skip-optional-deps
 ```
 
-También puedes forzarlo explícitamente con:
+---
 
-```bash
-bash package/linux/install.sh --install-optional-deps
-```
+### Windows
 
-Actualmente:
-
-1. `lazygit` se instala con `pacman`
-2. `subversion` se instala con `pacman`
-3. `openssh` y `picocom` se instalan con `pacman` cuando se habilita `connections`
-4. `lazysvn` se descarga como binario release a `~/.local/bin/lazysvn`
-
-Desinstalación:
-
-```bash
-bash package/linux/uninstall.sh
-bash package/linux/uninstall.sh --purge --yes
-```
-
-En Windows, el uninstall v1 se ejecuta directamente sin confirmación interactiva:
-
+#### Instalación rápida
 ```powershell
-powershell -ExecutionPolicy Bypass -File package\windows\uninstall.ps1
+git clone https://github.com/kodvmv/kvim.git
+cd kvim
+powershell -ExecutionPolicy Bypass -File package\windows\install.ps1 --yes
+kvim
 ```
 
-Si no se usa `--yes`, el uninstall Windows pide confirmación antes de borrar artefactos gestionados.
+#### Activar módulos extra durante la instalación
+```powershell
+powershell -ExecutionPolicy Bypass -File package\windows\install.ps1 --yes --enable-git --enable-svn --enable-connections
+```
 
-Notas:
+#### Notas reales del instalador Windows
+- usa **PowerShell**
+- intenta garantizar:
+  - `nvim >= 0.10.0`
+  - `node`
+  - `npm`
+- verifica `git`
+- detecta `neovide` como opcional e intenta instalarlo si falta
+- copia la configuración a `%LOCALAPPDATA%\kvim`
+- genera `local.lua`
+- crea `kvim.bat`
+- añade `%LOCALAPPDATA%\kvim\bin` al `PATH` de usuario
+- crea acceso directo en el menú inicio
+- configura integración básica con fuente y Windows Terminal
 
-1. el desinstalador elimina launcher, desktop entry y estado de KVIM en rutas de usuario
-2. `~/.config/kvim` se elimina por defecto como parte de la desinstalación gestionada
-3. en Windows, `Neovim` y `Node.js` se desinstalan automáticamente solo si `install-state` indica que los instaló KVIM
-4. en Windows, `neovide` se desinstala automáticamente solo si `install-state` indica que lo instaló KVIM
-5. en Windows, las fuentes globales gestionadas por KVIM y el perfil `KVIM` de Windows Terminal se retiran si `install-state` indica que fueron configurados por KVIM
-6. en Linux, las fuentes de usuario de KVIM y la inclusión gestionada de `foot` se retiran si `install-state` indica que fueron configuradas por KVIM
-7. en Linux, `neovide` se desinstala automáticamente solo si `install-state` indica que lo instaló KVIM
-8. `lazygit` se desinstala automáticamente si `install-state` indica que lo instaló KVIM
-9. `lazysvn` se elimina si `install-state` indica que lo instaló KVIM o si se usa `--remove-lazysvn`
-10. el icono del escritorio se instala en `~/.local/share/icons/hicolor/256x256/apps/kvim.png`
-11. el instalador registra estado en `~/.local/share/kvim/install-state`
+> Si `winget` instala dependencias pero no quedan disponibles en la sesión actual, puede ser necesario abrir una terminal nueva y relanzar el instalador.
 
-Uso del launcher:
+---
+
+## Primer arranque
+
+Lanzadores soportados:
 
 ```bash
 kvim
@@ -220,34 +194,36 @@ kvim file.lua
 kvim --gui file.lua
 ```
 
+En Windows y Linux, `kvim --gui` intenta usar `neovide` y, si no está disponible o falla al arrancar, hace fallback a terminal con `nvim`.
+
 Diagnóstico recomendado tras instalar:
 
 ```vim
 :checkhealth kvim
 ```
 
-### Override local de instalación
+---
 
-KVIM puede cargar un archivo opcional de override local en:
+## Personalización rápida
+
+KVIM soporta overrides locales en:
 
 ```text
 ~/.config/kvim/lua/kvim/local.lua
 ```
 
-Ese archivo permite personalizar una instalación sin modificar los defaults del repo.
-La precedencia de configuración es:
-
+Precedencia real:
 1. defaults de `kvim.config`
-2. override local `kvim.local`
-3. `opts` pasados a `require("kvim").setup(...)`
+2. `kvim.local`
+3. opciones pasadas a `require("kvim").setup(...)`
 
-Ejemplo mínimo para controlar módulos:
+Ejemplo mínimo para activar/desactivar módulos:
 
 ```lua
 return {
     modules = {
         workspaces = { enabled = true },
-        git = { enabled = false },
+        git = { enabled = true },
         svn = { enabled = false },
         connections = { enabled = false },
     },
@@ -256,25 +232,48 @@ return {
 
 ---
 
-## Comandos disponibles (estado actual)
+## Comandos principales
 
 ### Core
+- `:KvimModules` → lista módulos registrados
+- `:KvimAction <modulo> <accion>` → ejecuta una acción registrada
 
-- `:KvimModules`
-  Lista módulos registrados.
-- `:KvimAction <modulo> <accion>`
-  Ejecuta una acción registrada en el módulo.
+### Workspaces
+- `:KvimWorkspaceCreate <name>`
+- `:KvimWorkspaceSave [name]`
+- `:KvimWorkspaceLoad <name>`
+- `:KvimWorkspaceList`
+- `:KvimWorkspaceDelete <name>`
+- `:KvimWorkspaceCurrent`
+- `:KvimWorkspaceNext`
+- `:KvimWorkspacePrev`
+- `:KvimWorkspaceTerminalAdd`
+- `:KvimWorkspaceTerminalList`
+- `:KvimWorkspaceTerminalRemove <name>`
+- `:KvimWorkspaceTerminalRestore`
 
-> Nota: en keymaps core existen referencias a `KvimRun`, `KvimTest`, `KvimBuild`, `KvimFormat`, `KvimLint`, pero esos comandos no están definidos actualmente en `core/commands.lua`.
+### Git
+- `:KvimGit`
+- `:KvimGitFile`
+- `:KvimGitConfig`
 
-### Módulo `connections`
+### SVN
+- `:KvimLazySvn`
+- `:KvimSvnInfo`
+- `:KvimSvnStatus`
 
+### Connections
 - `:KvimConnections`
 - `:KvimSshConnections`
 - `:KvimSerialConnections`
 - `:KvimConnectionsReload`
+- `:KvimConnectionsReconnect <name>`
+- `:KvimConnectionsList`
+- `:KvimConnectionsAdd`
+- `:KvimConnectionsDel [name]`
 - `:KvimConnectionsGenerateKey`
 - `:KvimConnectionsInstallKey`
+- `:KvimConnectionsSetupSshKey`
 - `:KvimConnectionsTestSsh`
 - `:KvimConnectionSetActive`
 - `:KvimSSHConnectionSetActive`
@@ -285,129 +284,209 @@ return {
 - `:KvimSSHUploadPath [ruta_local]`
 - `:KvimSSHDownloadPath [ruta_remota]`
 
-### Módulo `git`
+---
 
-- `:KvimGit`
-- `:KvimGitFile`
-- `:KvimGitConfig`
+## Módulos principales
 
-### Módulo `svn`
+| Módulo | Estado | Qué hace |
+|---|---|---|
+| `workspaces` | usable / MVP ampliado | guarda y restaura workspaces, tabs lógicas y recetas de terminal |
+| `git` | usable | integra LazyGit para repo y archivo actual |
+| `svn` | usable | abre LazySVN y ejecuta `svn info/status` en terminal flotante |
+| `connections` | usable | SSH, serie, conexión activa, SCP, gestión de claves y reconexión |
 
-- `:KvimLazySvn`
-- `:KvimSvnInfo`
-- `:KvimSvnStatus`
+### Sobre `workspaces`
+Es uno de los puntos más diferenciales del estado actual de KVIM:
+- guarda workspace actual;
+- persiste sesión;
+- separa tabs lógicas `code` y `term`;
+- intenta restaurar terminales reproducibles;
+- puede integrarse con `connections` para recetas SSH.
+
+### Sobre `connections`
+Es el módulo más orientado a entorno real:
+- define conexiones en `~/.config/kvim/lua/kvim/connections.lua`
+- soporta SSH y serie
+- permite subir/bajar archivos
+- permite ejecutar comandos remotos
+- mantiene conexión activa en memoria de sesión
 
 ---
 
-## Keymaps principales actuales
+## Keymaps destacados
 
-## Globales (config por defecto)
+### Globales
+- `s` → guardar
+- `qq` → cerrar buffer/ventana
+- `qe` → salir
+- `<Esc>` → limpiar búsqueda
 
-### Personales (`config.keymaps.mappings.personal`)
-
-- `s` → guardar (`:w!`)
-- `qq` → cerrar buffer/ventana (`:q!`)
-- `qe` → salir de Neovim (`:qa!`)
-- `<Esc>` → limpiar búsqueda (`:noh`)
-- `da` → borrar todas las líneas (`:%delete _`)
-
-### UI / navegación
-
+### Navegación / UI
 - `<leader>e` → Neo-tree toggle
 - `<leader>E` → Neo-tree focus
-- `<leader>fe` → Neo-tree reveal
-- `<leader>ec` → Neo-tree close
-- `<leader>eg` → Neo-tree git status
-- `<leader>eb` → Neo-tree buffers
-- `<leader>y` / `<leader>Y` → Yazi / Yazi cwd
-- `<leader>ff` → Telescope find_files
-- `<leader>fg` → Telescope live_grep
+- `<leader>ff` → Telescope find files
+- `<leader>fg` → Telescope live grep
 - `<leader>fb` → Telescope buffers
-- `<leader>fr` → Telescope oldfiles
-- `<leader>fh` → Telescope help_tags
+- `<leader>fr` → archivos recientes
+- `<leader>y` → Yazi
 
-### Terminal core
+### Terminal
+- `<C-t>h` / `<C-t>j` / `<C-t>k` / `<C-t>l` → abrir terminal por posición
+- `<C-x>` en terminal → volver a modo normal
 
-- `<C-t>h` `<C-t>j` `<C-t>k` `<C-t>l` → abrir terminal (left/bottom/top/right)
-- `<C-x>` (modo terminal) → salir a modo normal
-
-### LSP (al adjuntar servidor)
-
-- `gd`, `gD`, `gr`, `gi`, `K`
-- `<leader>rn`, `<leader>ca`
-- `<leader>lf`, `<leader>ld`
-- `[d`, `]d`
-
-## Keymaps de módulos
-
-### Connections (prefix por defecto: `<leader>c`)
-
-- `<leader>cc` → `:KvimConnections`
-- `<leader>cs` → `:KvimSshConnections`
-- `<leader>cu` → `:KvimSerialConnections`
-- `<leader>cr` → `:KvimConnectionsReload`
-- `<leader>ckg` → `:KvimConnectionsGenerateKey`
-- `<leader>cki` → `:KvimConnectionsInstallKey`
-- `<leader>ckt` → `:KvimConnectionsTestSsh`
+### Workspaces
+- `<leader>ws` → guardar workspace
+- `<leader>wl` → listar workspaces
+- `<leader>wn` / `<leader>wp` → siguiente / anterior
+- `<leader>1` → tab `code`
+- `<leader>2` → tab `term`
 
 ### Git
+- `<leader>g` → LazyGit
+- `<leader>f` → LazyGit del archivo actual
 
-- `<leader>g` → abrir LazyGit
-- `<leader>f` → LazyGit current file
-- `<leader>c` → LazyGit config
-
-### SVN (prefix interno por defecto `<leader>s`)
-
+### SVN
 - `<leader>sv` → LazySVN
 - `<leader>si` → SVN info
 - `<leader>ss` → SVN status
 
+### Connections
+- `<leader>cc` → picker general
+- `<leader>cs` → picker SSH
+- `<leader>cu` → picker serie
+- `<leader>cr` → recargar config
+- `<leader>cl` → listar conexiones
+- `<leader>ca` → añadir conexión
+- `<leader>cd` → borrar conexión
+
 ---
 
-## Módulos actuales
+## Estado del proyecto
 
-### `git`
-Integración con LazyGit mediante acciones/comandos/keymaps.
-Incluye `plugins.lua` propio para declarar plugin(s) del módulo.
+### Qué está sólido ya
+- arquitectura modular sobre Lua
+- bootstrap con `lazy.nvim`
+- UI base y navegación moderna
+- LSP y autocompletado
+- módulos `workspaces`, `git`, `svn` y `connections`
+- instaladores Linux/Windows
+- testing automatizado en headless
 
-### `svn`
-Comandos SVN y LazySVN en terminal flotante (`svn info`, `svn status`, `lazysvn`), con validaciones de binarios y de working copy SVN.
+### Qué conviene saber hoy
+- KVIM está **activo**, pero no completamente cerrado a nivel de APIs internas
+- parte de la experiencia está más madura en Linux/terminal
+- el README intenta ser fiel al estado real: todavía hay piezas en consolidación
 
-### `connections`
-Gestión de conexiones SSH/serial:
-- selección por picker;
-- conexión activa en memoria;
-- ejecución remota (`KvimSSHRun`);
-- transferencias SCP (subida/bajada de archivos o directorios).
+### Limitaciones visibles actuales
+- en `core/keymaps.lua` existen mappings hacia `KvimRun`, `KvimTest`, `KvimBuild`, `KvimFormat` y `KvimLint`, pero **esos comandos no están definidos actualmente en `core/commands.lua`**
+- el módulo Git expone `:KvimGitConfig`, pero **no tiene keymap dedicado** en su implementación actual
+- no hay aún una galería oficial de screenshots en el repo
 
-Archivo de configuración por defecto de conexiones:
-`~/.config/kvim/lua/kvim/connections.lua`
-(debe devolver una tabla Lua).
+---
+
+## Arquitectura resumida
+
+```text
+nvim/
+├── init.lua
+└── lua/kvim/
+    ├── init.lua
+    ├── config.lua
+    ├── health.lua
+    ├── core/
+    ├── modules/
+    │   ├── workspaces/
+    │   ├── git/
+    │   ├── svn/
+    │   └── connections/
+    ├── plugins/
+    └── ui/
+```
+
+### Flujo real de carga
+1. `nvim/init.lua` bootstrappea `lazy.nvim`
+2. importa plugins base y plugins de módulos
+3. ejecuta `require("kvim").setup()`
+4. KVIM:
+   - carga configuración global
+   - registra comandos core
+   - configura UI y tema
+   - configura LSP
+   - carga módulos habilitados
+   - registra acciones
+   - aplica keymaps globales
 
 ---
 
 ## Testing
 
-Comando recomendado:
+KVIM incluye suite automatizada con:
+- **Neovim headless**
+- **plenary.nvim**
+- **busted**
 
+### Comando recomendado
 ```bash
 ./scripts/test.sh
 ```
 
-El script ejecuta Neovim headless con `tests/minimal_init.lua` y corre toda la suite en `tests/` usando `PlenaryBustedDirectory`, además de resumir:
-- Success
-- Failed
-- Errors
-- Total
-
-Comando alternativo directo:
-
+### Comando alternativo directo
 ```bash
 nvim --headless -u tests/minimal_init.lua -c "PlenaryBustedDirectory tests" -c "qa!"
 ```
 
+Actualmente hay cobertura sobre:
+- core
+- health
+- connections
+- workspaces
+
 ---
 
-## Licencia
+## Estructura de documentación útil
 
-MIT
+Si quieres profundizar:
+
+- `CHANGELOG.md`
+- `AGENTS.md`
+- `nvim/lua/kvim/plugins/README.md`
+- `nvim/lua/kvim/modules/workspaces/README.md`
+- `nvim/lua/kvim/modules/git/README.md`
+- `nvim/lua/kvim/modules/svn/README.md`
+- `nvim/lua/kvim/modules/connections/README.md`
+- `docs/specs/0001-linux-installer.md`
+- `docs/specs/0002-windows-installer.md`
+
+---
+
+## Contribuir
+
+Las contribuciones son bienvenidas, especialmente en:
+- documentación de usuario
+- screenshots reales
+- endurecimiento de módulos
+- mejoras de keymaps y DX
+- cobertura de tests
+- pulido de instaladores
+
+### Flujo recomendado
+1. revisa el estado real del módulo afectado
+2. evita documentar features no implementadas
+3. si cambias comportamiento público, actualiza README o README del módulo
+4. ejecuta la suite de tests antes de proponer cambios
+
+---
+
+## TL;DR
+
+KVIM ya ofrece una base atractiva para usar Neovim como IDE modular, con una mezcla interesante de:
+
+- **UI moderna**
+- **módulos prácticos**
+- **integración remota**
+- **testing**
+- **arquitectura extensible**
+
+Si buscas una base seria sobre Neovim que no sea solo “otra config”, KVIM ya tiene personalidad propia y un camino técnico claro.
+
+---
