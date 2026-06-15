@@ -14,6 +14,21 @@ local function expand_path(path)
   return vim.fn.expand(tostring(path))
 end
 
+local function read_public_key(path)
+  local lines = vim.fn.readfile(path)
+  if type(lines) ~= "table" or #lines == 0 then
+    return nil, "public key is empty"
+  end
+
+  local content = table.concat(lines, "\n")
+  content = content:gsub("%s+$", "")
+  if content == "" then
+    return nil, "public key is empty"
+  end
+
+  return content
+end
+
 local function slugify(value)
   value = tostring(value or "connection")
   value = value:lower()
@@ -132,11 +147,6 @@ function M.ensure_local_key_for_connection(connection)
 end
 
 function M.install_key(connection)
-  if not executable_exists("ssh-copy-id") then
-    vim.notify("KVIM Connections: ssh-copy-id not found", vim.log.levels.ERROR)
-    return
-  end
-
   if not connection or connection.type ~= "ssh" then
     vim.notify("KVIM Connections: selected connection is not SSH", vim.log.levels.ERROR)
     return
@@ -158,24 +168,127 @@ function M.install_key(connection)
     target = connection.host
   end
 
-  local parts = {
-    "ssh-copy-id",
-    "-i",
-    shellescape(public_key),
-  }
+  local terminal = require("kvim.core.terminal")
 
-  if connection.port then
-    table.insert(parts, "-p")
-    table.insert(parts, shellescape(connection.port))
+  if executable_exists("ssh-copy-id") then
+    local parts = {
+      "ssh-copy-id",
+      "-i",
+      shellescape(public_key),
+    }
+
+    if connection.port then
+      table.insert(parts, "-p")
+      table.insert(parts, shellescape(connection.port))
+    end
+
+    table.insert(parts, shellescape(target))
+
+    local verify_parts = { "ssh" }
+    if connection.port then
+      table.insert(verify_parts, "-p")
+      table.insert(verify_parts, shellescape(connection.port))
+    end
+    if connection.identity_file and connection.identity_file ~= "" then
+      table.insert(verify_parts, "-i")
+      table.insert(verify_parts, shellescape(expand_path(connection.identity_file)))
+    end
+    if connection.options and type(connection.options) == "table" then
+      for key, value in pairs(connection.options) do
+        table.insert(verify_parts, "-o")
+        table.insert(verify_parts, shellescape(key .. "=" .. tostring(value)))
+      end
+    end
+    table.insert(verify_parts, "-o")
+    table.insert(verify_parts, shellescape("BatchMode=yes"))
+    table.insert(verify_parts, shellescape(target))
+    table.insert(verify_parts, shellescape("exit"))
+
+    local cmd = table.concat(parts, " ")
+      .. " && echo 'KVIM Connections: verifying passwordless SSH auth...'"
+      .. " && " .. table.concat(verify_parts, " ")
+      .. " || echo 'KVIM Connections: SSH key installed but passwordless verification failed'"
+
+    terminal.open_command(cmd, {
+      position = "bottom",
+      name = "KVIM SSH Copy ID",
+      listed = false,
+    })
+    return
   end
 
-  table.insert(parts, shellescape(target))
+  if not executable_exists("ssh") then
+    vim.notify("KVIM Connections: neither ssh-copy-id nor ssh are available", vim.log.levels.ERROR)
+    return
+  end
 
-  local terminal = require("kvim.core.terminal")
+  local remote_command = table.concat({
+    "mkdir -p ~/.ssh",
+    "chmod 700 ~/.ssh",
+    "touch ~/.ssh/authorized_keys",
+    "chmod 600 ~/.ssh/authorized_keys",
+    "tmp=$(mktemp)",
+    "cat > \"$tmp\"",
+    "grep -qxF -f \"$tmp\" ~/.ssh/authorized_keys || cat \"$tmp\" >> ~/.ssh/authorized_keys",
+    "rm -f \"$tmp\"",
+  }, " && ")
+
+  local ssh_parts = { "ssh" }
+  if connection.identity_file and connection.identity_file ~= "" then
+    table.insert(ssh_parts, "-i")
+    table.insert(ssh_parts, shellescape(expand_path(connection.identity_file)))
+  end
+  if connection.port then
+    table.insert(ssh_parts, "-p")
+    table.insert(ssh_parts, shellescape(connection.port))
+  end
+  if connection.options and type(connection.options) == "table" then
+    for key, value in pairs(connection.options) do
+      table.insert(ssh_parts, "-o")
+      table.insert(ssh_parts, shellescape(key .. "=" .. tostring(value)))
+    end
+  end
+  table.insert(ssh_parts, shellescape(target))
+  table.insert(ssh_parts, shellescape(remote_command))
+
+  local verify_parts = { "ssh" }
+  if connection.identity_file and connection.identity_file ~= "" then
+    table.insert(verify_parts, "-i")
+    table.insert(verify_parts, shellescape(expand_path(connection.identity_file)))
+  end
+  if connection.port then
+    table.insert(verify_parts, "-p")
+    table.insert(verify_parts, shellescape(connection.port))
+  end
+  if connection.options and type(connection.options) == "table" then
+    for key, value in pairs(connection.options) do
+      table.insert(verify_parts, "-o")
+      table.insert(verify_parts, shellescape(key .. "=" .. tostring(value)))
+    end
+  end
+  table.insert(verify_parts, "-o")
+  table.insert(verify_parts, shellescape("BatchMode=yes"))
+  table.insert(verify_parts, shellescape(target))
+  table.insert(verify_parts, shellescape("exit"))
+
+  local cat_command = ((vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1) and "type") or "cat"
+
+  local parts = {
+    cat_command,
+    shellescape(public_key),
+    "|",
+    table.concat(ssh_parts, " "),
+    "&&",
+    "echo 'KVIM Connections: verifying passwordless SSH auth...'",
+    "&&",
+    table.concat(verify_parts, " "),
+    "||",
+    "echo 'KVIM Connections: SSH key installed but passwordless verification failed'",
+  }
 
   terminal.open_command(table.concat(parts, " "), {
     position = "bottom",
-    name = "KVIM SSH Copy ID",
+    name = "KVIM SSH Install Key",
     listed = false,
   })
 end

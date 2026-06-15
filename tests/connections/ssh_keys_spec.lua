@@ -4,6 +4,8 @@ describe("kvim.modules.connections.ssh_keys", function()
   local original_notify
   local original_executable
   local original_filereadable
+  local original_readfile
+  local original_has
   local original_mkdir
   local original_terminal
   local original_ssh
@@ -24,6 +26,8 @@ describe("kvim.modules.connections.ssh_keys", function()
     original_notify = vim.notify
     original_executable = vim.fn.executable
     original_filereadable = vim.fn.filereadable
+    original_readfile = vim.fn.readfile
+    original_has = vim.fn.has
     original_mkdir = vim.fn.mkdir
     original_terminal = package.loaded["kvim.core.terminal"]
     original_ssh = package.loaded["kvim.modules.connections.ssh"]
@@ -40,6 +44,14 @@ describe("kvim.modules.connections.ssh_keys", function()
     end
 
     vim.fn.filereadable = function()
+      return 0
+    end
+
+    vim.fn.readfile = function()
+      return { "ssh-ed25519 AAAATESTKEY windows@test" }
+    end
+
+    vim.fn.has = function()
       return 0
     end
 
@@ -65,6 +77,8 @@ describe("kvim.modules.connections.ssh_keys", function()
     vim.notify = original_notify
     vim.fn.executable = original_executable
     vim.fn.filereadable = original_filereadable
+    vim.fn.readfile = original_readfile
+    vim.fn.has = original_has
     vim.fn.mkdir = original_mkdir
 
     package.loaded["kvim.core.terminal"] = original_terminal
@@ -255,7 +269,7 @@ describe("kvim.modules.connections.ssh_keys", function()
     assert.matches("selected connection is not SSH", notifications[1].message)
   end)
 
-  it("does not install key when ssh-copy-id is missing", function()
+  it("builds ssh fallback command on non-windows when ssh-copy-id is missing", function()
     vim.fn.executable = function(cmd)
       if cmd == "ssh-copy-id" then
         return 0
@@ -264,16 +278,58 @@ describe("kvim.modules.connections.ssh_keys", function()
       return 1
     end
 
+    vim.fn.filereadable = function(path)
+      if path == vim.fn.expand("~/.ssh/test_key") .. ".pub" then
+        return 1
+      end
+
+      return 0
+    end
+
     ssh_keys.install_key({
       type = "ssh",
       name = "SSH Test",
       host = "127.0.0.1",
       user = "test",
+      port = 2222,
+      identity_file = "~/.ssh/test_key",
+    })
+
+    assert.are.equal(1, #opened_commands)
+    local cmd = opened_commands[1].cmd
+    assert.matches("^cat ", cmd)
+    assert.matches("authorized_keys", cmd)
+    assert.matches("BatchMode=yes", cmd)
+  end)
+
+  it("does not install key when neither ssh-copy-id nor ssh are available", function()
+    vim.fn.executable = function(cmd)
+      if cmd == "ssh-copy-id" or cmd == "ssh" then
+        return 0
+      end
+
+      return 1
+    end
+
+    vim.fn.has = function(flag)
+      if flag == "win32" then
+        return 1
+      end
+
+      return 0
+    end
+
+    ssh_keys.install_key({
+      type = "ssh",
+      name = "SSH Test",
+      host = "127.0.0.1",
+      user = "test",
+      identity_file = "~/.ssh/test_key",
     })
 
     assert.are.equal(0, #opened_commands)
     assert.are.equal(1, #notifications)
-    assert.matches("ssh%-copy%-id not found", notifications[1].message)
+    assert.matches("neither ssh%-copy%-id nor ssh are available", notifications[1].message)
   end)
 
   it("does not install key for non-ssh connection", function()
@@ -333,6 +389,8 @@ describe("kvim.modules.connections.ssh_keys", function()
     assert.matches("%-p", cmd)
     assert.matches("2222", cmd)
     assert.matches("test@127%.0%.0%.1", cmd)
+    assert.matches("BatchMode=yes", cmd)
+    assert.matches("verifying passwordless SSH auth", cmd)
 
     assert.are.equal("KVIM SSH Copy ID", opened_commands[1].opts.name)
   end)
@@ -359,6 +417,67 @@ describe("kvim.modules.connections.ssh_keys", function()
 
     assert.matches("127%.0%.0%.1", cmd)
     assert.is_nil(cmd:match("test@127%.0%.0%.1"))
+  end)
+
+  it("builds ssh fallback command on windows when ssh-copy-id is missing", function()
+    vim.fn.executable = function(cmd)
+      if cmd == "ssh-copy-id" then
+        return 0
+      end
+
+      return 1
+    end
+
+    vim.fn.has = function(flag)
+      if flag == "win32" then
+        return 1
+      end
+
+      return 0
+    end
+
+    vim.fn.filereadable = function(path)
+      if path == vim.fn.expand("~/.ssh/test_key") .. ".pub" then
+        return 1
+      end
+
+      return 0
+    end
+
+    vim.fn.readfile = function(path)
+      if path == vim.fn.expand("~/.ssh/test_key") .. ".pub" then
+        return { "ssh-ed25519 AAAATESTKEY windows@test" }
+      end
+
+      return {}
+    end
+
+    ssh_keys.install_key({
+      type = "ssh",
+      name = "SSH Test",
+      host = "127.0.0.1",
+      user = "test",
+      port = 2222,
+      identity_file = "~/.ssh/test_key",
+      options = {
+        IdentitiesOnly = "yes",
+      },
+    })
+
+    assert.are.equal(1, #opened_commands)
+
+    local cmd = opened_commands[1].cmd
+
+    assert.matches("^type ", cmd)
+    assert.matches("ssh", cmd)
+    assert.matches("%-p", cmd)
+    assert.matches("2222", cmd)
+    assert.matches("test@127%.0%.0%.1", cmd)
+    assert.matches("authorized_keys", cmd)
+    assert.matches("IdentitiesOnly=yes", cmd)
+    assert.matches("BatchMode=yes", cmd)
+    assert.matches("verifying passwordless SSH auth", cmd)
+    assert.are.equal("KVIM SSH Install Key", opened_commands[1].opts.name)
   end)
 
   it("does not test non-ssh connection", function()

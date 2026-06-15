@@ -19,7 +19,7 @@ Según funcionalidad:
 - `ssh` (sesiones SSH y ejecución remota)
 - `scp` (subida/bajada de archivos)
 - `picocom` u otro comando serie configurado en la conexión
-- `ssh-keygen` / `ssh-copy-id` (operaciones de claves, según entorno)
+- `ssh-keygen` / `ssh-copy-id` / `ssh` (operaciones de claves, según entorno)
 
 ---
 
@@ -91,7 +91,9 @@ Esto evita que `ssh` use otras claves por defecto cuando hay múltiples identida
 
 1. asegura `identity_file` y `options.IdentitiesOnly = "yes"` si faltan;
 2. si no existe clave local (privada/pública), lanza `ssh-keygen` para la conexión;
-3. si la clave local ya existe, ejecuta `ssh-copy-id` para instalar la pública en remoto.
+3. si la clave local ya existe y `ssh-copy-id` está disponible, lo usa para instalar la pública en remoto;
+4. si `ssh-copy-id` no está disponible pero existe `ssh`, usa un fallback por `stdin` para añadir la clave pública a `~/.ssh/authorized_keys` del servidor remoto Unix/Linux;
+5. después intenta verificar autenticación sin contraseña con `BatchMode=yes`.
 
 El flujo es idempotente y no sobreescribe `identity_file`/`options` ya definidos por el usuario.
 

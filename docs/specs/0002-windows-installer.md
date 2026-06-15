@@ -141,8 +141,8 @@ Opciones públicas actuales:
 
 Estado real de la interfaz:
 
-- `--yes` se acepta, pero el desinstalador actual no pide confirmación en ningún punto;
-- la desinstalación es directa y no interactiva.
+- `--yes` omite la confirmación del desinstalador;
+- si no se usa `--yes`, el desinstalador pide confirmación antes de continuar.
 
 ## Flujo real de instalación
 

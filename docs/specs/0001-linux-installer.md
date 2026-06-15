@@ -269,7 +269,7 @@ kvim --gui
 kvim --gui file.lua
 ```
 
-Si se usa `kvim --gui` y `neovide` no existe en `PATH`, el launcher termina con error.
+Si se usa `kvim --gui` y `neovide` no existe en `PATH`, el launcher hace fallback a `nvim` en terminal. Si `neovide` falla al arrancar, también hace fallback a terminal.
 
 ## Fuentes y terminal soportado
 

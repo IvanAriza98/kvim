@@ -119,7 +119,7 @@ Importante:
 - Si `winget` instala Neovim o Node.js pero el binario todavía no queda usable en la sesión actual, el instalador aborta antes de copiar KVIM.
 - En ese caso puedes ver el paquete como instalado por `winget` y aun así no tener todavía launcher, config ni `install-state` de KVIM.
 
-En Windows, `kvim --gui` intenta usar `neovide` y, si no está disponible o falla al arrancar, hace fallback a terminal con `nvim`.
+En Windows y Linux, `kvim --gui` intenta usar `neovide` y, si no está disponible o falla al arrancar, hace fallback a terminal con `nvim`.
 
 Fuentes actuales:
 
@@ -194,6 +194,8 @@ En Windows, el uninstall v1 se ejecuta directamente sin confirmación interactiv
 ```powershell
 powershell -ExecutionPolicy Bypass -File package\windows\uninstall.ps1
 ```
+
+Si no se usa `--yes`, el uninstall Windows pide confirmación antes de borrar artefactos gestionados.
 
 Notas:
 

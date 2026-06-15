@@ -85,6 +85,29 @@ function Fail {
     throw $Message
 }
 
+function Ask-YesNo {
+    param([string]$Prompt, [bool]$Default = $false)
+
+    if ($script:NonInteractive) {
+        return $Default
+    }
+
+    while ($true) {
+        $suffix = if ($Default) { "[Y/n]" } else { "[y/N]" }
+        $answer = Read-Host "$Prompt $suffix"
+        if ([string]::IsNullOrWhiteSpace($answer)) {
+            return $Default
+        }
+
+        switch ($answer.ToLower()) {
+            "y" { return $true }
+            "yes" { return $true }
+            "n" { return $false }
+            "no" { return $false }
+        }
+    }
+}
+
 function Show-Usage {
     @"
 KVIM Windows uninstaller
@@ -323,6 +346,13 @@ try {
 
     Set-Step "print_plan"
     Print-Plan
+
+    if (-not $script:NonInteractive) {
+        if (-not (Ask-YesNo -Prompt "Continue with KVIM uninstall?" -Default $true)) {
+            Write-Log "Uninstall cancelled"
+            exit 0
+        }
+    }
 
     Set-Step "remove_managed_files"
     Remove-FileIfExists -Path $script:LauncherFile

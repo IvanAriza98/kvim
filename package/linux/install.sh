@@ -689,11 +689,15 @@ if [ "${1:-}" = "--gui" ]; then
     shift
 
     if ! command -v neovide >/dev/null 2>&1; then
-        printf 'KVIM launcher: neovide not found\n' >&2
-        exit 1
+        printf 'KVIM launcher: neovide not found, falling back to terminal mode\n' >&2
+        exec nvim "$@"
     fi
 
-    exec neovide "$@"
+    if ! neovide "$@"; then
+        printf 'KVIM launcher: neovide failed to start, falling back to terminal mode\n' >&2
+        exec nvim "$@"
+    fi
+    exit 0
 fi
 
 exec nvim "$@"
