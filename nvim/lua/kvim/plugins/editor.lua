@@ -8,16 +8,18 @@ return {
     config = function()
       require("nvim-treesitter.configs").setup({
         ensure_installed = {
-          "lua",
-          "vim",
-          "vimdoc",
-          "c",
-          "cpp",
-          "python",
-          "json",
-          "yaml",
-          "markdown",
-          "markdown_inline",
+            "bash",
+            "regex",
+            "lua",
+            "vim",
+            "vimdoc",
+            "c",
+            "cpp",
+            "python",
+            "json",
+            "yaml",
+            "markdown",
+            "markdown_inline",
         },
 
         highlight = {

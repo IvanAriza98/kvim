@@ -12,6 +12,7 @@ STATE_FILE="${SHARE_DIR}/install-state"
 LAUNCHER_FILE="${BIN_DIR}/kvim"
 DESKTOP_FILE="${APPLICATIONS_DIR}/kvim.desktop"
 LAZYSVN_FILE="${BIN_DIR}/lazysvn"
+USER_CONNECTIONS_FILE="${CONFIG_DIR}/connections.lua"
 FONTS_DIR="${HOME}/.local/share/fonts/kvim"
 FOOT_CONFIG_DIR="${HOME}/.config/foot"
 FOOT_CONFIG_FILE="${FOOT_CONFIG_DIR}/foot.ini"
@@ -29,6 +30,8 @@ INSTALLED_LAZYSVN="false"
 INSTALLED_NEOVIDE="false"
 FONTS_INSTALLED="false"
 FOOT_CONFIG_UPDATED="false"
+USER_CONNECTIONS_PRESENT="false"
+REMOVE_USER_CONNECTIONS="false"
 
 usage() {
     cat <<EOF
@@ -163,7 +166,6 @@ KVIM uninstall plan:
     - ${LAUNCHER_FILE}
     - ${DESKTOP_FILE}
     - ${SHARE_DIR}
-    - ${CONFIG_DIR}
     - ${ICON_FILE}
 
   Conditional removal:
@@ -251,6 +253,40 @@ remove_foot_font_include() {
 remove_config_dir() {
     if [ ! -d "$CONFIG_DIR" ]; then
         log "Already absent: ${CONFIG_DIR}"
+        return 0
+    fi
+
+    if [ "$PURGE" = "true" ]; then
+        if [ -f "$USER_CONNECTIONS_FILE" ]; then
+            remove_connections="$(ask_yes_no "Remove user connections ${USER_CONNECTIONS_FILE}?" "false")"
+            if [ "$remove_connections" = "true" ]; then
+                REMOVE_USER_CONNECTIONS="true"
+                remove_dir_if_exists "$CONFIG_DIR"
+                return 0
+            fi
+
+            temp_dir="$(mktemp -d)"
+            cp "$USER_CONNECTIONS_FILE" "${temp_dir}/connections.lua"
+            remove_dir_if_exists "$CONFIG_DIR"
+            mkdir -p "$CONFIG_DIR"
+            cp "${temp_dir}/connections.lua" "$USER_CONNECTIONS_FILE"
+            rm -rf "$temp_dir"
+            log "Preserved user connections config ${USER_CONNECTIONS_FILE}"
+            return 0
+        fi
+
+        remove_dir_if_exists "$CONFIG_DIR"
+        return 0
+    fi
+
+    if [ -f "$USER_CONNECTIONS_FILE" ]; then
+        temp_dir="$(mktemp -d)"
+        cp "$USER_CONNECTIONS_FILE" "${temp_dir}/connections.lua"
+        remove_dir_if_exists "$CONFIG_DIR"
+        mkdir -p "$CONFIG_DIR"
+        cp "${temp_dir}/connections.lua" "$USER_CONNECTIONS_FILE"
+        rm -rf "$temp_dir"
+        log "Preserved user connections config ${USER_CONNECTIONS_FILE}"
         return 0
     fi
 

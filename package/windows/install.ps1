@@ -44,6 +44,9 @@ $script:ShortcutFile = Join-Path $script:StartMenuDir "KVIM.lnk"
 $script:IconSourceFile = Join-Path $script:RepoRoot "assets\kvim-logo.png"
 $script:IconFile = Join-Path $script:AssetsDir "kvim-logo.png"
 $script:LocalConfigFile = Join-Path $script:ConfigDir "lua\kvim\local.lua"
+$script:UserConnectionsFile = Join-Path $script:ConfigDir "connections.lua"
+$script:LegacyConnectionsFile = Join-Path $script:ConfigDir "lua\kvim\connections.lua"
+$script:DefaultConnectionsFile = Join-Path $script:RepoRoot "nvim\lua\kvim\modules\connections\defaults\connections.lua"
 $script:LauncherFile = Join-Path $script:BinDir "kvim.bat"
 $script:MinNvimVersion = [Version]"0.10.0"
 $script:FontFamily = "FiraCode Nerd Font Mono"
@@ -64,6 +67,7 @@ $script:InstalledNeovide = $false
 $script:FontsInstalled = $false
 $script:PathUpdated = $false
 $script:WindowsTerminalProfileConfigured = $false
+$script:UserConnectionsPresent = $false
 $script:NvimCmd = "nvim"
 $script:NodeCmd = "node"
 $script:NpmCmd = "npm"
@@ -550,6 +554,33 @@ function Copy-KvimConfig {
     Write-Log "KVIM configuration copied successfully"
 }
 
+function Ensure-UserConnectionsConfig {
+    Write-Log "Ensuring user connections config"
+
+    if (Test-Path -LiteralPath $script:UserConnectionsFile) {
+        $script:UserConnectionsPresent = $true
+        Write-Log "Using user connections config $($script:UserConnectionsFile)"
+        return
+    }
+
+    if (Test-Path -LiteralPath $script:LegacyConnectionsFile) {
+        Copy-Item -LiteralPath $script:LegacyConnectionsFile -Destination ($script:LegacyConnectionsFile + ".bak") -Force
+        Copy-Item -LiteralPath $script:LegacyConnectionsFile -Destination $script:UserConnectionsFile -Force
+        $script:UserConnectionsPresent = $true
+        Write-Log "Migrated legacy connections config to $($script:UserConnectionsFile)"
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $script:DefaultConnectionsFile)) {
+        Write-WarnLog "Default connections template not found: $($script:DefaultConnectionsFile)"
+        return
+    }
+
+    Copy-Item -LiteralPath $script:DefaultConnectionsFile -Destination $script:UserConnectionsFile -Force
+    $script:UserConnectionsPresent = $true
+    Write-Log "Created user connections config from default template"
+}
+
 function Write-LocalOverride {
     Write-Log "Writing local module override to $($script:LocalConfigFile)"
     $content = @"
@@ -848,6 +879,7 @@ function Write-InstallState {
         "SHORTCUT_FILE=$($script:ShortcutFile)",
         "WINDOWS_TERMINAL_FRAGMENT_FILE=$($script:WindowsTerminalFragmentFile)",
         "STATE_FILE=$($script:StateFile)",
+        "USER_CONNECTIONS_FILE=$($script:UserConnectionsFile)",
         "PROGRESS_FILE=$($script:ProgressFile)",
         "LOCAL_CONFIG_FILE=$($script:LocalConfigFile)",
         "LAUNCHER_FILE=$($script:LauncherFile)",
@@ -862,6 +894,7 @@ function Write-InstallState {
         "FONTS_INSTALLED=$(Format-Bool $script:FontsInstalled)",
         "PATH_UPDATED=$(Format-Bool $script:PathUpdated)",
         "WINDOWS_TERMINAL_PROFILE_CONFIGURED=$(Format-Bool $script:WindowsTerminalProfileConfigured)",
+        "USER_CONNECTIONS_PRESENT=$(Format-Bool $script:UserConnectionsPresent)",
         "ENABLE_WORKSPACES=$(Format-Bool $script:EnableWorkspaces)",
         "ENABLE_GIT=$(Format-Bool $script:EnableGit)",
         "ENABLE_SVN=$(Format-Bool $script:EnableSvn)",
@@ -886,6 +919,7 @@ function Print-Summary {
     Write-Host "  Start Menu:   $($script:ShortcutFile)"
     Write-Host "  Windows font: $($script:WindowsFontDir)"
     Write-Host "  WT profile:   $($script:WindowsTerminalFragmentFile)"
+    Write-Host "  Connections:  $($script:UserConnectionsFile)"
     Write-Host "  Local config: $($script:LocalConfigFile)"
     Write-Host "  Icon:         $($script:IconFile)"
     Write-Host "  State file:   $($script:StateFile)"
@@ -938,6 +972,9 @@ try {
 
     Set-Step "copy_kvim_config"
     Copy-KvimConfig
+
+    Set-Step "ensure_user_connections_config"
+    Ensure-UserConnectionsConfig
 
     Set-Step "write_local_override"
     Write-LocalOverride

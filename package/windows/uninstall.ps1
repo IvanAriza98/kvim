@@ -38,12 +38,16 @@ $script:IconFile = Join-Path $script:AssetsDir "kvim-logo.png"
 $script:WindowsTerminalFragmentFile = ""
 $script:ShowHelp = $false
 $script:NonInteractive = $false
+$script:Purge = $false
 $script:InstalledNeovim = $false
 $script:InstalledNodejs = $false
 $script:InstalledNeovide = $false
 $script:FontsInstalled = $false
 $script:PathUpdated = $false
 $script:WindowsTerminalProfileConfigured = $false
+$script:UserConnectionsFile = Join-Path $script:RootDir "connections.lua"
+$script:UserConnectionsPresent = $false
+$script:RemoveUserConnections = $false
 
 function Ensure-LogDirectory {
     $progressDir = Split-Path -Parent $script:ProgressFile
@@ -117,6 +121,7 @@ Usage:
 
 Options:
   --yes       Run without confirmation prompts
+  --purge     Remove local KVIM configuration as well
   -h, --help  Show this help
 "@ | Write-Host
 }
@@ -127,6 +132,7 @@ function Parse-Args {
     foreach ($arg in $CliArgs) {
         switch ($arg) {
             "--yes" { $script:NonInteractive = $true }
+            "--purge" { $script:Purge = $true }
             "-h" { $script:ShowHelp = $true }
             "--help" { $script:ShowHelp = $true }
             default { Fail "Unknown option: $arg" }
@@ -165,6 +171,8 @@ function Load-InstallState {
             "^FONTS_INSTALLED$" { $script:FontsInstalled = ($value -eq "true") }
             "^PATH_UPDATED$" { $script:PathUpdated = ($value -eq "true") }
             "^WINDOWS_TERMINAL_PROFILE_CONFIGURED$" { $script:WindowsTerminalProfileConfigured = ($value -eq "true") }
+            "^USER_CONNECTIONS_FILE$" { $script:UserConnectionsFile = $value }
+            "^USER_CONNECTIONS_PRESENT$" { $script:UserConnectionsPresent = ($value -eq "true") }
             "^STATE_FILE$" { $script:StateFile = $value }
         }
     }
@@ -183,7 +191,44 @@ function Print-Plan {
     if ($script:InstalledNodejs) { Write-Host "  - Node.js LTS via winget" }
     if ($script:InstalledNeovide) { Write-Host "  - Neovide via winget" }
     if ($script:PathUpdated) { Write-Host "  - user PATH entry: $($script:BinDir)" }
+    if ($script:Purge -and $script:UserConnectionsPresent) { Write-Host "  - user connections config: $($script:UserConnectionsFile)" }
     Write-Host "  - $($script:RootDir)"
+}
+
+function Preserve-UserConnectionsFile {
+    if ($script:Purge) {
+        if (Test-Path -LiteralPath $script:UserConnectionsFile) {
+            $removeConnections = Ask-YesNo -Prompt "Remove user connections $($script:UserConnectionsFile)?" -Default $false
+            if (-not $removeConnections) {
+                $tempFile = Join-Path $env:TEMP "kvim-connections.lua"
+                Copy-Item -LiteralPath $script:UserConnectionsFile -Destination $tempFile -Force
+                Remove-DirIfExists -Path $script:RootDir
+                New-Item -ItemType Directory -Force -Path $script:RootDir | Out-Null
+                Copy-Item -LiteralPath $tempFile -Destination $script:UserConnectionsFile -Force
+                Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue
+                Write-Log "Preserved user connections config $($script:UserConnectionsFile)"
+                return
+            end
+
+            $script:RemoveUserConnections = $true
+        end
+
+        Remove-DirIfExists -Path $script:RootDir
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $script:UserConnectionsFile)) {
+        Remove-DirIfExists -Path $script:RootDir
+        return
+    }
+
+    $tempFile = Join-Path $env:TEMP "kvim-connections.lua"
+    Copy-Item -LiteralPath $script:UserConnectionsFile -Destination $tempFile -Force
+    Remove-DirIfExists -Path $script:RootDir
+    New-Item -ItemType Directory -Force -Path $script:RootDir | Out-Null
+    Copy-Item -LiteralPath $tempFile -Destination $script:UserConnectionsFile -Force
+    Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue
+    Write-Log "Preserved user connections config $($script:UserConnectionsFile)"
 }
 
 function Remove-FileIfExists {
@@ -371,7 +416,7 @@ try {
     Remove-UserPath
 
     Set-Step "remove_root_dir"
-    Remove-DirIfExists -Path $script:RootDir
+    Preserve-UserConnectionsFile
 
     Set-Step "print_summary"
     Print-Summary
