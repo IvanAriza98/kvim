@@ -115,6 +115,12 @@ describe("kvim.modules.workspaces.actions", function()
             open_connection = function() end,
         }
 
+        package.loaded["kvim.modules.connections.state"] = {
+            get_connection_buffer = function()
+                return nil
+            end,
+        }
+
         package.loaded["resession"] = {
             save = function()
                 session_calls.save = session_calls.save + 1
@@ -493,5 +499,64 @@ describe("kvim.modules.workspaces.actions", function()
         assert.matches("test@127%.0%.0%.1:2222", text)
         assert.are.same("kvim-term-sessions", buffer_options[created_buffers[1]].filetype)
         assert.are.same("", window_options.colorcolumn)
+    end)
+
+    it("goto_term_tab shows opened indicator for active connection buffer", function()
+        package.loaded["kvim.modules.connections.state"] = {
+            get_connection_buffer = function(name)
+                if name == "ssh-dev" then
+                    return 77
+                end
+                return nil
+            end,
+        }
+
+        vim.api.nvim_get_option_value = function(name, opts)
+            if name == "buftype" and opts and opts.buf == 77 then
+                return "terminal"
+            end
+
+            return ""
+        end
+
+        package.loaded["kvim.modules.workspaces.actions"] = nil
+        actions = require("kvim.modules.workspaces.actions")
+
+        actions.create.callback("demo")
+        actions.terminal_add.callback({
+            name = "ssh-term",
+            type = "ssh",
+            connection = "ssh-dev",
+            auto_restore = true,
+        })
+
+        local ok = actions.goto_term_tab.callback()
+
+        assert.is_true(ok)
+        local text = table.concat(buffer_lines[created_buffers[1]], "\n")
+        assert.matches("󰐃", text)
+    end)
+
+    it("goto_term_tab keeps active terminal visible instead of replacing it with sessions view", function()
+        actions.create.callback("demo")
+        actions.terminal_add.callback({
+            name = "ssh-term",
+            type = "ssh",
+            connection = "ssh-dev",
+            auto_restore = true,
+        })
+
+        vim.api.nvim_get_option_value = function(name, opts)
+            if name == "buftype" and opts and opts.buf == 1 then
+                return "terminal"
+            end
+
+            return ""
+        end
+
+        local ok = actions.goto_term_tab.callback()
+
+        assert.is_true(ok)
+        assert.are.same(0, #created_buffers)
     end)
 end)

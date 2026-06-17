@@ -360,8 +360,19 @@ local function check_ssh_session_reachability(entry)
 end
 
 local function refresh_workspace_ssh_session_states(entries)
+    local ok_conn_state, conn_state = pcall(require, "kvim.modules.connections.state")
+
     for _, entry in ipairs(entries or {}) do
         entry.reachable = check_ssh_session_reachability(entry)
+        entry.opened = false
+
+        if ok_conn_state and entry.connection_name then
+            local bufnr = conn_state.get_connection_buffer(entry.connection_name)
+            if type(bufnr) == "number" and vim.api.nvim_buf_is_valid(bufnr) and get_buf_buftype(bufnr) == "terminal" then
+                entry.opened = true
+                entry.bufnr = bufnr
+            end
+        end
     end
 end
 
@@ -375,10 +386,12 @@ local function build_term_sessions_lines(entries, selected_index, winid)
 
     for index, entry in ipairs(entries or {}) do
         local bullet = entry.reachable and "●" or "○"
+        local opened = entry.opened and "󰐃" or " "
         local user = entry.user ~= "" and entry.user or "unknown"
         local line = string.format(
-            "%s %s    %s@%s:%s",
+            "%s %s %s    %s@%s:%s",
             bullet,
+            opened,
             tostring(entry.connection_name or "unnamed"),
             user,
             tostring(entry.host or "?"),
@@ -396,7 +409,7 @@ local function build_term_sessions_lines(entries, selected_index, winid)
 
     table.insert(content, "")
     table.insert(content, "Acciones")
-    table.insert(content, "[Enter] conectar/reconectar")
+    table.insert(content, "[Enter] abrir o reconectar")
     table.insert(content, "[j/k] moverse")
     table.insert(content, "[r] refrescar estados")
 
@@ -439,6 +452,17 @@ local function activate_term_session(bufnr)
     local entry = view.entries[view.selected_index]
     if not entry or type(entry.connection_name) ~= "string" or entry.connection_name == "" then
         return nil, "selected session not found"
+    end
+
+    if entry.opened and type(entry.bufnr) == "number" and vim.api.nvim_buf_is_valid(entry.bufnr) and get_buf_buftype(entry.bufnr) == "terminal" then
+        local winids = vim.fn.win_findbuf(entry.bufnr)
+        if type(winids) == "table" and #winids > 0 then
+            vim.api.nvim_set_current_win(winids[1])
+            return true
+        end
+
+        vim.api.nvim_set_current_buf(entry.bufnr)
+        return true
     end
 
     local ok_actions, conn_actions = pcall(require, "kvim.modules.connections.actions")
@@ -566,6 +590,10 @@ local function ensure_term_tab_window()
     end
 
     goto_role_tab("term")
+
+    if term_tab_has_active_terminal(term_tab) then
+        return true
+    end
 
     local workspace = state.get_current()
     if workspace then
@@ -947,9 +975,9 @@ M.load = {
         state.set_current(workspace)
 
         local cfg = config.get()
-        if cfg.restore_terminals_on_load then
-            restore_terminals(workspace)
-        end
+        -- if cfg.restore_terminals_on_load then
+        --     restore_terminals(workspace)
+        -- end
 
         vim.notify("KVIM Workspaces: loaded workspace '" .. workspace.name .. "'", vim.log.levels.INFO)
         return workspace

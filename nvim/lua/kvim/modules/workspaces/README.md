@@ -74,6 +74,13 @@ Al cargar un workspace, KVIM restaura el contenido y deja el foco final en `code
 
 Si el tab `term` no tiene terminales activas o restaurables, KVIM muestra un placeholder centrado reutilizable con acciones sugeridas para abrir o restaurar terminales. Ese placeholder no muestra numeración de líneas.
 
+Si el workspace tiene recetas SSH, el hub `term` puede mostrar una vista de sesiones con:
+
+- indicador de conectividad (`reachable`)
+- indicador de terminal ya abierta (`opened`)
+
+Si una conexión ya tiene una terminal viva asociada, KVIM prioriza reutilizarla/enfocarla en lugar de recrearla innecesariamente.
+
 ## Storage
 
 Ruta de persistencia:
