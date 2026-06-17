@@ -28,7 +28,7 @@ Según funcionalidad:
 Archivo por defecto de conexiones:
 
 ```text
-~/.config/kvim/lua/kvim/connections.lua
+~/.config/kvim/connections.lua
 ```
 
 Debe devolver una **tabla Lua** con conexiones.
@@ -37,25 +37,27 @@ Ejemplo mínimo:
 
 ```lua
 return {
-    {
-        type = "ssh",
-        name = "srv-dev",
-        host = "192.168.1.10",
-        user = "dev",
-        port = 22,
-        identity_file = "~/.ssh/id_ed25519",
-        remote_root = "/home/dev/project",
-        transfer = {
+    connections = {
+        {
+            type = "ssh",
+            name = "srv-dev",
+            host = "192.168.1.10",
+            user = "dev",
+            port = 22,
+            identity_file = "~/.ssh/id_ed25519",
             remote_root = "/home/dev/project",
-            local_root = "~/Downloads",
+            transfer = {
+                remote_root = "/home/dev/project",
+                local_root = "~/Downloads",
+            },
         },
-    },
-    {
-        type = "serial",
-        name = "uart-esp32",
-        device = "/dev/ttyUSB0",
-        baudrate = 115200,
-        command = "picocom",
+        {
+            type = "serial",
+            name = "uart-esp32",
+            device = "/dev/ttyUSB0",
+            baudrate = 115200,
+            command = "picocom",
+        },
     },
 }
 ```

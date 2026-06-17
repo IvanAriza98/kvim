@@ -9,6 +9,9 @@ CONFIG_DIR="${HOME}/.config/kvim"
 SHARE_DIR="${HOME}/.local/share/kvim"
 BIN_DIR="${HOME}/.local/bin"
 APPLICATIONS_DIR="${HOME}/.local/share/applications"
+USER_CONNECTIONS_FILE="${CONFIG_DIR}/connections.lua"
+LEGACY_CONNECTIONS_FILE="${CONFIG_DIR}/lua/kvim/connections.lua"
+DEFAULT_CONNECTIONS_FILE="${REPO_ROOT}/nvim/lua/kvim/modules/connections/defaults/connections.lua"
 ICON_SOURCE_FILE="${REPO_ROOT}/assets/kvim-logo.png"
 FONT_SOURCE_DIR="${REPO_ROOT}/assets/fonts"
 ICON_DIR="${HOME}/.local/share/icons/hicolor/256x256/apps"
@@ -42,6 +45,7 @@ INSTALLED_NEOVIDE="false"
 LAZY_PREINSTALL_OK="false"
 FONTS_INSTALLED="false"
 FOOT_CONFIG_UPDATED="false"
+USER_CONNECTIONS_PRESENT="false"
 
 usage() {
     cat <<EOF
@@ -195,6 +199,7 @@ ICON_FILE="${ICON_FILE}"
 FONTS_DIR="${FONTS_DIR}"
 FOOT_CONFIG_FILE="${FOOT_CONFIG_FILE}"
 FOOT_KVIM_INCLUDE_FILE="${FOOT_KVIM_INCLUDE_FILE}"
+USER_CONNECTIONS_FILE="${USER_CONNECTIONS_FILE}"
 STATE_FILE="${STATE_FILE}"
 LOCAL_CONFIG_FILE="${LOCAL_CONFIG_FILE}"
 LAUNCHER_FILE="${LAUNCHER_FILE}"
@@ -207,6 +212,7 @@ INSTALLED_NEOVIDE="${INSTALLED_NEOVIDE}"
 LAZY_PREINSTALL_OK="${LAZY_PREINSTALL_OK}"
 FONTS_INSTALLED="${FONTS_INSTALLED}"
 FOOT_CONFIG_UPDATED="${FOOT_CONFIG_UPDATED}"
+USER_CONNECTIONS_PRESENT="${USER_CONNECTIONS_PRESENT}"
 FONT_FAMILY="${FONT_FAMILY}"
 NEOVIDE_FONT_SIZE="${NEOVIDE_FONT_SIZE}"
 TERMINAL_FONT_SIZE="${TERMINAL_FONT_SIZE}"
@@ -638,6 +644,33 @@ EOF
     log "foot font configuration written to ${FOOT_KVIM_INCLUDE_FILE}"
 }
 
+ensure_user_connections_config() {
+    log "Ensuring user connections config"
+
+    if [ -f "$USER_CONNECTIONS_FILE" ]; then
+        USER_CONNECTIONS_PRESENT="true"
+        log "Using user connections config ${USER_CONNECTIONS_FILE}"
+        return 0
+    fi
+
+    if [ -f "$LEGACY_CONNECTIONS_FILE" ]; then
+        cp "$LEGACY_CONNECTIONS_FILE" "${LEGACY_CONNECTIONS_FILE}.bak"
+        cp "$LEGACY_CONNECTIONS_FILE" "$USER_CONNECTIONS_FILE"
+        USER_CONNECTIONS_PRESENT="true"
+        log "Migrated legacy connections config to ${USER_CONNECTIONS_FILE}"
+        return 0
+    fi
+
+    if [ ! -f "$DEFAULT_CONNECTIONS_FILE" ]; then
+        warn "Default connections template not found: ${DEFAULT_CONNECTIONS_FILE}"
+        return 0
+    fi
+
+    cp "$DEFAULT_CONNECTIONS_FILE" "$USER_CONNECTIONS_FILE"
+    USER_CONNECTIONS_PRESENT="true"
+    log "Created user connections config from default template"
+}
+
 install_kvim_config() {
     log "Copying KVIM configuration into ${CONFIG_DIR}"
     cp -R "$REPO_ROOT/nvim/." "$CONFIG_DIR/"
@@ -773,6 +806,7 @@ main() {
     install_optional_dependencies
     check_dependencies
     install_kvim_config
+    ensure_user_connections_config
     write_local_override
     preinstall_lazy_plugins
     install_user_fonts

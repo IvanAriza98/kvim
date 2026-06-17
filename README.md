@@ -305,7 +305,7 @@ Es uno de los puntos más diferenciales del estado actual de KVIM:
 
 ### Sobre `connections`
 Es el módulo más orientado a entorno real:
-- define conexiones en `~/.config/kvim/lua/kvim/connections.lua`
+- define conexiones en `~/.config/kvim/connections.lua`
 - soporta SSH y serie
 - permite subir/bajar archivos
 - permite ejecutar comandos remotos

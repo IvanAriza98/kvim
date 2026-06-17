@@ -49,7 +49,7 @@ KVIM se divide en estas áreas principales:
 - `nvim/lua/kvim/init.lua`: punto de entrada Lua de KVIM.
 - `nvim/lua/kvim/config.lua`: configuración global de KVIM.
 - `nvim/lua/kvim/health.lua`: comprobaciones de salud del proyecto.
-- `nvim/lua/kvim/connections.lua`: definiciones o configuración de entrada para conexiones.
+- `nvim/lua/kvim/connections.lua`: referencia obsoleta; la configuración real de conexiones de usuario ya no debe vivir dentro del árbol versionado.
 - `nvim/lua/kvim/core/`: funcionalidad base del framework.
 - `nvim/lua/kvim/modules/`: módulos funcionales opcionales.
 - `nvim/lua/kvim/plugins/`: especificaciones de plugins para `lazy.nvim`.

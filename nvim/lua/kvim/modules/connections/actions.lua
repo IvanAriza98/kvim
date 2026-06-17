@@ -15,14 +15,23 @@ end
 
 local function load_connections_for_edit(opts)
   local config_file = get_config_file(opts)
-  if vim.fn.filereadable(config_file) ~= 1 then
-    return {}
+  if not config_file or config_file == "" then
+    local ok_path, resolved = pcall(require("kvim.modules.connections.config_paths").ensure_user_config)
+    if not ok_path then
+      vim.notify("KVIM Connections: failed to resolve config file", vim.log.levels.ERROR)
+      return nil, "failed to resolve config file"
+    end
+    config_file = resolved
   end
 
   local ok, connections = pcall(dofile, config_file)
   if not ok or type(connections) ~= "table" then
     vim.notify("KVIM Connections: failed to parse config file", vim.log.levels.ERROR)
     return nil, "failed to parse config file"
+  end
+
+  if type(config.normalize) == "function" then
+    return config.normalize(connections)
   end
 
   return connections
@@ -33,7 +42,12 @@ local function save_connections(connections, opts)
   local parent = vim.fn.fnamemodify(config_file, ":h")
   vim.fn.mkdir(parent, "p")
 
-  local content = "return " .. vim.inspect(connections) .. "\n"
+  local content
+  if type(config.serialize) == "function" then
+    content = config.serialize(connections)
+  else
+    content = "return " .. vim.inspect(connections) .. "\n"
+  end
   local ok, err = pcall(vim.fn.writefile, vim.split(content, "\n", { plain = true }), config_file)
   if not ok then
     return nil, err
