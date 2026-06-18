@@ -6,6 +6,7 @@ local config = require("kvim.modules.workspaces.config")
 
 local term_sessions_views = {}
 local resolve_connection_for_command
+local explorer_redirect_in_progress = false
 
 local function safe_buf_var(bufnr, varname)
     local ok, value = pcall(vim.api.nvim_buf_get_var, bufnr, varname)
@@ -199,6 +200,24 @@ local function goto_role_tab(role)
     set_active_tab_role(role)
 
     return tabnr
+end
+
+local function current_role()
+    local tabnr = get_current_tabnr()
+    return state.get_tab_role(tabnr) or state.get_active_tab_role()
+end
+
+local function open_explorer_in_code_tab(command)
+    command = command or "Neotree focus filesystem left"
+
+    local role = current_role()
+    if role == "term" then
+        vim.notify("KVIM Workspaces: Neo-tree is not available in term tab", vim.log.levels.INFO)
+        return nil, "neo-tree not allowed in term tab"
+    end
+
+    pcall(vim.cmd, command)
+    return true
 end
 
 local function build_term_placeholder_lines(winid)
@@ -454,6 +473,14 @@ local function activate_term_session(bufnr)
         return nil, "selected session not found"
     end
 
+    if entry.reachable == false then
+        vim.notify(
+            "KVIM Workspaces: cannot connect because the SSH endpoint is not reachable",
+            vim.log.levels.ERROR
+        )
+        return nil, "connection not reachable"
+    end
+
     if entry.opened and type(entry.bufnr) == "number" and vim.api.nvim_buf_is_valid(entry.bufnr) and get_buf_buftype(entry.bufnr) == "terminal" then
         local winids = vim.fn.win_findbuf(entry.bufnr)
         if type(winids) == "table" and #winids > 0 then
@@ -477,6 +504,14 @@ local function activate_term_session(bufnr)
 
     if reconnect_err ~= "terminal buffer not found: " .. entry.connection_name then
         return nil, reconnect_err
+    end
+
+    if type(entry.connection) ~= "table" then
+        vim.notify(
+            "KVIM Workspaces: cannot connect because the SSH connection is not available anymore",
+            vim.log.levels.ERROR
+        )
+        return nil, "connection not available"
     end
 
     conn_actions.open_connection(entry.connection, { startinsert = false })
@@ -1288,6 +1323,33 @@ M.goto_term_tab = {
 
         ensure_term_tab_window()
         refresh_bufferline()
+        return true
+    end,
+}
+
+M.explorer_in_code_tab = {
+    callback = function(command)
+        return open_explorer_in_code_tab(command)
+    end,
+}
+
+M.handle_explorer_opened_in_term = {
+    callback = function()
+        if explorer_redirect_in_progress then
+            return true
+        end
+
+        local role = current_role()
+        if role ~= "term" then
+            return false
+        end
+
+        explorer_redirect_in_progress = true
+        vim.schedule(function()
+            pcall(vim.cmd, "Neotree close")
+            vim.notify("KVIM Workspaces: Neo-tree cannot be opened in term tab", vim.log.levels.INFO)
+            explorer_redirect_in_progress = false
+        end)
         return true
     end,
 }

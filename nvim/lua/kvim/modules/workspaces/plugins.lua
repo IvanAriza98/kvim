@@ -36,6 +36,35 @@ return {
                     local role = ws_state.get_tab_role(vim.fn.tabpagenr())
                     ws_state.set_active_tab_role(role)
                     pcall(vim.cmd, "redrawtabline")
+
+                    if role ~= "term" then
+                        return
+                    end
+
+                    local ok_ft, ft = pcall(vim.api.nvim_get_option_value, "filetype", { buf = 0 })
+                    if not ok_ft or ft ~= "neo-tree" then
+                        return
+                    end
+
+                    vim.schedule(function()
+                        local ok_actions, ws_actions = pcall(require, "kvim.modules.workspaces.actions")
+                        if ok_actions and ws_actions.goto_term_tab and type(ws_actions.goto_term_tab.callback) == "function" then
+                            ws_actions.goto_term_tab.callback()
+                        end
+                    end)
+                end,
+            })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                group = sync_group,
+                pattern = "neo-tree",
+                callback = function()
+                    local ok_actions, ws_actions = pcall(require, "kvim.modules.workspaces.actions")
+                    if not ok_actions or not ws_actions.handle_explorer_opened_in_term or type(ws_actions.handle_explorer_opened_in_term.callback) ~= "function" then
+                        return
+                    end
+
+                    ws_actions.handle_explorer_opened_in_term.callback()
                 end,
             })
 

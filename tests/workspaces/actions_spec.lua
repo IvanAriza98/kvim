@@ -559,4 +559,43 @@ describe("kvim.modules.workspaces.actions", function()
         assert.is_true(ok)
         assert.are.same(0, #created_buffers)
     end)
+
+    it("does not open connection from term sessions view when endpoint is not reachable", function()
+        local notifications = {}
+
+        vim.notify = function(message, level)
+            table.insert(notifications, { message = message, level = level })
+        end
+
+        vim.fn.sockconnect = function()
+            return 0
+        end
+
+        actions.create.callback("demo")
+        actions.terminal_add.callback({
+            name = "ssh-term",
+            type = "ssh",
+            connection = "ssh-dev",
+            auto_restore = true,
+        })
+
+        local ok = actions.goto_term_tab.callback()
+        assert.is_true(ok)
+
+        local sessions_buf = created_buffers[1]
+        local session_keymap
+        for _, item in ipairs(keymaps) do
+            if item.lhs == "<CR>" and item.opts and item.opts.buffer == sessions_buf then
+                session_keymap = item.rhs
+                break
+            end
+        end
+
+        assert.is_function(session_keymap)
+        session_keymap()
+
+        assert.are.equal(0, #opened_commands)
+        assert.are.equal(1, #notifications)
+        assert.matches("SSH endpoint is not reachable", notifications[1].message)
+    end)
 end)

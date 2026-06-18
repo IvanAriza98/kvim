@@ -10,6 +10,16 @@ local function map(mode, lhs, rhs, opts)
 	vim.keymap.set(mode, lhs, rhs, opts)
 end
 
+local function run_explorer_action(command)
+    local ok_actions, ws_actions = pcall(require, "kvim.modules.workspaces.actions")
+    if ok_actions and ws_actions.explorer_in_code_tab and type(ws_actions.explorer_in_code_tab.callback) == "function" then
+        ws_actions.explorer_in_code_tab.callback(command)
+        return
+    end
+
+    vim.cmd(command)
+end
+
 function M.setup_personal(config)
 	local opts = config.keymaps.opts
 	local mappings = config.keymaps.mappings.personal
@@ -43,12 +53,12 @@ function M.setup_ui(config)
         return
     end
     -- neo-tree
-    map("n", mappings.explorer_toggle,      "<cmd>Neotree toggle filesystem left<CR>",  opts)
-    map("n", mappings.explorer_focus,       "<cmd>Neotree focus filesystem left<CR>",   opts)
-    map("n", mappings.explorer_reveal,      "<cmd>Neotree reveal filesystem left<CR>",  opts)
-    map("n", mappings.explorer_close,       "<cmd>Neotree close<CR>",                   opts)
-    map("n", mappings.explorer_git_status,  "<cmd>Neotree git_status left<CR>",         opts)
-    map("n", mappings.explorer_buffers,     "<cmd>Neotree buffers left<CR>",            opts)
+    map("n", mappings.explorer_toggle,      function() run_explorer_action("Neotree toggle filesystem left") end, opts)
+    map("n", mappings.explorer_focus,       function() run_explorer_action("Neotree focus filesystem left") end, opts)
+    map("n", mappings.explorer_reveal,      function() run_explorer_action("Neotree reveal filesystem left") end, opts)
+    map("n", mappings.explorer_close,       function() run_explorer_action("Neotree close") end, opts)
+    map("n", mappings.explorer_git_status,  function() run_explorer_action("Neotree git_status left") end, opts)
+    map("n", mappings.explorer_buffers,     function() run_explorer_action("Neotree buffers left") end, opts)
     -- yazi
     map("n", mappings.yazi,     "<cmd>Yazi<CR>",        opts)
     map("n", mappings.yazi_cwd, "<cmd>Yazi cwd<CR>",    opts)
