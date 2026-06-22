@@ -50,6 +50,42 @@ return {
   },
 
   {
+    "stevearc/dressing.nvim",
+    event = "VeryLazy",
+    opts = {
+      input = {
+        enabled = true,
+        default_prompt = "❯ ",
+        border = "rounded",
+        relative = "editor",
+        prefer_width = 52,
+        width = nil,
+        max_width = { 100, 0.6 },
+        min_width = { 40, 0.3 },
+        win_options = {
+          winblend = 0,
+          winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
+        },
+      },
+      select = {
+        enabled = true,
+        backend = { "telescope", "builtin" },
+        builtin = {
+          relative = "editor",
+          border = "rounded",
+          winblend = 0,
+          win_options = {
+            winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
+          },
+          width = 0.42,
+          min_width = 40,
+          max_width = 84,
+        },
+      },
+    },
+  },
+
+  {
     "sphamba/smear-cursor.nvim",
     enabled = function()
       return not vim.g.neovide
@@ -69,74 +105,113 @@ return {
       "MunifTanjim/nui.nvim",
       "rcarriga/nvim-notify",
     },
-    opts = {
-      cmdline = {
-        enabled = true,
-        view = "cmdline_popup",
-        format = {
-          cmdline = {
-            pattern = "^:",
-            icon = "",
-            lang = "vim",
-          },
-          search_down = {
-            pattern = "^/",
-            icon = " ",
-            lang = "regex",
-          },
-          search_up = {
-            pattern = "^%?",
-            icon = " ",
-            lang = "regex",
-          },
-          filter = {
-            pattern = "^:%s*!",
-            icon = "$",
-            lang = "bash",
-          },
-          lua = {
-            pattern = "^:%s*lua%s+",
-            icon = "",
-            lang = "lua",
+    opts = function()
+      local palette_width = math.max(52, math.min(84, math.floor(vim.o.columns * 0.42)))
+
+      return {
+        cmdline = {
+          enabled = true,
+          view = "cmdline_popup",
+          format = {
+            cmdline = {
+              pattern = "^:",
+              icon = "",
+              lang = "vim",
+            },
+            search_down = {
+              pattern = "^/",
+              icon = " ",
+              lang = "regex",
+            },
+            search_up = {
+              pattern = "^%?",
+              icon = " ",
+              lang = "regex",
+            },
+            filter = {
+              pattern = "^:%s*!",
+              icon = "$",
+              lang = "bash",
+            },
+            lua = {
+              pattern = "^:%s*lua%s+",
+              icon = "",
+              lang = "lua",
+            },
+            input = {
+              view = "cmdline",
+              icon = "",
+            },
           },
         },
-      },
 
-      views = {
-        cmdline_popup = {
-          position = {
-            row = "50%",
-            col = "50%",
+        views = {
+          cmdline_popup = {
+            relative = "editor",
+            position = {
+              row = "50%",
+              col = "50%",
+            },
+            size = {
+              width = palette_width,
+              height = "auto",
+            },
+            border = {
+              style = "rounded",
+              padding = { 0, 1 },
+            },
+            win_options = {
+              winblend = 0,
+              winhighlight = {
+                Normal = "NormalFloat",
+                FloatBorder = "FloatBorder",
+              },
+            },
           },
-          size = {
-            width = 60,
-            height = "auto",
-          },
-          border = {
-            style = "rounded",
+          popupmenu = {
+            relative = "editor",
+            position = {
+              row = "53%",
+              col = "50%",
+            },
+            size = {
+              width = palette_width,
+              height = 8,
+            },
+            border = {
+              style = "rounded",
+              padding = { 0, 1 },
+            },
+            win_options = {
+              winblend = 0,
+              winhighlight = {
+                Normal = "NormalFloat",
+                FloatBorder = "FloatBorder",
+              },
+            },
           },
         },
-      },
 
-      messages = {
-        enabled = true,
-      },
+        messages = {
+          enabled = true,
+        },
 
-      popupmenu = {
-        enabled = true,
-      },
+        popupmenu = {
+          enabled = true,
+        },
 
-      notify = {
-        enabled = true,
-      },
+        notify = {
+          enabled = true,
+        },
 
-      presets = {
-        bottom_search = false,
-        command_palette = true,
-        long_message_to_split = true,
-        inc_rename = false,
-        lsp_doc_border = true,
-      },
-    },
+        presets = {
+          bottom_search = false,
+          command_palette = true,
+          long_message_to_split = true,
+          inc_rename = false,
+          lsp_doc_border = true,
+        },
+      }
+    end,
   },
 }

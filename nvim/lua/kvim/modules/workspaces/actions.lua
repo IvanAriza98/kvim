@@ -1112,7 +1112,11 @@ local function switch_workspace_by_offset(offset)
     end
 
     if not current_index then
-        current_index = 1
+        if offset > 0 then
+            return M.load.callback(workspaces[1])
+        end
+
+        return M.load.callback(workspaces[#workspaces])
     end
 
     local target_index = ((current_index - 1 + offset) % #workspaces) + 1
@@ -1164,6 +1168,22 @@ M.current = {
 
         vim.notify("KVIM Workspaces: current workspace '" .. current.name .. "'", vim.log.levels.INFO)
         return current
+    end,
+}
+
+M.clear = {
+    callback = function()
+        state.clear_current()
+        if type(state.clear_tab_roles) == "function" then
+            state.clear_tab_roles()
+        end
+        if type(state.set_active_tab_role) == "function" then
+            state.set_active_tab_role(nil)
+        end
+
+        refresh_bufferline()
+        vim.notify("KVIM Workspaces: cleared active workspace", vim.log.levels.INFO)
+        return true
     end,
 }
 

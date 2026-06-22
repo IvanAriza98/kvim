@@ -89,6 +89,12 @@ function M.setup(opts)
         desc = "Workspaces: Mostrar workspace actual",
     })
 
+    map("n", prefix .. "x", "<cmd>KvimWorkspaceClear<CR>", {
+        silent = true,
+        noremap = true,
+        desc = "Workspaces: Salir del workspace actual",
+    })
+
     map("n", prefix .. "n", "<cmd>KvimWorkspaceNext<CR>", {
         silent = true,
         noremap = true,

@@ -440,6 +440,91 @@ describe("kvim.modules.workspaces.actions", function()
         assert.are.same("b", current.name)
     end)
 
+    it("next loads first workspace when no workspace is active", function()
+        local loaded_name
+        package.loaded["kvim.modules.workspaces.storage"] = {
+            save = function(workspace)
+                storage_calls.save = storage_calls.save + 1
+                saved_workspace = workspace
+                return true
+            end,
+            load = function(name)
+                loaded_name = name
+                storage_calls.load = storage_calls.load + 1
+                return {
+                    name = name,
+                    root = "/tmp/project",
+                    session = name,
+                    version = 1,
+                    connections = { active = nil },
+                    terminals = {},
+                    tasks = {},
+                }
+            end,
+            list = function()
+                return { "a", "b" }
+            end,
+            delete = function()
+                return true
+            end,
+        }
+
+        current_workspace = nil
+        package.loaded["kvim.modules.workspaces.actions"] = nil
+        actions = require("kvim.modules.workspaces.actions")
+
+        actions.next.callback()
+
+        assert.are.equal("a", loaded_name)
+    end)
+
+    it("prev loads last workspace when no workspace is active", function()
+        local loaded_name
+        package.loaded["kvim.modules.workspaces.storage"] = {
+            save = function(workspace)
+                storage_calls.save = storage_calls.save + 1
+                saved_workspace = workspace
+                return true
+            end,
+            load = function(name)
+                loaded_name = name
+                storage_calls.load = storage_calls.load + 1
+                return {
+                    name = name,
+                    root = "/tmp/project",
+                    session = name,
+                    version = 1,
+                    connections = { active = nil },
+                    terminals = {},
+                    tasks = {},
+                }
+            end,
+            list = function()
+                return { "a", "b" }
+            end,
+            delete = function()
+                return true
+            end,
+        }
+
+        current_workspace = nil
+        package.loaded["kvim.modules.workspaces.actions"] = nil
+        actions = require("kvim.modules.workspaces.actions")
+
+        actions.prev.callback()
+
+        assert.are.equal("b", loaded_name)
+    end)
+
+    it("clear removes current workspace state", function()
+        actions.create.callback("demo")
+
+        local ok = actions.clear.callback()
+
+        assert.is_true(ok)
+        assert.is_nil(current_workspace)
+    end)
+
     it("goto_term_tab opens centered placeholder when no terminals exist", function()
         actions.create.callback("demo")
         local ok = actions.goto_term_tab.callback()

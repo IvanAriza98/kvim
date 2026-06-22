@@ -36,6 +36,12 @@ return {
                     local role = ws_state.get_tab_role(vim.fn.tabpagenr())
                     ws_state.set_active_tab_role(role)
                     pcall(vim.cmd, "redrawtabline")
+                    pcall(function()
+                        local bufferline = require("bufferline")
+                        if type(bufferline.refresh) == "function" then
+                            bufferline.refresh()
+                        end
+                    end)
 
                     if role ~= "term" then
                         return
@@ -81,11 +87,11 @@ return {
 
             local function role_label(role)
                 if role == "code" then
-                    return "󰈔 Code"
+                    return "Code"
                 end
 
                 if role == "term" then
-                    return " Term"
+                    return "Term"
                 end
 
                 if type(role) == "string" and role ~= "" then
@@ -99,11 +105,14 @@ return {
                 local selected = resolve_hl("TabLineSel", { fg = "#1e1e2e", bg = "#89b4fa" })
                 local normal = resolve_hl("TabLine", { fg = "#a6adc8", bg = "#1e1e2e" })
                 local style = is_current
-                    and { fg = selected.fg, bg = selected.bg, bold = true, italic = true }
-                    or { fg = normal.fg, bg = normal.bg, bold = false, italic = false }
+                    and { fg = "#ffffff", bg = selected.bg, bold = true, italic = false }
+                    or { fg = "#7f849c", bg = normal.bg, bold = false, italic = false }
+                local display = is_current
+                    and (" ● " .. text .. " ")
+                    or (" " .. text .. " ")
 
                 return {
-                    text = " " .. text .. " ",
+                    text = display,
                     fg = style.fg,
                     bg = style.bg,
                     bold = style.bold,
@@ -158,7 +167,6 @@ return {
                                 return {}
                             end
 
-                            local active_role = ws_state.get_active_tab_role()
                             local current_tabnr = vim.fn.tabpagenr()
                             local ordered_tabnrs = {}
                             for tabnr, _ in pairs(roles) do
@@ -170,12 +178,7 @@ return {
                             for _, tabnr in ipairs(ordered_tabnrs) do
                                 local label = role_label(roles[tabnr])
                                 if label then
-                                    local is_current = false
-                                    if type(active_role) == "string" and active_role ~= "" then
-                                        is_current = (roles[tabnr] == active_role)
-                                    else
-                                        is_current = (tabnr == current_tabnr)
-                                    end
+                                    local is_current = (tabnr == current_tabnr)
                                     table.insert(out, tab_badge(label, is_current))
                                 end
                             end
