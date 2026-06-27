@@ -3,8 +3,23 @@
 **Título:** KVIM, entorno IDE modular sobre Neovim y Lua  
 **Tipo de documento:** Documentación técnica ampliada  
 **Proyecto:** KVIM  
-**Estado del documento:** Borrador sólido para memoria/TFM  
 **Fecha:** 2026  
+
+---
+
+## Índice
+
+1. [Introducción](#1-introducción)
+2. [Descripción general del proyecto](#2-descripción-general-del-proyecto)
+3. [Stack tecnológico utilizado](#3-stack-tecnológico-utilizado)
+4. [Información sobre instalación y ejecución](#4-información-sobre-instalación-y-ejecución)
+5. [Estructura del proyecto](#5-estructura-del-proyecto)
+6. [Funcionamiento general de KVIM](#6-funcionamiento-general-de-kvim)
+7. [Funcionalidades principales](#7-funcionalidades-principales)
+8. [Limitaciones y consideraciones técnicas](#8-limitaciones-y-consideraciones-técnicas)
+9. [Conclusiones](#9-conclusiones)
+10. [Anexos](#10-anexos)
+11. [Resumen final](#11-resumen-final)
 
 ---
 
@@ -20,28 +35,19 @@ Este documento recoge una explicación extensa del proyecto desde una perspectiv
 
 ![KVIM Home](assets/docs/images/home-screen.png)
 
-### 1.2. Objeto del documento
+*Figura 1. Pantalla inicial de KVIM.*
 
-El propósito de este documento es describir con claridad:
+### 1.2. Alcance
 
-- qué es KVIM y cuál es su objetivo;
-- qué tecnologías utiliza;
-- cómo se instala y ejecuta;
-- cómo está organizado internamente el proyecto;
-- cuáles son sus funcionalidades principales en el estado actual.
+El alcance de KVIM se sitúa a nivel de proyecto y de plataforma de trabajo sobre Neovim. En términos prácticos, el sistema busca proporcionar una base modular reutilizable para edición, navegación, integración con herramientas externas, gestión de sesiones de trabajo y ampliación mediante módulos propios.
 
-### 1.3. Alcance
+Por tanto:
 
-Este documento cubre el estado **real y actual** del repositorio, no una hoja de ruta ideal o futura. Por tanto:
-
-- se describen únicamente capacidades que existen o están cableadas de forma visible en el código;
-- se incluyen limitaciones y zonas en consolidación cuando resulta relevante;
-- no se profundiza en comparativas extensas con otras distribuciones de Neovim;
-- no se documentan personalizaciones privadas del usuario que no formen parte del árbol versionado.
-
-### 1.4. Estado actual del proyecto
-
-KVIM es actualmente un proyecto **usable**, con una arquitectura modular real, plugins integrados por áreas, módulos funcionales propios y una suite de tests automatizados en modo headless. Aun así, algunas piezas siguen evolucionando y conviene entenderlo como un sistema en crecimiento, no como una plataforma completamente cerrada a nivel interno.
+- se describen capacidades que existen o que están reflejadas de forma reconocible en el repositorio;
+- se cubren tanto la arquitectura interna como la experiencia de uso visible;
+- se incluyen integraciones propias del proyecto, como workspaces, Git, SVN y connections;
+- no se documentan configuraciones privadas del usuario que no formen parte del árbol versionado;
+- no se plantea KVIM como una idea teórica, sino como una implementación concreta sobre Neovim y Lua.
 
 ---
 
@@ -92,7 +98,7 @@ Esta separación favorece:
 
 ### 2.4. Casos de uso principales
 
-En su estado actual, KVIM cubre varios casos de uso relevantes:
+KVIM cubre varios casos de uso relevantes:
 
 - desarrollo general con soporte LSP y autocompletado;
 - exploración de archivos y búsqueda en proyecto;
@@ -148,27 +154,48 @@ flowchart TD
 
 ![Tour general KVIM](assets/docs/gifs/home.gif)
 
+*Vídeo 1. Uso general de KVIM y primeros pasos dentro del entorno.*
+
 ---
 
 ## 3. Stack tecnológico utilizado
 
-### 3.1. Lenguajes y base de ejecución
+Para describir correctamente KVIM conviene separar las tecnologías empleadas para desarrollar el proyecto de aquellas que forman parte del producto final ejecutado por el usuario.
 
-KVIM utiliza como tecnologías principales:
+### 3.1. Stack tecnológico de desarrollo general
 
-- **Lua** como lenguaje principal de implementación;
-- **Neovim** como plataforma de ejecución;
-- **Shell (Bash)** para scripts de instalación/desinstalación en Linux;
-- **PowerShell** para instalación/desinstalación en Windows.
-- **IA Agéntica** para la codificación del proyecto
-    -**Agentes**, orquestador de los subagentes
-    -**Subagentes**, agentes desarrollados para tareas específicas y gestionandos por el agente orquestado
-    -**Opencode**, plataforma open-source que hace posible el uso de la IA agéntica
-    -**Ponytail**, uso de la skill para optimizar la programación y reducción del uso de tokens
-- **Git Flow** para la gestión del proyecto, branches, releases ...
-Lua resulta especialmente adecuado en este contexto por ser el lenguaje nativo de la configuración moderna de Neovim, lo que permite una integración natural con su API y con la mayor parte del ecosistema actual de plugins.
+El desarrollo general del proyecto se apoya en:
 
-### 3.2. Gestor de plugins
+- **Lua**, como lenguaje principal de implementación;
+- **Neovim**, como plataforma de ejecución del propio entorno;
+- **Git** como sistema de control de versiones;
+- **Git Flow** como estrategia de organización del trabajo, ramas y releases;
+- **Shell (Bash)** para scripts de instalación, desinstalación y utilidades en Linux;
+- **PowerShell** para instalación, desinstalación y automatización en Windows.
+
+Lua resulta especialmente adecuado en este contexto por ser el lenguaje nativo de la configuración moderna de Neovim, lo que permite una integración directa con la API del editor y con gran parte de su ecosistema.
+
+### 3.2. Stack tecnológico de desarrollo asistido por IA
+
+Una parte diferencial del proceso de desarrollo de KVIM es el uso de **IA agéntica** como apoyo directo a la construcción y mantenimiento del proyecto.
+
+Las piezas principales de esta capa son:
+
+- **OpenCode**, plataforma open-source empleada como entorno de trabajo para agentes;
+- **agente principal**, encargado de orquestar el flujo general del proyecto;
+- **subagentes especializados**, orientados a áreas concretas como core, módulos, documentación, testing e instaladores;
+- **skills**, utilizadas para cargar comportamientos o modos de trabajo concretos;
+- **hooks y reglas operativas**, que ayudan a mantener consistencia en el flujo de edición.
+
+Dentro de este stack destaca **Ponytail**, una skill centrada en reducir sobreingeniería y en priorizar soluciones simples, pequeñas y mantenibles. En la práctica, su uso favorece diffs más cortos, menor complejidad accidental y un aprovechamiento más eficiente del contexto y de los tokens durante el desarrollo asistido.
+
+Además, el repositorio incorpora en `.opencode/` la configuración de este entorno, incluyendo agentes propios de KVIM y la activación del plugin asociado a Ponytail.
+
+### 3.3. Stack tecnológico propio de KVIM sobre Neovim
+
+El producto final que utiliza el usuario se construye sobre un stack específico de Neovim organizado en core, plugins, UI y módulos propios.
+
+#### 3.3.1. Gestor de plugins
 
 El sistema de plugins se articula sobre **`lazy.nvim`**, utilizado como gestor y cargador de plugins. Esta elección permite:
 
@@ -177,7 +204,7 @@ El sistema de plugins se articula sobre **`lazy.nvim`**, utilizado como gestor y
 - mantener una estructura modular y legible;
 - incorporar plugins aportados por módulos concretos.
 
-### 3.3. Stack de interfaz y experiencia de usuario
+#### 3.3.2. Interfaz y experiencia de usuario
 
 La experiencia visual actual de KVIM se apoya en las siguientes piezas:
 
@@ -188,46 +215,54 @@ La experiencia visual actual de KVIM se apoya en las siguientes piezas:
 | Dashboard | Snacks | Pantalla de inicio |
 | Explorador | Neo-tree | Árbol de archivos y vistas laterales |
 | Búsqueda | Telescope | Búsqueda de archivos, buffers y texto |
-| Gestor de archivos | Yazi | Integración con explorador externo |
+| Gestor de archivos | Yazi | Integración externa orientada principalmente a Linux |
 | Notificaciones | nvim-notify | Mensajes visuales |
 | Command palette | noice.nvim | Interfaz mejorada para `:` y mensajes |
 | Select/Input UI | dressing.nvim | Mejora de `vim.ui.select()` y `vim.ui.input()` |
-| Línea de buffers | bufferline.nvim | Gestión visual de buffers y tabs lógicas |
+| Línea de buffers | bufferline.nvim | Gestión visual de buffers y apoyo a tabs lógicas de workspace |
 | Folds | nvim-ufo | Plegado avanzado |
 | Sintaxis/árbol | nvim-treesitter | Resaltado y estructura de código |
 
 Además, el proyecto incorpora plugins complementarios como:
 
+- `which-key.nvim`;
 - `smartcolumn.nvim`;
 - `vim-visual-multi`;
 - `nvim-autopairs`;
-- `which-key.nvim`;
-- `smear-cursor.nvim` en contextos donde no se usa Neovide.
+- `smear-cursor.nvim` cuando no se está usando Neovide.
 
-### 3.4. Stack de desarrollo
+#### 3.3.3. Desarrollo y edición de código
 
 Para el soporte de desarrollo y lenguaje, KVIM emplea:
 
 - **`nvim-lspconfig`** para configuración LSP;
 - **`mason.nvim`** para gestión de herramientas y servidores;
 - **`mason-lspconfig.nvim`** como puente con LSP;
-- **`blink.cmp`** como sistema de autocompletado.
+- **`blink.cmp`** como sistema de autocompletado;
+- **`friendly-snippets`** como fuente de snippets reutilizables integrada con el autocompletado.
 
-### 3.5. Servidores LSP actualmente configurados
+Los servidores LSP configurados actualmente son:
 
-En el estado actual del proyecto aparecen configurados los siguientes servidores:
+- `lua_ls`;
+- `clangd`;
+- `pyright`;
+- `ts_ls`;
+- `bashls`;
+- `jsonls`;
+- `yamlls`.
 
-- `lua_ls`
-- `clangd`
-- `pyright`
-- `ts_ls`
-- `bashls`
-- `jsonls`
-- `yamlls`
+#### 3.3.4. Módulos funcionales propios
 
-Estos cubren una base razonable para desarrollo en Lua, C/C++, Python, TypeScript/JavaScript, Bash, JSON y YAML.
+Los módulos propios de KVIM representan la parte más específica del proyecto. En el estado actual del repositorio existen:
 
-### 3.6. Dependencias externas por funcionalidad
+- `workspaces`;
+- `git`;
+- `svn`;
+- `connections`.
+
+Estos módulos añaden comportamiento funcional por encima del editor base y son los responsables de gran parte de la identidad propia de KVIM.
+
+#### 3.3.5. Dependencias externas por funcionalidad
 
 KVIM puede funcionar con distinta profundidad según las dependencias disponibles. Entre las más relevantes se encuentran:
 
@@ -244,7 +279,11 @@ KVIM puede funcionar con distinta profundidad según las dependencias disponible
 - `picocom`;
 - `neovide` como GUI opcional.
 
-### 3.7. Stack de testing
+![Command Palette](assets/docs/images/command-palette.png)
+
+*Figura 2. Command palette centrada mediante `noice.nvim`.*
+
+### 3.4. Stack tecnológico de testing
 
 La capa de testing automatizado se construye con:
 
@@ -252,11 +291,7 @@ La capa de testing automatizado se construye con:
 - **`plenary.nvim`**;
 - **`busted`**.
 
-Esta combinación permite probar comportamiento Lua y lógica de integración sin depender de una sesión interactiva manual.
-
-![Command Palette](assets/docs/images/command-palette.png)
-
-**[Insertar tabla o figura: resumen del stack tecnológico]**
+Esta combinación permite probar comportamiento Lua, comandos, keymaps, módulos y lógica de integración sin depender de una sesión interactiva manual ni de servicios externos reales.
 
 ---
 
@@ -361,6 +396,8 @@ kvim --gui fichero.lua
 
 Cuando se solicita el modo GUI, KVIM intenta utilizar `neovide` y, si no está disponible o falla el arranque, hace fallback a ejecución en terminal con `nvim`.
 
+La incorporación de `neovide` no cambia la arquitectura de KVIM, pero sí mejora la experiencia de uso visual: cursor animado, scroll más fluido, renderizado más suave y una sensación de interacción más cercana a la de un IDE gráfico moderno.
+
 ### 4.6. Configuración local del usuario
 
 KVIM admite configuración local en:
@@ -374,6 +411,8 @@ La precedencia de configuración es:
 1. defaults definidos en `kvim.config`;
 2. configuración local del usuario (`kvim.local`);
 3. opciones pasadas programáticamente a `require("kvim").setup(...)`.
+
+Este mecanismo permite mantener separadas varias configuraciones de Neovim: por un lado la configuración habitual del usuario y, por otro, la configuración específica de KVIM. Esa separación es especialmente útil cuando se trabaja con `NVIM_APPNAME`, con launchers propios o con instalaciones independientes del editor.
 
 Ejemplo mínimo:
 
@@ -395,8 +434,13 @@ Es importante señalar una diferencia práctica entre el comportamiento del repo
 - los **defaults del proyecto** y los **defaults del `local.lua` generado por instalación** no son idénticos;
 - el instalador adopta por defecto una postura más conservadora, activando principalmente `workspaces` y dejando otros módulos opcionales deshabilitados salvo que se soliciten explícitamente.
 
-![Instalación Linux](assets/docs/gitfs/install.gif)
-![Desinstalación Linux](assets/docs/gitfs/uninstall.gif)
+![Instalación Linux](assets/docs/gifs/install.gif)
+
+*Vídeo 2. Proceso de instalación de KVIM en Linux.*
+
+![Desinstalación Linux](assets/docs/gifs/uninstall.gif)
+
+*Vídeo 3. Proceso de desinstalación de KVIM en Linux.*
 
 ---
 
@@ -404,34 +448,33 @@ Es importante señalar una diferencia práctica entre el comportamiento del repo
 
 ### 5.1. Organización general del repositorio
 
-La organización principal del repositorio responde a una separación clara entre configuración ejecutable, scripts de soporte, tests y documentación.
+La organización principal del repositorio responde a una separación clara entre configuración ejecutable, scripts de soporte, documentación, assets, testing e infraestructura de agentes.
 
-Árbol simplificado:
+Árbol simplificado actualizado:
 
 ```text
 .
+├── .opencode/
+├── assets/
+├── docs/
+│   └── specs/
 ├── nvim/
 ├── package/
 ├── scripts/
 ├── tests/
-├── docs/specs/
-├── README.md
-├── CHANGELOG.md
 ├── AGENTS.md
+├── CHANGELOG.md
+├── KVIM_REFERENCE.md
+├── README.md
 └── TFM.md
 ```
 
 ### 5.2. Directorio `nvim/`
 
-Este directorio contiene la configuración efectiva del editor.
+Este directorio contiene la configuración efectiva del editor y el punto de entrada real del sistema. En particular:
 
-#### 5.2.1. `nvim/init.lua`
-
-Es el punto de entrada de Neovim. Su responsabilidad principal es bootstrappear el entorno y delegar la carga modular correspondiente.
-
-#### 5.2.2. `nvim/lua/kvim/init.lua`
-
-Es el punto de entrada Lua de KVIM. Desde aquí se desencadena la secuencia real de configuración del sistema.
+- `nvim/init.lua` bootstrappea `lazy.nvim`, declara la importación de plugins base y arranca KVIM;
+- `nvim/lua/kvim/init.lua` actúa como punto de entrada Lua del framework y coordina la carga de configuración, core, UI, LSP y módulos.
 
 ### 5.3. Flujo de carga del sistema
 
@@ -459,12 +502,12 @@ nvim/lua/kvim/core/
 
 Entre sus piezas principales destacan:
 
-- `commands.lua`
-- `keymaps.lua`
-- `registry.lua`
-- `runner.lua`
-- `terminal.lua`
-- `lsp/`
+- `commands.lua`;
+- `keymaps.lua`;
+- `registry.lua`;
+- `runner.lua`;
+- `terminal.lua`;
+- `lsp/`.
 
 Sus responsabilidades son genéricas y compartidas, por ejemplo:
 
@@ -484,18 +527,20 @@ nvim/lua/kvim/modules/
 
 Un módulo en KVIM puede exponer, según necesidad:
 
-- `setup`
-- `plugins`
-- `actions`
-- `commands`
-- `keymaps`
+- `setup`;
+- `plugins`;
+- `actions`;
+- `commands`;
+- `keymaps`.
 
 Los módulos actuales son:
 
-- `workspaces`
-- `git`
-- `svn`
-- `connections`
+- `workspaces`;
+- `git`;
+- `svn`;
+- `connections`.
+
+Además, existe una línea de evolución prevista ligada al desarrollo embebido. En etapas anteriores del repositorio se contemplaron integraciones orientadas a flujos con `nrfjprog` y `esp-idf`, pero esas piezas perdieron compatibilidad durante la migración arquitectónica actual. Por ello, su recuperación queda como trabajo futuro, no como funcionalidad activa del estado presente.
 
 ### 5.6. Capa de plugins
 
@@ -507,13 +552,13 @@ nvim/lua/kvim/plugins/
 
 Agrupaciones principales actuales:
 
-- `ui.lua`
-- `lsp.lua`
-- `dev.lua`
-- `editor.lua`
-- `dashboard.lua`
-- `navigation.lua`
-- `completion.lua`
+- `ui.lua`;
+- `lsp.lua`;
+- `dev.lua`;
+- `editor.lua`;
+- `dashboard.lua`;
+- `navigation.lua`;
+- `completion.lua`.
 
 Esto permite mantener la integración con el ecosistema externo bien separada del código específico de módulos y del core.
 
@@ -527,22 +572,24 @@ nvim/lua/kvim/ui/
 
 Aquí se encuentran, entre otros:
 
-- `editor.lua`
-- `theme.lua`
-- `lualine.lua`
-- `init.lua`
+- `editor.lua`;
+- `theme.lua`;
+- `lualine.lua`;
+- `neovide.lua`;
+- `font.lua`;
+- `init.lua`.
 
 ### 5.8. Testing
 
 La estructura de testing se compone de:
 
-- `scripts/test.sh`
-- `tests/minimal_init.lua`
-- `tests/core/`
-- `tests/core/lsp/`
-- `tests/ui/`
-- `tests/workspaces/`
-- `tests/connections/`
+- `scripts/test.sh`;
+- `tests/minimal_init.lua`;
+- `tests/core/`;
+- `tests/core/lsp/`;
+- `tests/ui/`;
+- `tests/workspaces/`;
+- `tests/connections/`.
 
 Esta organización facilita probar áreas concretas sin perder la visión global del sistema.
 
@@ -552,19 +599,116 @@ Además del README general, el proyecto incluye:
 
 - `CHANGELOG.md`;
 - `AGENTS.md`;
-- READMEs específicos de módulos;
+- `KVIM_REFERENCE.md`;
+- `nvim/lua/kvim/plugins/README.md`;
+- `nvim/lua/kvim/modules/workspaces/README.md`;
+- `nvim/lua/kvim/modules/git/README.md`;
+- `nvim/lua/kvim/modules/svn/README.md`;
+- `nvim/lua/kvim/modules/connections/README.md`;
 - especificaciones internas en `docs/specs/`.
 
-**[Insertar esquema: arquitectura por capas]**
-![Arbol Neo-Tree](assets/docs/images/proyecto-neo-tree.png)
+### 5.10. Infraestructura de agentes y configuración de IA
+
+La carpeta `.opencode/` representa la infraestructura de desarrollo asistido por IA del proyecto. En ella se encuentran:
+
+- la configuración global de OpenCode;
+- la activación del plugin de Ponytail;
+- los agentes especializados del proyecto KVIM;
+- la base de coordinación entre agente principal y subagentes.
+
+Este directorio no forma parte del runtime de Neovim, pero sí del proceso real de construcción, mantenimiento y evolución del repositorio.
 
 ---
 
-## 6. Funcionalidades principales
+## 6. Funcionamiento general de KVIM
 
-Esta sección recoge las capacidades públicas más relevantes del sistema en su estado actual.
+Esta sección describe de forma clara cómo se conecta KVIM con Neovim sin entrar en las tripas completas de cada fichero.
 
-### 6.1. Experiencia base de edición
+### 6.1. Punto de entrada real
+
+El arranque comienza en `nvim/init.lua`. Ese fichero:
+
+1. define leader y localleader;
+2. bootstrappea `lazy.nvim` en el runtimepath;
+3. importa los plugins base del proyecto;
+4. importa plugins aportados por módulos que ya exponen spec propia;
+5. ejecuta `require("kvim").setup()`.
+
+Por tanto, Neovim no carga KVIM como un bloque monolítico, sino como una secuencia de inicialización en la que primero se prepara el gestor de plugins y después se levanta el framework.
+
+### 6.2. Entrada al framework Lua
+
+Una vez que Neovim llama a `require("kvim").setup()`, el control pasa a `nvim/lua/kvim/init.lua`. Ese punto de entrada coordina el resto del sistema.
+
+El orden general es:
+
+1. cargar configuración global y local;
+2. registrar comandos core;
+3. inicializar UI base si está habilitada;
+4. inicializar tema;
+5. inicializar LSP;
+6. recorrer los módulos habilitados y cargarlos;
+7. registrar finalmente los keymaps globales.
+
+Este orden es importante porque evita que ciertos keymaps o comandos intenten usar piezas que todavía no existen en memoria.
+
+### 6.3. Papel de la configuración
+
+La configuración base vive en `nvim/lua/kvim/config.lua`. Allí se definen:
+
+- opciones de UI;
+- keymaps globales;
+- configuración de LSP;
+- terminales;
+- estado por defecto de los módulos.
+
+Después, KVIM intenta cargar `kvim.local` desde `local.lua`, lo que permite personalizar el entorno sin tocar el repositorio. Finalmente, si el arranque recibe opciones directas mediante Lua, esas opciones tienen la máxima prioridad.
+
+### 6.4. Cómo se conectan core y módulos
+
+El core aporta infraestructura, pero no debería contener lógica específica de negocio de cada módulo. La relación real funciona así:
+
+- el **core** registra comandos comunes, keymaps globales, acciones y servicios compartidos;
+- cada **módulo** encapsula su propia funcionalidad;
+- cuando un módulo está habilitado, KVIM lo carga, le asigna nombre si es necesario, lo registra en el registry y ejecuta su `setup`;
+- a partir de ahí, ese módulo puede registrar comandos, acciones, keymaps o plugins propios.
+
+Esto permite que Neovim vea una experiencia unificada, mientras internamente KVIM mantiene una separación razonable entre infraestructura y funcionalidad.
+
+### 6.5. Cómo un módulo se integra en el flujo de Neovim
+
+Un módulo no modifica Neovim de forma arbitraria. Normalmente sigue un patrón reconocible:
+
+1. expone una tabla Lua;
+2. define sus acciones reutilizables;
+3. define comandos que llaman a esas acciones;
+4. define keymaps que llaman a comandos o acciones;
+5. opcionalmente expone plugins o configuración propia.
+
+De esta forma, la integración con Neovim se realiza a través de mecanismos nativos del editor —comandos, keymaps, buffers, terminales, LSP o UI— pero manteniendo la lógica agrupada por responsabilidad.
+
+### 6.6. Ejemplo conceptual de interconexión
+
+Un caso representativo es el de `workspaces` y `connections`:
+
+- `connections` puede abrir sesiones SSH o gestionar la conexión activa;
+- `workspaces` puede almacenar recetas de terminal y restaurarlas;
+- ambos se apoyan en servicios comunes del editor, como terminales, tabs, buffers y notificaciones;
+- sin embargo, el core no necesita conocer los detalles de una conexión SSH concreta ni de una receta de workspace concreta.
+
+La consecuencia es que KVIM funciona como una capa de organización sobre Neovim: aprovecha el editor, pero le añade un flujo estructurado y orientado a uso real.
+
+### 6.7. Resultado de ese diseño
+
+Desde el punto de vista del usuario, todo parece un único entorno cohesionado. Desde el punto de vista interno, KVIM reparte responsabilidades entre capas y módulos. Ese equilibrio es precisamente uno de los objetivos centrales del proyecto: que el sistema sea extensible sin convertirse en una configuración monolítica difícil de mantener.
+
+---
+
+## 7. Funcionalidades principales
+
+Esta sección recoge las capacidades públicas más relevantes del sistema.
+
+### 7.1. Experiencia base de edición
 
 KVIM proporciona una experiencia de edición moderna construida sobre varias capas complementarias:
 
@@ -573,19 +717,19 @@ KVIM proporciona una experiencia de edición moderna construida sobre varias cap
 - dashboard inicial con Snacks;
 - exploración de archivos con Neo-tree;
 - búsquedas rápidas con Telescope;
-- integración con Yazi;
+- integración con Yazi, orientada principalmente a Linux y a entornos donde dicho binario esté instalado;
 - notificaciones visuales con `nvim-notify`;
 - command palette con `noice.nvim`;
 - mejora de selectores e inputs mediante `dressing.nvim`;
 - fold avanzado con `nvim-ufo`;
-- cierre automático de simbolos como parentesis, corchetes con `nvim-autopairs`;
+- cierre automático de símbolos con `nvim-autopairs`;
 - multiselección con `vim-visual-multi`.
 
 Todo ello busca que el editor no sea únicamente un contenedor de plugins, sino una experiencia coherente y utilizable desde el primer arranque.
 
-### 6.2. Soporte de desarrollo
+### 7.2. Soporte de desarrollo
 
-#### 6.2.1. LSP
+#### 7.2.1. LSP
 
 KVIM integra soporte LSP para varios lenguajes y ofrece keymaps habituales para:
 
@@ -599,23 +743,25 @@ KVIM integra soporte LSP para varios lenguajes y ofrece keymaps habituales para:
 - formatear (`<leader>lf`);
 - navegar diagnósticos (`[d`, `]d`, `<leader>ld`).
 
-#### 6.2.2. Autocompletado
+#### 7.2.2. Autocompletado y snippets
 
 El autocompletado se articula mediante `blink.cmp`, complementando el uso de LSP y proporcionando una experiencia de edición más cercana a la de un IDE moderno.
 
-#### 6.2.3. Consideración importante sobre comandos de core
+Además, KVIM incorpora soporte para snippets mediante `friendly-snippets`, lo que permite acelerar la escritura de estructuras repetitivas, plantillas de lenguaje y expansiones habituales durante el desarrollo. En conjunto, autocompletado y snippets reducen fricción y favorecen una edición más productiva.
 
-Existe una limitación conocida: en `core/keymaps.lua` aparecen mapeos hacia comandos como `KvimRun`, `KvimTest`, `KvimBuild`, `KvimFormat` y `KvimLint`, pero dichos comandos no están definidos actualmente en `core/commands.lua`. Esta situación debe entenderse como parte del estado en consolidación del proyecto.
+#### 7.2.3. Consideración importante sobre comandos de core
 
-### 6.3. Workspaces
+Existe una limitación conocida: en `core/keymaps.lua` aparecen mapeos hacia comandos como `KvimRun`, `KvimTest`, `KvimBuild`, `KvimFormat` y `KvimLint`, pero dichos comandos no están definidos actualmente en `core/commands.lua`. Esta situación debe entenderse como parte del estado todavía no completamente cerrado del proyecto.
+
+### 7.3. Workspaces
 
 El módulo `workspaces` es uno de los rasgos más distintivos de KVIM.
 
-#### 6.3.1. Propósito
+#### 7.3.1. Propósito
 
 Su objetivo es conservar y restaurar contexto de trabajo a nivel de proyecto, evitando que la sesión dependa únicamente de buffers abiertos de forma accidental o temporal.
 
-#### 6.3.2. Capacidades actuales
+#### 7.3.2. Capacidades actuales
 
 Entre sus capacidades actuales destacan:
 
@@ -630,7 +776,7 @@ Entre sus capacidades actuales destacan:
 - restaurar terminales reproducibles;
 - ofrecer un hub o zona principal para `term`.
 
-#### 6.3.3. Persistencia
+#### 7.3.3. Persistencia
 
 La persistencia del módulo se apoya en:
 
@@ -640,69 +786,78 @@ stdpath("state")/kvim/workspaces
 
 Además, el módulo se integra con `resession.nvim` para soporte de sesión.
 
-#### 6.3.4. Tabs lógicas `Code` y `Term`
+#### 7.3.4. Tabs lógicas `Code` y `Term`
 
-KVIM diferencia entre dos tabs lógicas principales:
+KVIM diferencia entre dos tabs lógicas principales cuando se está trabajando dentro de un workspace:
 
 - **Code**: orientada a edición y navegación;
 - **Term**: orientada a terminales, sesiones SSH y vistas asociadas.
 
-Esta separación aporta una UX más predecible cuando se combinan edición, exploración y trabajo en terminal dentro del mismo workspace.
+Estas tabs no son una característica global del editor fuera del flujo de workspace, sino una convención propia del módulo `workspaces` para estructurar mejor el contexto del proyecto.
 
-#### 6.3.5. Limitaciones actuales
+#### 7.3.5. Limitaciones actuales
 
 Entre las limitaciones razonables del módulo se pueden señalar:
 
 - la restauración no equivale a recuperar procesos interactivos vivos exactamente donde estaban;
 - la UI de selección puede depender del backend de `vim.ui.select()` disponible;
-- todavía puede haber margen de pulido en algunos flujos de restauración avanzada.
+- todavía puede haber margen de pulido en algunos flujos de restauración avanzada;
+- existe un bug visual conocido relacionado con el cambio entre tabs `Code` y `Term` y el resaltado asociado a esa transición.
 
 ![Uso workspaces](assets/docs/gifs/workspace-term-code.gif)
 
-### 6.4. Integración Git
+*Vídeo 4. Creación de una conexión desde el contexto de un workspace y uso de las tabs `Code` y `Term`.*
+
+### 7.4. Integración Git
 
 El módulo `git` integra **LazyGit** como herramienta principal de interacción con repositorios Git.
 
-Capacidades públicas principales:
+#### 7.4.1. Comandos públicos
 
 - `:KvimGit`;
 - `:KvimGitFile`;
 - `:KvimGitConfig`.
 
+#### 7.4.2. Aportación al flujo de trabajo
+
 Esto permite trabajar sobre el repositorio completo o sobre el archivo actual sin abandonar el editor. Se trata de una integración pragmática, apoyada en una herramienta ya consolidada, en lugar de reinventar internamente toda la interfaz de Git.
 
-![LazyGit](assets/docs/imges/lazygit.png)
+![LazyGit](assets/docs/images/lazygit.png)
 
-### 6.5. Integración SVN
+*Figura 3. Integración de LazyGit dentro de KVIM.*
+
+### 7.5. Integración SVN
 
 El módulo `svn` cubre un caso de uso menos habitual en configuraciones modernas, pero todavía relevante en determinados contextos profesionales o heredados.
 
-Expone:
+#### 7.5.1. Comandos públicos
 
 - `:KvimLazySvn`;
 - `:KvimSvnInfo`;
 - `:KvimSvnStatus`.
 
-Su finalidad es facilitar:
+#### 7.5.2. Aportación al flujo de trabajo
 
-- apertura de LazySVN;
-- consulta de información SVN;
-- consulta del estado del working copy desde el propio editor.
+Su finalidad es facilitar la apertura de LazySVN y la consulta del estado o de la información del working copy desde el propio editor, manteniendo una experiencia similar en estructura a la del módulo Git aunque sobre una herramienta distinta.
 
-![LazySVN](assets/docs/imges/lazysvn.png)
+![LazySVN](assets/docs/images/lazysvn.png)
 
-### 6.6. Módulo Connections
+*Figura 4. Integración de LazySVN dentro de KVIM.*
+
+### 7.6. Módulo Connections
 
 El módulo `connections` es probablemente la parte más orientada a flujos de trabajo reales sobre sistemas remotos.
 
-#### 6.6.1. Tipos de conexión soportados
+#### 7.6.1. Tipos de conexión soportados
 
 El sistema contempla conexiones:
 
 - **SSH**;
 - **serie**.
 
-#### 6.6.2. Capacidades públicas principales
+No obstante, el foco principal del desarrollo actual se ha centrado en la parte de **conexión SSH**, que es donde se encuentra la funcionalidad más madura y completa.
+
+#### 7.6.2. Capacidades públicas principales
 
 Entre sus comandos principales se encuentran:
 
@@ -715,7 +870,11 @@ Entre sus comandos principales se encuentran:
 - ejecución remota de comandos por SSH;
 - subida y bajada de archivos mediante SCP.
 
-#### 6.6.3. Gestión de claves SSH
+![Añadir conexión SSH](assets/docs/gifs/add-ssh.gif)
+
+*Vídeo 5. Alta interactiva de una conexión SSH desde KVIM.*
+
+#### 7.6.3. Gestión de claves SSH
 
 El módulo permite:
 
@@ -724,7 +883,11 @@ El módulo permite:
 - realizar un setup completo de autenticación;
 - probar la conexión SSH.
 
-#### 6.6.4. Conexión activa
+![Claves publico/privada](assets/docs/gifs/pub-priv.gif)
+
+*Vídeo 6. Flujo de generación e instalación de claves SSH.*
+
+#### 7.6.4. Conexión activa
 
 KVIM mantiene el concepto de **conexión activa** en memoria de sesión, lo que simplifica operaciones como:
 
@@ -733,7 +896,11 @@ KVIM mantiene el concepto de **conexión activa** en memoria de sesión, lo que 
 - descargar rutas remotas;
 - cambiar o limpiar el destino activo.
 
-#### 6.6.5. Configuración externa del usuario
+![Conexión SSH](assets/docs/gifs/connect-ssh.gif)
+
+*Vídeo 7. Apertura y uso de una conexión SSH activa desde KVIM.*
+
+#### 7.6.5. Configuración externa del usuario
 
 Las conexiones del usuario viven fuera del árbol versionado, normalmente en:
 
@@ -743,90 +910,35 @@ Las conexiones del usuario viven fuera del árbol versionado, normalmente en:
 
 Esta decisión evita mezclar información sensible o específica de entorno con el código fuente compartido del proyecto.
 
-![Añadir conexión SSH](assets/docs/gifs/add-ssh.gif)
-![Conexión SSH](assets/docs/gifs/connect-ssh.gif)
-![Claves publico/privada](assets/docs/gifs/pub-priv.gif)
+Las conexiones serie existen en la arquitectura del módulo, pero siguen menos desarrolladas que el flujo SSH.
 
-Las conexiones serie están por desarrollar.
+### 7.7. Comandos principales del sistema
 
-### 6.7. Comandos principales del sistema
+Para evitar que esta memoria crezca innecesariamente, la referencia completa de comandos se centraliza en:
 
-Desde el punto de vista funcional, KVIM expone comandos agrupables por áreas:
+- [KVIM_REFERENCE.md](KVIM_REFERENCE.md)
 
-#### Core
+Ese documento reúne los comandos reales del core y de los módulos actuales, agrupados por área funcional.
 
-- `:KvimModules`
-- `:KvimAction <modulo> <accion>`
+### 7.8. Keymaps destacados
 
-#### Workspaces
+Del mismo modo, la referencia completa de keymaps se centraliza en:
 
-- `:KvimWorkspaceCreate <name>`
-- `:KvimWorkspaceSave [name]`
-- `:KvimWorkspaceLoad <name>`
-- `:KvimWorkspaceList`
-- `:KvimWorkspaceDelete <name>`
-- `:KvimWorkspaceCurrent`
-- `:KvimWorkspaceClear`
-- `:KvimWorkspaceNext`
-- `:KvimWorkspacePrev`
-- `:KvimWorkspaceTerminalAdd`
-- `:KvimWorkspaceTerminalList`
-- `:KvimWorkspaceTerminalRemove <name>`
-- `:KvimWorkspaceTerminalRestore`
-- `:KvimWorkspaceTermHome`
-- `:KvimWorkspaceTabCode`
-- `:KvimWorkspaceTabTerm`
+- [KVIM_REFERENCE.md](KVIM_REFERENCE.md)
 
-#### Git
+En términos generales, los keymaps más relevantes se agrupan en:
 
-- `:KvimGit`
-- `:KvimGitFile`
-- `:KvimGitConfig`
+- personales y globales;
+- exploración y búsqueda;
+- terminal;
+- workspaces;
+- Git;
+- SVN;
+- connections;
+- LSP;
+- folds y navegación rápida entre buffers.
 
-#### SVN
-
-- `:KvimLazySvn`
-- `:KvimSvnInfo`
-- `:KvimSvnStatus`
-
-#### Connections
-
-- `:KvimConnections`
-- `:KvimSshConnections`
-- `:KvimSerialConnections`
-- `:KvimConnectionsReload`
-- `:KvimConnectionsReconnect <name>`
-- `:KvimConnectionsList`
-- `:KvimConnectionsAdd`
-- `:KvimConnectionsDel [name]`
-- `:KvimConnectionsGenerateKey`
-- `:KvimConnectionsInstallKey`
-- `:KvimConnectionsSetupSshKey`
-- `:KvimConnectionsTestSsh`
-- `:KvimConnectionSetActive`
-- `:KvimSSHConnectionSetActive`
-- `:KvimConnectionShowActive`
-- `:KvimConnectionClearActive`
-- `:KvimSSHRun [comando]`
-- `:KvimSSHUploadCurrent`
-- `:KvimSSHUploadPath [ruta_local]`
-- `:KvimSSHDownloadPath [ruta_remota]`
-
-### 6.8. Keymaps destacados
-
-Aunque KVIM dispone de numerosos keymaps, los más relevantes pueden agruparse en:
-
-- globales (`s`, `qq`, `qe`, `<Esc>`, `da`);
-- navegación y dashboard (`<leader>h`, `<leader>e`, `<leader>ff`, etc.);
-- terminal (`<C-t>h/j/k/l`, `<C-x>`);
-- workspaces (`<leader>ws`, `<leader>wl`, `<leader>1`, `<leader>2`, etc.);
-- Git (`<leader>g`, `<leader>f`);
-- SVN (`<leader>sv`, `<leader>si`, `<leader>ss`);
-- connections (`<leader>cc`, `<leader>cs`, `<leader>cu`, etc.);
-- LSP (`gd`, `gr`, `K`, `<leader>rn`, `<leader>ca`, etc.);
-- folds (`zR`, `zM`, `zr`, `zm`).
-
-### 6.9. Integración entre módulos y capas
+### 7.9. Integración entre módulos y capas
 
 Una de las fortalezas del proyecto es cómo se conectan sus partes sin mezclar responsabilidades de forma excesiva. Ejemplos claros:
 
@@ -837,9 +949,9 @@ Una de las fortalezas del proyecto es cómo se conectan sus partes sin mezclar r
 
 ---
 
-## 7. Estado actual, limitaciones y consideraciones técnicas
+## 8. Limitaciones y consideraciones técnicas
 
-### 7.1. Aspectos sólidos del proyecto
+### 8.1. Aspectos sólidos del proyecto
 
 En el estado actual del desarrollo, pueden considerarse relativamente sólidos:
 
@@ -851,16 +963,18 @@ En el estado actual del desarrollo, pueden considerarse relativamente sólidos:
 - los instaladores Linux y Windows;
 - la suite de testing headless.
 
-### 7.2. Limitaciones conocidas
+### 8.2. Limitaciones conocidas
 
 Entre las limitaciones o incoherencias visibles actualmente conviene destacar:
 
 - existen mappings de core hacia comandos que no están definidos todavía;
 - no toda la configuración pública refleja con precisión toda la realidad interna del cableado;
 - parte de la documentación secundaria puede quedarse por detrás del código real;
-- algunos comportamientos de UI y restauración todavía están en fase de pulido.
+- algunos comportamientos de UI y restauración todavía están en fase de pulido;
+- existe un bug visual conocido en el flujo de tabs `Code`/`Term` de workspaces;
+- en ciertos contextos aparecen mensajes de error o avisos de `noice.nvim` que todavía no se han aislado y corregido por completo.
 
-### 7.3. Decisiones de diseño relevantes
+### 8.3. Decisiones de diseño relevantes
 
 Algunas decisiones del diseño merecen ser señaladas de forma explícita:
 
@@ -871,7 +985,7 @@ Algunas decisiones del diseño merecen ser señaladas de forma explícita:
 
 ---
 
-## 8. Conclusiones
+## 9. Conclusiones
 
 KVIM representa una propuesta técnica seria para construir un entorno modular sobre Neovim. El proyecto combina una base visual moderna, integración con herramientas consolidadas del ecosistema y módulos propios orientados a casos de uso reales.
 
@@ -888,15 +1002,113 @@ Aunque todavía existan áreas en consolidación, el proyecto ya ofrece una base
 
 ---
 
-## 9. Anexos
+## 10. Anexos
 
-### Anexo A. Árbol ampliado del proyecto
+### 10.1. Anexo A. Árbol ampliado del proyecto
 
-Se puede incorporar en una versión posterior un árbol más detallado del repositorio completo.
+```text
+.
+├── .opencode/
+│   ├── agents/
+│   │   ├── kvim-core.md
+│   │   ├── kvim-docs.md
+│   │   ├── kvim-installer.md
+│   │   ├── kvim-main.md
+│   │   ├── kvim-module.md
+│   │   └── kvim-tester.md
+│   ├── opencode.json
+│   ├── package.json
+│   └── package-lock.json
+├── assets/
+│   ├── docs/
+│   │   ├── gifs/
+│   │   │   ├── add-ssh.gif
+│   │   │   ├── connect-ssh.gif
+│   │   │   ├── home.gif
+│   │   │   ├── install.gif
+│   │   │   ├── pub-priv.gif
+│   │   │   ├── uninstall.gif
+│   │   │   └── workspace-term-code.gif
+│   │   └── images/
+│   │       ├── command-palette.png
+│   │       ├── home-screen.png
+│   │       ├── lazygit.png
+│   │       ├── lazysvn.png
+│   │       └── proyecto-neo-tree.png
+│   ├── fonts/
+│   └── kvim-logo.png
+├── docs/
+│   └── specs/
+│       ├── 0001-linux-installer.md
+│       ├── 0002-windows-installer.md
+│       ├── 0003-user-connections-configuration.md
+│       └── 0004-term-tab-code-explorer-separation.md
+├── nvim/
+│   ├── init.lua
+│   ├── lazy-lock.json
+│   └── lua/
+│       └── kvim/
+│           ├── config.lua
+│           ├── health.lua
+│           ├── init.lua
+│           ├── core/
+│           │   ├── commands.lua
+│           │   ├── keymaps.lua
+│           │   ├── registry.lua
+│           │   ├── runner.lua
+│           │   ├── terminal.lua
+│           │   └── lsp/
+│           ├── modules/
+│           │   ├── connections/
+│           │   ├── git/
+│           │   ├── svn/
+│           │   └── workspaces/
+│           ├── plugins/
+│           │   ├── README.md
+│           │   ├── completion.lua
+│           │   ├── dashboard.lua
+│           │   ├── dev.lua
+│           │   ├── editor.lua
+│           │   ├── init.lua
+│           │   ├── lsp.lua
+│           │   ├── navigation.lua
+│           │   └── ui.lua
+│           └── ui/
+│               ├── editor.lua
+│               ├── font.lua
+│               ├── init.lua
+│               ├── lualine.lua
+│               ├── neovide.lua
+│               └── theme.lua
+├── package/
+│   ├── linux/
+│   │   ├── install.sh
+│   │   └── uninstall.sh
+│   └── windows/
+│       ├── install.ps1
+│       └── uninstall.ps1
+├── scripts/
+│   └── test.sh
+├── tests/
+│   ├── minimal_init.lua
+│   ├── connections/
+│   ├── core/
+│   │   └── lsp/
+│   ├── ui/
+│   └── workspaces/
+├── AGENTS.md
+├── CHANGELOG.md
+├── KVIM_REFERENCE.md
+├── LICENSE
+├── README.md
+└── TFM.md
+```
 
-**[Insertar anexo: árbol completo del proyecto]**
+### 10.2. Anexo B. Ejemplo mínimo de `local.lua`
 
-### Anexo B. Ejemplo mínimo de `local.lua`
+`local.lua` es el fichero de configuración local del usuario para KVIM. Su finalidad es permitir personalización sin modificar el repositorio y sin mezclar la configuración general del usuario con la configuración específica de esta distribución.
+
+Ejemplo mínimo:
 
 ```lua
 return {
@@ -909,60 +1121,77 @@ return {
 }
 ```
 
-### Anexo C. Ejemplo orientativo de `connections.lua`
+### 10.3. Anexo C. Ejemplo orientativo de `connections.lua`
 
-> Debe rellenarse con datos ficticios o anonimizados. No debe incluir secretos reales.
+`connections.lua` es el fichero de configuración de conexiones del usuario. Se almacena fuera del árbol versionado y permite definir conexiones reutilizables para SSH y, en menor medida, para flujos serie.
+
+Debe devolver una tabla Lua. Formato orientativo:
 
 ```lua
 return {
-    {
-        name = "demo-server",
-        type = "ssh",
-        host = "example.com",
-        user = "user",
-        port = 22,
+    connections = {
+        {
+            type = "ssh",
+            name = "demo-server",
+            host = "example.com",
+            user = "user",
+            port = 22,
+            identity_file = "~/.ssh/id_ed25519",
+            remote_root = "/home/user/project",
+            options = {
+                IdentitiesOnly = "yes",
+            },
+            transfer = {
+                remote_root = "/home/user/project",
+                local_root = "~/Downloads",
+            },
+        },
+        {
+            type = "serial",
+            name = "demo-uart",
+            device = "/dev/ttyUSB0",
+            baudrate = 115200,
+            command = "picocom",
+        },
     },
 }
 ```
 
-### Anexo D. Comando de testing
+Campos más relevantes:
+
+- `type`: tipo de conexión, normalmente `ssh` o `serial`.
+- `name`: nombre identificativo de la conexión.
+- `host`: host o IP del destino SSH.
+- `user`: usuario remoto.
+- `port`: puerto SSH si no se usa el 22 por defecto.
+- `identity_file`: ruta a la clave privada usada por la conexión.
+- `remote_root`: ruta remota base útil para flujos de trabajo y transferencias.
+- `options`: opciones adicionales de SSH, por ejemplo `IdentitiesOnly`.
+- `transfer`: bloque de configuración para subida y bajada de archivos.
+  - `transfer.remote_root`: raíz remota para transferencias.
+  - `transfer.local_root`: raíz local por defecto.
+- `device`: dispositivo serie, por ejemplo `/dev/ttyUSB0`.
+- `baudrate`: velocidad de la conexión serie.
+- `command`: comando a usar para la sesión serie, por ejemplo `picocom`.
+
+> Debe rellenarse siempre con datos ficticios o anonimizados. No debe incluir secretos reales.
+
+### 10.4. Anexo D. Comando de testing
+
+Comando principal:
 
 ```bash
 ./scripts/test.sh
 ```
 
-### Anexo E. Documentación complementaria
+Este script ejecuta Neovim en modo headless usando `tests/minimal_init.lua`, lanza `PlenaryBustedDirectory` sobre el directorio `tests/`, captura la salida completa, elimina códigos ANSI para poder analizarla con fiabilidad y finalmente muestra un resumen con:
 
-- `README.md`
-- `CHANGELOG.md`
-- `AGENTS.md`
-- `nvim/lua/kvim/plugins/README.md`
-- `nvim/lua/kvim/modules/*/README.md`
-- `docs/specs/*.md`
+- número de tests correctos;
+- número de tests fallidos;
+- número de errores;
+- total agregado.
 
----
-
-## 10. Espacios sugeridos para material audiovisual
-
-Si este documento se acompaña posteriormente con demostraciones, los puntos más útiles para insertar material audiovisual serían los siguientes:
-
-- **[Insertar vídeo: dashboard y navegación inicial]**
-- **[Insertar vídeo: instalación en Linux]**
-- **[Insertar vídeo: instalación en Windows]**
-- **[Insertar vídeo: uso de la command palette]**
-- **[Insertar vídeo: gestión de workspaces Code/Term]**
-- **[Insertar vídeo: integración con LazyGit]**
-- **[Insertar vídeo: uso de conexiones SSH]**
-- **[Insertar vídeo: ejecución de tests]**
-
-Del mismo modo, sería especialmente recomendable añadir capturas en:
-
-- dashboard inicial;
-- vista con Neo-tree + bufferline + lualine;
-- command palette centrada;
-- workspace con tabs `Code` y `Term`;
-- selector de conexiones;
-- ejecución de LazyGit y LazySVN.
+Si el proceso de Neovim falla o aparece cualquier fallo/error en la suite, el script termina con código de error.
 
 ---
 
@@ -975,3 +1204,5 @@ KVIM es un IDE modular construido sobre Neovim y Lua que combina:
 - módulos propios útiles para trabajo real;
 - soporte para LSP, terminales, control de versiones y conexiones remotas;
 - testing automatizado y documentación estructurada.
+
+Su principal valor reside en cómo organiza esas piezas: Neovim aporta la base, `lazy.nvim` gestiona el ecosistema de plugins, el core coordina la infraestructura común y los módulos añaden funcionalidad especializada sin romper la separación de responsabilidades.
