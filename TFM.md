@@ -111,6 +111,7 @@ Frente a una configuración básica o puramente personal, KVIM aporta varias car
 - integración de conexiones remotas como parte del entorno;
 - tests automatizados del comportamiento del sistema.
 
+```mermaid
 flowchart TD
     A["KVIM"]
 
@@ -143,6 +144,7 @@ flowchart TD
     UI --> UI1["tema"]
     UI --> UI2["lualine"]
     UI --> UI3["neovide / fuentes"]
+```
 
 ![Tour general KVIM](assets/docs/gifs/home.gif)
 
