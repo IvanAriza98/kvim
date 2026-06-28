@@ -29,9 +29,9 @@
 
 Neovim se ha consolidado como una base muy potente para construir entornos de desarrollo altamente personalizables. A diferencia de un IDE tradicional monolítico, Neovim permite componer la experiencia de usuario mediante configuración, scripts, plugins y automatizaciones. Sin embargo, esa flexibilidad tiene un coste: crear desde cero una configuración robusta, mantenible y reutilizable exige tiempo, criterio arquitectónico y capacidad de integración entre componentes heterogéneos.
 
-En ese contexto surge **KVIM**, un proyecto orientado a ofrecer una base modular sobre Neovim escrita principalmente en **Lua**, con una arquitectura separada por responsabilidades y preparada para cubrir tanto necesidades de edición general como flujos más específicos, por ejemplo trabajo con repositorios Git, entornos SVN, conexiones remotas por SSH o gestión de workspaces persistentes.
+En ese contexto surge **KVIM**, un proyecto orientado a ofrecer una base modular sobre Neovim escrita principalmente en **Lua**. Su arquitectura separa responsabilidades y cubre edición general, integración con Git y SVN, conexiones remotas por SSH y gestión de workspaces persistentes. Junto con esa modularidad, KVIM también persigue un enfoque de minimalismo práctico: priorizar una base simple, comprensible y mantenible, evitando incorporar complejidad o funcionalidades que rara vez aportan valor real al trabajo diario.
 
-Este documento recoge una explicación extensa del proyecto desde una perspectiva técnica y funcional. El objetivo es que pueda servir para entender las bases de su creación.
+Este documento ofrece una explicación técnica y funcional del proyecto y de las decisiones que sustentan su diseño.
 
 ![KVIM Home](assets/docs/images/home-screen.png)
 
@@ -55,21 +55,23 @@ Por tanto:
 
 ### 2.1. Qué es KVIM
 
-KVIM es una distribución/configuración modular de Neovim construida sobre Lua. Su diseño gira en torno a cuatro pilares principales:
+KVIM es una configuración modular de Neovim construida sobre Lua. Su diseño gira en torno a cuatro pilares principales:
 
 1. un **core reducido**, responsable de la infraestructura común;
 2. un conjunto de **módulos funcionales** que encapsulan comportamientos específicos;
 3. una capa de **plugins** organizada por áreas temáticas para `lazy.nvim`;
 4. una capa de **UI** que da coherencia visual y de interacción al sistema.
 
-No se trata simplemente de una colección de plugins agrupados en carpetas, sino de una base con intención de framework ligero: comandos, acciones, keymaps, carga modular, testing y separación explícita de responsabilidades.
+No se trata simplemente de una colección de plugins agrupados en carpetas, sino de una base concebida como un framework ligero: comandos, acciones, keymaps, carga modular, testing y separación explícita de responsabilidades.
 
 ### 2.2. Objetivo del proyecto
 
-El objetivo principal de KVIM es proporcionar una base extensible y mantenible para usar Neovim como IDE modular, evitando dos problemas frecuentes:
+El objetivo principal de KVIM es proporcionar una base extensible, mantenible y simple para usar Neovim como IDE modular, evitando dos problemas frecuentes:
 
 - configuraciones monolíticas difíciles de mantener;
 - dependencias excesivas entre componentes que hacen costosa la evolución del sistema.
+
+Además, KVIM prioriza el minimalismo: no busca acumular funcionalidades por defecto, sino ofrecer una base clara sobre la que activar únicamente lo necesario.
 
 De forma concreta, KVIM busca ofrecer una experiencia integrada para:
 
@@ -94,7 +96,8 @@ Esta separación favorece:
 - menor acoplamiento;
 - cambios más localizados;
 - posibilidad de activar o desactivar módulos;
-- mayor claridad al testear o documentar el sistema.
+- mayor claridad al testear o documentar el sistema;
+- una evolución más simple del proyecto sin sobrecargar el core.
 
 ### 2.4. Casos de uso principales
 
@@ -187,7 +190,7 @@ Las piezas principales de esta capa son:
 - **skills**, utilizadas para cargar comportamientos o modos de trabajo concretos;
 - **hooks y reglas operativas**, que ayudan a mantener consistencia en el flujo de edición.
 
-Dentro de este stack destaca **Ponytail**, una skill centrada en reducir sobreingeniería y en priorizar soluciones simples, pequeñas y mantenibles. En la práctica, su uso favorece diffs más cortos, menor complejidad accidental y un aprovechamiento más eficiente del contexto y de los tokens durante el desarrollo asistido.
+Dentro de este stack destaca **Ponytail**, una skill orientada a reducir la sobreingeniería y a priorizar soluciones simples y mantenibles. En la práctica, favorece cambios más pequeños y menor complejidad accidental durante el desarrollo asistido.
 
 Además, el repositorio incorpora en `.opencode/` la configuración de este entorno, incluyendo agentes propios de KVIM y la activación del plugin asociado a Ponytail.
 
@@ -344,6 +347,22 @@ Si se desea evitar ciertas dependencias opcionales:
 bash package/linux/install.sh --yes --skip-optional-deps
 ```
 
+![Instalación Linux](assets/docs/gifs/install.gif)
+
+*Vídeo 2. Proceso de instalación de KVIM en Linux.*
+
+#### 4.2.4. Desinstalación en Linux
+
+KVIM incluye un script de desinstalación para eliminar la instalación realizada previamente por el instalador Linux.
+
+```bash
+bash package/linux/uninstall.sh --yes
+```
+
+![Desinstalación Linux](assets/docs/gifs/uninstall.gif)
+
+*Vídeo 3. Proceso de desinstalación de KVIM en Linux.*
+
 ### 4.3. Instalación en Windows
 
 #### 4.3.1. Instalación rápida
@@ -396,7 +415,7 @@ kvim --gui fichero.lua
 
 Cuando se solicita el modo GUI, KVIM intenta utilizar `neovide` y, si no está disponible o falla el arranque, hace fallback a ejecución en terminal con `nvim`.
 
-La incorporación de `neovide` no cambia la arquitectura de KVIM, pero sí mejora la experiencia de uso visual: cursor animado, scroll más fluido, renderizado más suave y una sensación de interacción más cercana a la de un IDE gráfico moderno.
+La incorporación de `neovide` no cambia la arquitectura de KVIM, pero sí mejora la experiencia visual con un renderizado más fluido y una interacción más cercana a la de un IDE gráfico.
 
 ### 4.6. Configuración local del usuario
 
@@ -412,7 +431,7 @@ La precedencia de configuración es:
 2. configuración local del usuario (`kvim.local`);
 3. opciones pasadas programáticamente a `require("kvim").setup(...)`.
 
-Este mecanismo permite mantener separadas varias configuraciones de Neovim: por un lado la configuración habitual del usuario y, por otro, la configuración específica de KVIM. Esa separación es especialmente útil cuando se trabaja con `NVIM_APPNAME`, con launchers propios o con instalaciones independientes del editor.
+Este mecanismo permite mantener separadas varias configuraciones de Neovim. Por un lado, la configuración habitual del usuario; por otro, la configuración específica de KVIM. Esa separación es especialmente útil cuando se trabaja con `NVIM_APPNAME`, con launchers propios o con instalaciones independientes del editor.
 
 Ejemplo mínimo:
 
@@ -433,14 +452,6 @@ Es importante señalar una diferencia práctica entre el comportamiento del repo
 
 - los **defaults del proyecto** y los **defaults del `local.lua` generado por instalación** no son idénticos;
 - el instalador adopta por defecto una postura más conservadora, activando principalmente `workspaces` y dejando otros módulos opcionales deshabilitados salvo que se soliciten explícitamente.
-
-![Instalación Linux](assets/docs/gifs/install.gif)
-
-*Vídeo 2. Proceso de instalación de KVIM en Linux.*
-
-![Desinstalación Linux](assets/docs/gifs/uninstall.gif)
-
-*Vídeo 3. Proceso de desinstalación de KVIM en Linux.*
 
 ---
 
@@ -540,7 +551,7 @@ Los módulos actuales son:
 - `svn`;
 - `connections`.
 
-Además, existe una línea de evolución prevista ligada al desarrollo embebido. En etapas anteriores del repositorio se contemplaron integraciones orientadas a flujos con `nrfjprog` y `esp-idf`, pero esas piezas perdieron compatibilidad durante la migración arquitectónica actual. Por ello, su recuperación queda como trabajo futuro, no como funcionalidad activa del estado presente.
+Además, existe una posible línea de evolución ligada al desarrollo embebido. En etapas anteriores del repositorio se contemplaron integraciones con `nrfjprog` y `esp-idf`, pero esas piezas perdieron compatibilidad durante la migración arquitectónica actual. Por ello, su recuperación queda como trabajo futuro y no como funcionalidad activa del estado presente.
 
 ### 5.6. Capa de plugins
 
@@ -607,6 +618,15 @@ Además del README general, el proyecto incluye:
 - `nvim/lua/kvim/modules/connections/README.md`;
 - especificaciones internas en `docs/specs/`.
 
+Como criterio de calidad, la documentación interna del proyecto debe ser **breve, específica y homogénea**, tanto en el código como en los ficheros auxiliares. Su objetivo no es repetir lo evidente, sino explicar con claridad:
+
+- la responsabilidad principal de cada fichero;
+- la finalidad de funciones no triviales;
+- los parámetros o valores esperados cuando no sean evidentes;
+- las decisiones de diseño que afecten al uso o al mantenimiento.
+
+Esta documentación debe mantenerse alineada con el comportamiento real del repositorio para evitar divergencias entre código y texto.
+
 ### 5.10. Infraestructura de agentes y configuración de IA
 
 La carpeta `.opencode/` representa la infraestructura de desarrollo asistido por IA del proyecto. En ella se encuentran:
@@ -622,7 +642,7 @@ Este directorio no forma parte del runtime de Neovim, pero sí del proceso real 
 
 ## 6. Funcionamiento general de KVIM
 
-Esta sección describe de forma clara cómo se conecta KVIM con Neovim sin entrar en las tripas completas de cada fichero.
+Esta sección describe de forma clara cómo se conecta KVIM con Neovim sin entrar en el detalle interno de cada fichero.
 
 ### 6.1. Punto de entrada real
 
@@ -634,7 +654,7 @@ El arranque comienza en `nvim/init.lua`. Ese fichero:
 4. importa plugins aportados por módulos que ya exponen spec propia;
 5. ejecuta `require("kvim").setup()`.
 
-Por tanto, Neovim no carga KVIM como un bloque monolítico, sino como una secuencia de inicialización en la que primero se prepara el gestor de plugins y después se levanta el framework.
+Por tanto, Neovim no carga KVIM como un bloque monolítico, sino como una secuencia de inicialización en la que primero se prepara el gestor de plugins y después se inicializa el framework.
 
 ### 6.2. Entrada al framework Lua
 
@@ -700,7 +720,7 @@ La consecuencia es que KVIM funciona como una capa de organización sobre Neovim
 
 ### 6.7. Resultado de ese diseño
 
-Desde el punto de vista del usuario, todo parece un único entorno cohesionado. Desde el punto de vista interno, KVIM reparte responsabilidades entre capas y módulos. Ese equilibrio es precisamente uno de los objetivos centrales del proyecto: que el sistema sea extensible sin convertirse en una configuración monolítica difícil de mantener.
+Desde el punto de vista del usuario, KVIM se percibe como un entorno cohesionado. Internamente, reparte responsabilidades entre capas y módulos para seguir siendo extensible sin convertirse en una configuración monolítica difícil de mantener.
 
 ---
 
@@ -725,7 +745,7 @@ KVIM proporciona una experiencia de edición moderna construida sobre varias cap
 - cierre automático de símbolos con `nvim-autopairs`;
 - multiselección con `vim-visual-multi`.
 
-Todo ello busca que el editor no sea únicamente un contenedor de plugins, sino una experiencia coherente y utilizable desde el primer arranque.
+Con ello se busca que el editor ofrezca una experiencia coherente y utilizable desde el primer arranque, sin perder simplicidad.
 
 ### 7.2. Soporte de desarrollo
 
@@ -745,7 +765,7 @@ KVIM integra soporte LSP para varios lenguajes y ofrece keymaps habituales para:
 
 #### 7.2.2. Autocompletado y snippets
 
-El autocompletado se articula mediante `blink.cmp`, complementando el uso de LSP y proporcionando una experiencia de edición más cercana a la de un IDE moderno.
+El autocompletado se articula mediante `blink.cmp`, complementando el uso de LSP sin añadir complejidad innecesaria al flujo base.
 
 Además, KVIM incorpora soporte para snippets mediante `friendly-snippets`, lo que permite acelerar la escritura de estructuras repetitivas, plantillas de lenguaje y expansiones habituales durante el desarrollo. En conjunto, autocompletado y snippets reducen fricción y favorecen una edición más productiva.
 
@@ -883,7 +903,7 @@ El módulo permite:
 - realizar un setup completo de autenticación;
 - probar la conexión SSH.
 
-![Claves publico/privada](assets/docs/gifs/pub-priv.gif)
+![Claves públicas y privadas](assets/docs/gifs/pub-priv.gif)
 
 *Vídeo 6. Flujo de generación e instalación de claves SSH.*
 
@@ -968,7 +988,7 @@ En el estado actual del desarrollo, pueden considerarse relativamente sólidos:
 Entre las limitaciones o incoherencias visibles actualmente conviene destacar:
 
 - existen mappings de core hacia comandos que no están definidos todavía;
-- no toda la configuración pública refleja con precisión toda la realidad interna del cableado;
+- no toda la configuración pública refleja con precisión la implementación interna real;
 - parte de la documentación secundaria puede quedarse por detrás del código real;
 - algunos comportamientos de UI y restauración todavía están en fase de pulido;
 - existe un bug visual conocido en el flujo de tabs `Code`/`Term` de workspaces;
@@ -980,6 +1000,7 @@ Algunas decisiones del diseño merecen ser señaladas de forma explícita:
 
 - mantener un **core pequeño** y genérico;
 - evitar introducir lógica específica de módulo dentro del core salvo cuando sea reutilizable;
+- priorizar el minimalismo, evitando complejidad innecesaria tanto en el código como en la experiencia de uso;
 - usar configuración local fuera del árbol versionado para datos específicos del usuario;
 - diseñar tests sin depender de red real ni credenciales sensibles.
 
@@ -987,7 +1008,7 @@ Algunas decisiones del diseño merecen ser señaladas de forma explícita:
 
 ## 9. Conclusiones
 
-KVIM representa una propuesta técnica seria para construir un entorno modular sobre Neovim. El proyecto combina una base visual moderna, integración con herramientas consolidadas del ecosistema y módulos propios orientados a casos de uso reales.
+KVIM propone un entorno modular sobre Neovim que combina una base visual moderna, integración con herramientas consolidadas del ecosistema y módulos propios orientados a casos de uso reales.
 
 Su valor no reside únicamente en reunir plugins populares, sino en ofrecer una estructura mantenible y extensible donde el core, los módulos, la UI y el testing tienen responsabilidades relativamente bien definidas.
 
@@ -995,10 +1016,10 @@ KVIM resulta interesante porque muestra:
 
 - diseño modular aplicado a un editor extensible;
 - integración entre componentes de distinta naturaleza;
-- equilibrio entre personalización y mantenibilidad;
+- equilibrio entre personalización, mantenibilidad y simpleza;
 - preocupación por testing, documentación y experiencia de usuario.
 
-Aunque todavía existan áreas en consolidación, el proyecto ya ofrece una base funcional con identidad propia y un camino técnico reconocible.
+Aunque todavía existan áreas en consolidación, el proyecto ya ofrece una base funcional con un criterio técnico reconocible y una apuesta clara por la simplicidad.
 
 ---
 
@@ -1203,6 +1224,7 @@ KVIM es un IDE modular construido sobre Neovim y Lua que combina:
 - integración moderna de UI y plugins;
 - módulos propios útiles para trabajo real;
 - soporte para LSP, terminales, control de versiones y conexiones remotas;
-- testing automatizado y documentación estructurada.
+- testing automatizado y documentación estructurada;
+- una búsqueda explícita de simplicidad y minimalismo práctico.
 
-Su principal valor reside en cómo organiza esas piezas: Neovim aporta la base, `lazy.nvim` gestiona el ecosistema de plugins, el core coordina la infraestructura común y los módulos añaden funcionalidad especializada sin romper la separación de responsabilidades.
+Su principal valor reside en cómo organiza esas piezas: Neovim aporta la base, `lazy.nvim` gestiona el ecosistema de plugins, el core coordina la infraestructura común y los módulos añaden funcionalidad especializada. El resultado es un entorno flexible, mantenible y alineado con una idea clara de simplicidad.
